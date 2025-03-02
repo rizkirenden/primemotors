@@ -301,17 +301,19 @@
                     <div>
                         <label for="harga_toko">Harga Toko</label>
                         <input type="text" id="harga_toko" name="harga_toko" required
-                            oninput="formatCurrency(this)">
+                            oninput="formatCurrency(this)" placeholder="Masukkan Angka">
                     </div>
                     <div>
-                        <label for="harga_toko">Harga Jual</label>
+                        <label for="harga_toko">Harga
+                            Jual</label>
                         <input type="text" id="harga_jual" name="harga_jual" required
-                            oninput="formatCurrency(this)">
+                            oninput="formatCurrency(this)" placeholder="Masukkan Angka">
                     </div>
                     <div>
                         <label for="jumlah">Jumlah</label>
-                        <input type="number" id="jumlah" name="jumlah" value="0" readonly>
+                        <input type="number" id="jumlah" name="jumlah" value="0" disabled>
                     </div>
+
                 </div>
                 <div class="mt-4 flex space-x-4 justify-center">
                     <button type="button" onclick="closeAddModal()"
@@ -363,7 +365,7 @@
                     </div>
                     <div>
                         <label for="jumlah-edit">Jumlah</label>
-                        <input type="number" id="jumlah-edit" name="jumlah" required readonly>
+                        <input type="number" id="jumlah-edit" name="jumlah" required disabled>
                     </div>
                 </div>
                 <div class="mt-4 flex space-x-4 justify-center">
@@ -445,9 +447,13 @@
             });
         }
 
-        function openEditModal(id, kode_barang, nama_part, stn, tipe, merk, harga_jual, harga_toko,
-            jumlah) {
+        // Format nilai input saat mengisi form edit
+        function openEditModal(id, kode_barang, nama_part, stn, tipe, merk, harga_toko, harga_jual, jumlah) {
             document.getElementById("modal-edit").classList.remove("hidden");
+
+            // Format harga toko dan harga jual dengan "Rp"
+            let formattedHargaToko = 'Rp ' + parseInt(harga_toko).toLocaleString();
+            let formattedHargaJual = 'Rp ' + parseInt(harga_jual).toLocaleString();
 
             // Fill the edit form with data
             document.getElementById('kode-barang-edit').value = kode_barang;
@@ -455,14 +461,25 @@
             document.getElementById('stn-edit').value = stn;
             document.getElementById('tipe-edit').value = tipe;
             document.getElementById('merk-edit').value = merk;
-            document.getElementById('harga_toko-edit').value = harga_toko;
-            document.getElementById('harga_toko-edit').value = harga_jual;
+            document.getElementById('harga_toko-edit').value = formattedHargaToko;
+            document.getElementById('harga_jual-edit').value = formattedHargaJual;
             document.getElementById('jumlah-edit').value = jumlah;
 
             // Set the action to the edit route
             document.getElementById("inputFormEdit").action = "/datasparepat/" + id;
         }
 
+        // Sebelum submit, pastikan nilai yang dikirim adalah nilai asli
+        document.getElementById('inputFormEdit').addEventListener('submit', function(event) {
+            let hargaTokoInput = document.getElementById('harga_toko-edit');
+            let hargaJualInput = document.getElementById('harga_jual-edit');
+
+            // Hapus "Rp" dan tanda pemisah ribuan sebelum submit
+            hargaTokoInput.value = hargaTokoInput.value.replace(/\D/g, '');
+            hargaJualInput.value = hargaJualInput.value.replace(/\D/g, '');
+        });
+
+        // Fungsi untuk menutup modal edit
         function closeEditModal() {
             document.getElementById("modal-edit").classList.add("hidden");
         }

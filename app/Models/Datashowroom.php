@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class Datashowroom extends Model
 {
     use HasFactory;
-    protected $table = 'datashowrooms';
 
     protected $fillable = [
         'nomor_polisi',

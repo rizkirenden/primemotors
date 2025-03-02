@@ -196,11 +196,21 @@
                             <td class="px-4 py-2">{{ $partMasuk->tanggal_masuk }}</td>
                             <td class="px-4 py-2">{{ $partMasuk->jumlah }}</td>
                             <td class="px-4 py-2">
-                                <!-- Action Icons -->
+                                <!-- Tombol Edit -->
                                 <a href="#" class="text-blue-500 hover:text-blue-700 mr-3"
-                                    onclick="openEditModal()">
+                                    onclick="openEditModal(
+                                        '{{ $partMasuk->id }}',
+                                        '{{ $partMasuk->kode_barang }}',
+                                        '{{ $partMasuk->nama_part }}',
+                                        '{{ $partMasuk->stn }}',
+                                        '{{ $partMasuk->tipe }}',
+                                        '{{ $partMasuk->merk }}',
+                                        '{{ $partMasuk->tanggal_masuk }}',
+                                        '{{ $partMasuk->jumlah }}'
+                                    )">
                                     <i class="fas fa-edit"></i>
                                 </a>
+                                <!-- Tombol Hapus -->
                                 <form action="{{ route('partmasuk.destroy', $partMasuk->id) }}" method="POST"
                                     class="inline-block">
                                     @csrf
@@ -244,7 +254,6 @@
         </div>
     </div>
 
-    <!-- Modal Add Form -->
     <!-- Modal Add Form -->
     <div id="modal-add" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center hidden">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
@@ -296,6 +305,53 @@
         </div>
     </div>
 
+    <!-- Modal Add Edit -->
+    <div id="modal-edit" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center hidden">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
+            <h2 class="text-xl font-bold mb-4">Edit Data</h2>
+            <form id="inputFormEdit" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-input-row">
+                    <div>
+                        <label for="kode_barang_edit">Kode Barang</label>
+                        <input type="text" id="kode_barang_edit" name="kode_barang" readonly>
+                    </div>
+                    <div>
+                        <label for="nama_part_edit">Nama Part</label>
+                        <input type="text" id="nama_part_edit" name="nama_part" readonly>
+                    </div>
+                    <div>
+                        <label for="stn_edit">STN</label>
+                        <input type="text" id="stn_edit" name="stn" readonly>
+                    </div>
+                    <div>
+                        <label for="tipe_edit">Tipe</label>
+                        <input type="text" id="tipe_edit" name="tipe" readonly>
+                    </div>
+                    <div>
+                        <label for="merk_edit">Merk</label>
+                        <input type="text" id="merk_edit" name="merk" readonly>
+                    </div>
+                    <div>
+                        <label for="tanggal_masuk_edit">Tanggal Masuk</label>
+                        <input type="date" id="tanggal_masuk_edit" name="tanggal_masuk" required>
+                    </div>
+                    <div>
+                        <label for="jumlah_edit">Jumlah</label>
+                        <input type="number" id="jumlah_edit" name="jumlah" required>
+                    </div>
+                </div>
+                <div class="mt-4 flex space-x-4 justify-center">
+                    <button type="button" onclick="closeEditModal()"
+                        class="bg-black text-white hover:bg-red-700 px-4 py-2 rounded-full w-full sm:w-auto">Cancel</button>
+                    <button type="submit"
+                        class="bg-black text-white hover:bg-gray-700 px-4 py-2 rounded-full w-full sm:w-auto">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         function fetchSparepartData() {
             const kodeBarang = document.getElementById('kode_barang').value;
@@ -334,6 +390,28 @@
 
         function closeAddModal() {
             document.getElementById("modal-add").classList.add("hidden");
+        }
+
+        // Fungsi untuk membuka modal edit dan mengisi data
+        function openEditModal(id, kode_barang, nama_part, stn, tipe, merk, tanggal_masuk, jumlah) {
+            document.getElementById("modal-edit").classList.remove("hidden");
+
+            // Isi form edit dengan data
+            document.getElementById('kode_barang_edit').value = kode_barang;
+            document.getElementById('nama_part_edit').value = nama_part;
+            document.getElementById('stn_edit').value = stn;
+            document.getElementById('tipe_edit').value = tipe;
+            document.getElementById('merk_edit').value = merk;
+            document.getElementById('tanggal_masuk_edit').value = tanggal_masuk;
+            document.getElementById('jumlah_edit').value = jumlah;
+
+            // Set action form edit
+            document.getElementById("inputFormEdit").action = `/partmasuk/${id}`;
+        }
+
+        // Fungsi untuk menutup modal edit
+        function closeEditModal() {
+            document.getElementById("modal-edit").classList.add("hidden");
         }
 
         function searchTable() {

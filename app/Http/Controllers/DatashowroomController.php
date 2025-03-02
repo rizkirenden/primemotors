@@ -76,7 +76,7 @@ class DatashowroomController extends Controller
         $request->validate([
             'nomor_polisi' => 'required|string|max:10',
             'merk_model' => 'required|string|max:255',
-            'tahun_pembuatan' => 'required|integer',
+            'tahun_pembuatan' => 'required|date',
             'nomor_rangka' => 'required|string|max:20',
             'nomor_mesin' => 'required|string|max:20',
             'bahan_bakar' => 'required|string|max:20',

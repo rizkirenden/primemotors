@@ -42,18 +42,19 @@ Route::delete('datasparepat/{id}', [DatasparepatController::class, 'destroy'])->
 
 Route::get('/partmasuk', [PartmasukController::class, 'index'])->name('partmasuk');
 Route::post('/partmasuk', [PartmasukController::class, 'store'])->name('partmasuk.store');
+Route::put('/partmasuk/{id}', [PartmasukController::class, 'update'])->name('partmasuk.update');
 Route::get('/spareparts/{kode_barang}', [PartmasukController::class, 'getSparepartByKode']);
 Route::delete('/partmasuk/{id}', [PartmasukController::class, 'destroy'])->name('partmasuk.destroy');
 
 Route::get('/partkeluar',[PartkeluarController::class, 'index'])->name('partkeluar');
 Route::post('/partkeluar', [PartKeluarController::class, 'store'])->name('partkeluar.store');
+Route::put('/partkeluar/{id}', [PartkeluarController::class, 'update'])->name('partkeluar.update');
 Route::delete('/partkeluar/{id}', [PartKeluarController::class, 'destroy'])->name('partkeluar.destroy');
 
 Route::get('/pengguna', [PenggunaController::class, 'index'])->name('pengguna');
 
 Route::get('/datashowroom', [DatashowroomController::class, 'index'])->name('datashowroom');
-Route::post('/datashowroom', [DatashowroomController::class,'store'])->name('datashowroom.store');
-Route::get('/datashowroom/create', [DatashowroomController::class,'create'])->name('datashowroom.create');
-Route::get('datashowroom/{id}/edit', [DatashowroomController::class,'edit'])->name('datashowroom.edit');
-Route::put('datashowroom/{id}', [DatashowroomController::class, 'update'])->name('datashowroom.update');
-Route::delete('datashowroom/{id}', [DatashowroomController::class,'destroy'])->name('datashowroom.destroy');
+Route::post('/datashowroom', [DatashowroomController::class, 'store'])->name('datashowroom.store');
+Route::get('/datashowroom/{id}/edit', [DatashowroomController::class, 'edit'])->name('datashowroom.edit');
+Route::put('/datashowroom/{id}', [DatashowroomController::class, 'update'])->name('datashowroom.update');
+Route::delete('/datashowroom/{id}', [DatashowroomController::class, 'destroy'])->name('datashowroom.destroy');

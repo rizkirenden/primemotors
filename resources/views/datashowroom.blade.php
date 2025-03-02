@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Showroom Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
-        /* Table Styling */
+        /* Custom CSS */
         thead {
             border-bottom: 2px solid #ccc;
         }
@@ -24,7 +24,7 @@
             padding: 4px 8px;
         }
 
-        /* Pagination Styling */
+        /* Style pagination buttons */
         #pagination button:hover {
             background-color: #000000;
             border-color: #888;
@@ -82,7 +82,6 @@
             flex-grow: 1;
         }
 
-        /* Description Row Styling */
         .description-row td {
             padding: 20px 10px;
         }
@@ -96,7 +95,30 @@
             width: 30%;
         }
 
-        /* Modal Styling */
+        .hidden {
+            display: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.hidden {
+            display: none;
+        }
+
+        .modal:not(.hidden) {
+            display: flex;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -142,8 +164,10 @@
 </head>
 
 <body class="bg-black flex h-screen">
-    <!-- Sidebar (Assumed to be included elsewhere) -->
+    <!-- Sidebar -->
     @include('sidebar')
+
+    <!-- Main Content -->
     <div class="flex-1 p-3 overflow-x-auto">
         <!-- Card -->
         <div class="bg-white shadow-lg rounded-lg">
@@ -204,7 +228,7 @@
                             <td class="px-4 py-2">Rp {{ number_format($showroom->harga, 0, ',', '.') }}</td>
                             <td class="px-4 py-2">
                                 @if ($showroom->foto)
-                                    <img src="{{ asset('storage/fotos/' . $showroom->foto) }}" alt="Foto Showroom"
+                                    <img src="{{ asset('storage/' . $showroom->foto) }}" alt="Foto Showroom"
                                         width="100">
                                 @else
                                     No Foto
@@ -220,7 +244,27 @@
                             <td class="px-4 py-2">
                                 <!-- Action Icons -->
                                 <a href="#" class="text-blue-500 hover:text-blue-700 mr-3"
-                                    onclick="openEditModal({{ $showroom->id }}, '{{ $showroom->nomor_polisi }}', '{{ $showroom->merk_model }}', '{{ $showroom->tahun_pembuatan }}', '{{ $showroom->harga }}', '{{ $showroom->status }}')">
+                                    onclick="openEditModal(
+                                    '{{ $showroom->id }}',
+                                    '{{ $showroom->nomor_polisi }}',
+                                    '{{ $showroom->merk_model }}',
+                                    '{{ $showroom->tahun_pembuatan }}',
+                                    '{{ $showroom->nomor_rangka }}',
+                                    '{{ $showroom->nomor_mesin }}',
+                                    '{{ $showroom->bahan_bakar }}',
+                                    '{{ $showroom->kapasitas_mesin }}',
+                                    '{{ $showroom->jumlah_roda }}',
+                                    '{{ $showroom->harga }}',
+                                    '{{ $showroom->tanggal_registrasi }}',
+                                    '{{ $showroom->masa_berlaku_stnk }}',
+                                    '{{ $showroom->masa_berlaku_pajak }}',
+                                    '{{ $showroom->status_kepemilikan }}',
+                                    '{{ $showroom->kilometer }}',
+                                    '{{ $showroom->fitur_keamanan }}',
+                                    '{{ $showroom->riwayat_servis }}',
+                                    '{{ $showroom->status }}',
+                                    '{{ $showroom->foto }}'
+                                )">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <form action="{{ route('datashowroom.destroy', $showroom->id) }}" method="POST"
@@ -298,7 +342,6 @@
         <div class="modal-content w-full max-w-6xl mx-auto bg-white rounded-lg shadow-xl p-6">
             <div class="modal-header flex justify-between items-center p-4 border-b">
                 <h2 class="text-xl font-bold">Tambah Data Kendaraan</h2>
-                <!-- Removed the X button -->
             </div>
             <div class="modal-body p-6">
                 <form id="inputFormAdd" method="POST" action="{{ route('datashowroom.store') }}"
@@ -445,13 +488,13 @@
         </div>
     </div>
 
-
-
+    <!-- Modal Edit Form -->
     <!-- Modal Edit Form -->
     <div id="modal-edit" class="modal hidden">
         <div class="modal-content w-full max-w-6xl mx-auto bg-white rounded-lg shadow-xl p-6">
             <div class="modal-header flex justify-between items-center p-4 border-b">
                 <h2 class="text-xl font-bold">Edit Data Kendaraan</h2>
+                <button onclick="closeEditModal()" class="text-black hover:text-gray-700">&times;</button>
             </div>
             <div class="modal-body p-6">
                 <form id="inputFormEdit" method="POST" enctype="multipart/form-data">
@@ -475,7 +518,7 @@
                         <!-- Tahun Pembuatan -->
                         <div>
                             <label for="tahun-pembuatan-edit" class="block text-xs">Tahun Pembuatan:</label>
-                            <input type="number" id="tahun-pembuatan-edit" name="tahun_pembuatan" required
+                            <input type="date" id="tahun-pembuatan-edit" name="tahun_pembuatan" required
                                 class="w-full px-4 py-2 border border-gray-300 rounded-md">
                         </div>
 
@@ -588,7 +631,6 @@
                                 class="w-full px-4 py-2 border border-gray-300 rounded-md">
                             <p id="foto-preview" class="text-gray-500 mt-2"></p>
                         </div>
-
                         <!-- Preview Foto -->
                         <div class="mt-2" id="foto-container-edit">
                             <!-- Foto lama ditampilkan di sini -->
@@ -605,18 +647,28 @@
             </div>
         </div>
     </div>
-
-
-
-
     <script>
         function formatCurrency(input) {
-            let value = input.value.replace(/\D/g, ''); // Remove non-numeric characters
+            let value = input.value.replace(/\D/g, ''); // Hapus semua karakter non-angka
             if (value) {
-                value = parseInt(value, 10).toLocaleString(); // Format as a number
-                input.value = 'Rp ' + value; // Add 'Rp' prefix
+                let formattedValue = parseInt(value, 10).toLocaleString(); // Format angka dengan pemisah ribuan
+                input.value = 'Rp ' + formattedValue; // Tambahkan "Rp" di depan
+                input.setAttribute('data-raw-value', value); // Simpan nilai asli (tanpa "Rp") di atribut data
             }
         }
+
+        // Untuk form Add
+        document.getElementById('inputFormAdd').addEventListener('submit', function(event) {
+            let hargaInput = document.getElementById('harga');
+            hargaInput.value = hargaInput.getAttribute('data-raw-value'); // Kirim nilai asli (tanpa "Rp")
+        });
+
+        // Untuk form Edit
+        document.getElementById('inputFormEdit').addEventListener('submit', function(event) {
+            let hargaInput = document.getElementById('harga-edit');
+            hargaInput.value = hargaInput.getAttribute('data-raw-value'); // Kirim nilai asli (tanpa "Rp")
+        });
+
         // JavaScript for auto-search
         function searchTable() {
             const input = document.getElementById("search-input");
@@ -663,6 +715,17 @@
             console.log("Closing Add Modal");
             document.getElementById("modal-add").classList.add("hidden");
         }
+        // Untuk form Add
+        document.getElementById('inputFormAdd').addEventListener('submit', function(event) {
+            let hargaInput = document.getElementById('harga');
+            hargaInput.value = hargaInput.value.replace(/\D/g, ''); // Hapus semua karakter non-angka
+        });
+
+        // Untuk form Edit
+        document.getElementById('inputFormEdit').addEventListener('submit', function(event) {
+            let hargaInput = document.getElementById('harga-edit');
+            hargaInput.value = hargaInput.value.replace(/\D/g, ''); // Hapus semua karakter non-angka
+        });
 
         function openEditModal(
             id, nomor_polisi, merk_model, tahun_pembuatan, nomor_rangka, nomor_mesin,
@@ -670,10 +733,10 @@
             masa_berlaku_stnk, masa_berlaku_pajak, status_kepemilikan, kilometer,
             fitur_keamanan, riwayat_servis, status, foto
         ) {
-            // Show the modal
+            console.log("Opening Edit Modal");
             document.getElementById("modal-edit").classList.remove("hidden");
-
-            // Fill the edit form with data
+            let formattedHarga = 'Rp ' + parseInt(harga).toLocaleString();
+            // Isi form edit dengan data
             document.getElementById('nomor-polisi-edit').value = nomor_polisi;
             document.getElementById('merk-model-edit').value = merk_model;
             document.getElementById('tahun-pembuatan-edit').value = tahun_pembuatan;
@@ -682,7 +745,7 @@
             document.getElementById('bahan-bakar-edit').value = bahan_bakar;
             document.getElementById('kapasitas-mesin-edit').value = kapasitas_mesin;
             document.getElementById('jumlah-roda-edit').value = jumlah_roda;
-            document.getElementById('harga-edit').value = harga;
+            document.getElementById('harga-edit').value = formattedHarga;
             document.getElementById('tanggal-registrasi-edit').value = tanggal_registrasi;
             document.getElementById('masa-berlaku-stnk-edit').value = masa_berlaku_stnk;
             document.getElementById('masa-berlaku-pajak-edit').value = masa_berlaku_pajak;
@@ -692,21 +755,22 @@
             document.getElementById('riwayat-servis-edit').value = riwayat_servis;
             document.getElementById('status-edit').value = status;
 
-            // Set the action to the edit route (PUT method)
+            // Set action form ke route update
             document.getElementById("inputFormEdit").action = "/datashowroom/" + id;
 
-            // Display the old photo (if any)
+            // Tampilkan foto lama (jika ada)
             if (foto) {
                 document.getElementById('foto-container-edit').innerHTML = `
-            <img src="{{ asset('storage/fotos/') }}/${foto}" alt="Foto Kendaraan" width="100" class="rounded-md">
+            <img src="{{ asset('storage/') }}/${foto}" alt="Foto Kendaraan" width="100" class="rounded-md">
             <p class="text-gray-500 mt-2">Foto Lama</p>
         `;
             } else {
-                document.getElementById('foto-container-edit').innerHTML = '';
+                document.getElementById('foto-container-edit').innerHTML = 'Tidak ada foto';
             }
+        }
 
-            // Clear previous preview
-            document.getElementById('foto-preview').textContent = '';
+        function closeEditModal() {
+            document.getElementById("modal-edit").classList.add("hidden");
         }
     </script>
 </body>
