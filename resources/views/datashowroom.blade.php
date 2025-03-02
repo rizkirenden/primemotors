@@ -623,7 +623,6 @@
                                 <option value="terjual">Terjual</option>
                             </select>
                         </div>
-
                         <!-- Foto Kendaraan -->
                         <div>
                             <label for="foto-edit" class="block text-xs">Foto Kendaraan:</label>
@@ -658,6 +657,7 @@
         }
 
         // Untuk form Add
+        // Untuk form Add
         document.getElementById('inputFormAdd').addEventListener('submit', function(event) {
             let hargaInput = document.getElementById('harga');
             hargaInput.value = hargaInput.getAttribute('data-raw-value'); // Kirim nilai asli (tanpa "Rp")
@@ -668,7 +668,6 @@
             let hargaInput = document.getElementById('harga-edit');
             hargaInput.value = hargaInput.getAttribute('data-raw-value'); // Kirim nilai asli (tanpa "Rp")
         });
-
         // JavaScript for auto-search
         function searchTable() {
             const input = document.getElementById("search-input");
@@ -735,7 +734,10 @@
         ) {
             console.log("Opening Edit Modal");
             document.getElementById("modal-edit").classList.remove("hidden");
+
+            // Format harga ke dalam bentuk "Rp x.xxx.xxx"
             let formattedHarga = 'Rp ' + parseInt(harga).toLocaleString();
+
             // Isi form edit dengan data
             document.getElementById('nomor-polisi-edit').value = nomor_polisi;
             document.getElementById('merk-model-edit').value = merk_model;
@@ -746,6 +748,7 @@
             document.getElementById('kapasitas-mesin-edit').value = kapasitas_mesin;
             document.getElementById('jumlah-roda-edit').value = jumlah_roda;
             document.getElementById('harga-edit').value = formattedHarga;
+            document.getElementById('harga-edit').setAttribute('data-raw-value', harga); // Simpan nilai asli
             document.getElementById('tanggal-registrasi-edit').value = tanggal_registrasi;
             document.getElementById('masa-berlaku-stnk-edit').value = masa_berlaku_stnk;
             document.getElementById('masa-berlaku-pajak-edit').value = masa_berlaku_pajak;

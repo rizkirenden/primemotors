@@ -90,7 +90,7 @@ class DatashowroomController extends Controller
             'kilometer' => 'required|integer',
             'fitur_keamanan' => 'required|string',
             'riwayat_servis' => 'required|string',
-            'status' => 'required|in:terjual,tersedia',
+            'status' => 'required|in:tersedia,terjual',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validasi upload foto
         ]);
 
