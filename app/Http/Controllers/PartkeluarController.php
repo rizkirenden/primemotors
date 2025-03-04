@@ -89,6 +89,15 @@ class PartkeluarController extends Controller
         $sparepart->save();
     }
 
+    // Validasi jika stok 0 atau jumlah yang diminta melebihi stok yang tersedia
+    if ($sparepart->jumlah == 0) {
+        return redirect()->back()->with('error', 'Stok barang sudah habis!');
+    }
+
+    if ($sparepart->jumlah < $request->jumlah) {
+        return redirect()->back()->with('error', 'Stok tidak mencukupi!');
+    }
+
     // Update data part keluar
     $partKeluar->update($request->all());
 

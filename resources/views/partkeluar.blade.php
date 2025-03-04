@@ -7,6 +7,7 @@
     <title>Data Keluar</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         /* Add borders to the table header and body */
         thead {
@@ -356,6 +357,20 @@
     </div>
 
     <script>
+        // Fungsi untuk menampilkan pop-up error
+        // Fungsi untuk menampilkan pop-up error menggunakan SweetAlert
+        function showErrorPopup(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: message,
+            });
+        }
+
+        // Cek jika ada pesan error dari controller
+        @if (session('error'))
+            showErrorPopup("{{ session('error') }}");
+        @endif
         function fetchSparepartData() {
             const kodeBarang = document.getElementById('kode_barang').value;
 
