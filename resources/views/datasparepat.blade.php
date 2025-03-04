@@ -220,18 +220,11 @@
                         <tr id="desc-{{ $sparepat->id }}" class="hidden description-row">
                             <td colspan="12">
                                 <div class="description-container">
-                                    <div>
-                                        <strong>STN:</strong> {{ $sparepat->stn }}<br>
-                                        <strong>Tipe:</strong> {{ $sparepat->tipe }}<br>
-                                        <strong>Merk:</strong> {{ $sparepat->merk }}<br>
-                                    </div>
-                                    <div>
-                                        <strong>Jumlah:</strong> {{ $sparepat->jumlah }}<br>
-                                    </div>
-                                    <div>
-                                        <strong>Harga Toko:</strong> Rp
-                                        {{ number_format($sparepat->harga_toko, 0, ',', '.') }}<br>
-                                        <strong>Kode Barang:</strong> {{ $sparepat->kode_barang }}<br>
+                                    <div style="display: flex; gap: 20px;">
+                                        <!-- Tambahkan display: flex dan gap untuk jarak -->
+                                        <div><strong>STN:</strong> {{ $sparepat->stn }}</div>
+                                        <div><strong>Tipe:</strong> {{ $sparepat->tipe }}</div>
+                                        <div><strong>Merk:</strong> {{ $sparepat->merk }}</div>
                                     </div>
                                 </div>
                             </td>
