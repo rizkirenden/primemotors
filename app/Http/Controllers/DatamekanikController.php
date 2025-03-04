@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Datamekanik; // Import your model
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class DatamekanikController extends Controller
 {
@@ -73,4 +74,35 @@ class DatamekanikController extends Controller
         // Redirect back to the index route after deleting
         return redirect()->route('datamekanik');
     }
+    public function printPDF(Request $request)
+{
+    // Ambil parameter pencarian dan tanggal dari request
+    $search = $request->input('search');
+    $date = $request->input('date');
+
+    // Query data mekanik berdasarkan pencarian dan tanggal
+    $query = Datamekanik::query();
+
+    if ($search) {
+        $query->where('nama_mekanik', 'like', '%' . $search . '%')
+              ->orWhere('nomor_hp', 'like', '%' . $search . '%')
+              ->orWhere('alamat', 'like', '%' . $search . '%');
+    }
+
+    if ($date) {
+        $query->whereDate('tanggal_lahir', $date);
+    }
+
+    // Ambil data yang sudah difilter
+    $mekaniks = $query->get();
+
+    // Load view ke PDF
+    $pdf = Pdf::loadView('printpdfdatamekanik', compact('mekaniks'));
+
+    // Download PDF
+    return $pdf->download('Data_Mekanik.pdf');
+
+    // Atau tampilkan langsung di browser
+    // return $pdf->stream('Data_Mekanik.pdf');
+}
 }

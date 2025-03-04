@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\PartMasuk; // Pastikan nama model benar
 use App\Models\Datasparepat; // Pastikan nama model benar
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PartmasukController extends Controller
 {
@@ -111,5 +112,37 @@ public function update(Request $request, $id)
     }
 
     return redirect()->route('partmasuk')->with('success', 'Data part masuk berhasil diupdate!');
+}
+public function printPDF(Request $request)
+{
+    // Ambil parameter pencarian dan tanggal dari request
+    $search = $request->input('search');
+    $date = $request->input('date');
+
+    // Query data mekanik berdasarkan pencarian dan tanggal
+    $query = PartMasuk::query();
+
+    if ($search) {
+        $query->where('kode_barang', 'like', '%' . $search . '%')
+              ->orWhere('nama_part', 'like', '%' . $search . '%')
+              ->orWhere('stn', 'like', '%' . $search . '%')
+              ->orWhere('merk', 'like', '%' . $search . '%')
+              ->orWhere('jumlah', 'like', '%' . $search . '%')
+              ->orWhere('tanggal_masuk', 'like', '%' . $search . '%')
+              ->orWhere('tipe', 'like', '%' . $search . '%');
+    }
+
+    // Ambil data yang sudah difilter
+    $partmasuks = $query->get();
+
+    // Load view ke PDF
+    $pdf = Pdf::loadView('printpdfpartmasuk', compact('partmasuks'));
+
+    //return $pdf->stream('Data_Sparepat.pdf');
+
+    // Download PDF
+    return $pdf->download('Data_Partmasuk.pdf');
+
+
 }
 }

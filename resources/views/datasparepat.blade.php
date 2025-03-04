@@ -146,20 +146,20 @@
                 <div class="mb-1 p-2">
                     <div class="flex justify-between items-center space-x-4">
                         <!-- Search -->
-                        <div class="flex items-center space-x-4 w-full">
-                            <input type="text" id="search-input" placeholder="Search..."
-                                class="px-4 py-2 rounded-full text-black w-64 bg-white border border-gray-300"
-                                onkeyup="searchTable()">
-                            <!-- Filter Date -->
-                            <input type="date" id="date-input"
-                                class="px-4 py-2 rounded-full text-black bg-white border border-gray-300"
-                                onchange="filterByDate()">
-                            <!-- Print PDF Button -->
-                            <button
-                                class="px-4 py-2 bg-white text-black rounded-full hover:bg-gray-200 border border-gray-300">
-                                <i class="fas fa-file-pdf text-black"></i> Print PDF
-                            </button>
-                        </div>
+                        <form action="{{ route('printpdfdatasparepat') }}" method="GET">
+                            <div class="flex items-center space-x-4 w-full">
+                                <!-- Search Input -->
+                                <input type="text" name="search" id="search-input" placeholder="Search..."
+                                    class="px-4 py-2 rounded-full text-black w-64 bg-white border border-gray-300"
+                                    value="{{ request('search') }}" onkeyup="searchTable()">
+
+                                <!-- Print PDF Button -->
+                                <button type="submit"
+                                    class="px-4 py-2 bg-white text-black rounded-full hover:bg-gray-200 border border-gray-300">
+                                    <i class="fas fa-file-pdf text-black"></i> Print PDF
+                                </button>
+                            </div>
+                        </form>
 
                         <!-- Add Data Button -->
                         <button onclick="openAddModal()"
@@ -420,13 +420,15 @@
             Array.from(rows).forEach(row => {
                 let cells = row.getElementsByTagName("td");
                 let found = false;
-                for (let i = 0; i < cells.length; i++) {
-                    let cell = cells[i];
+
+                // Loop through all the columns of the row
+                Array.from(cells).forEach(cell => {
                     if (cell && cell.textContent.toLowerCase().includes(filter)) {
                         found = true;
-                        break;
                     }
-                }
+                });
+
+                // Show or hide the row based on the search result
                 row.style.display = found ? "" : "none";
             });
         }

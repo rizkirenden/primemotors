@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Datasparepat;
+use Barryvdh\DomPDF\Facade\Pdf;
 class DatasparepatController extends Controller
 {
     public function index(){
@@ -57,5 +58,38 @@ class DatasparepatController extends Controller
         $sparepat = Datasparepat::findOrFail($id);
         $sparepat->delete();
         return redirect()->route('datasparepat');
+    }
+    public function printPDF(Request $request)
+    {
+        // Ambil parameter pencarian dan tanggal dari request
+        $search = $request->input('search');
+        $date = $request->input('date');
+
+        // Query data mekanik berdasarkan pencarian dan tanggal
+        $query = Datasparepat::query();
+
+        if ($search) {
+            $query->where('kode_barang', 'like', '%' . $search . '%')
+                  ->orWhere('nama_part', 'like', '%' . $search . '%')
+                  ->orWhere('stn', 'like', '%' . $search . '%')
+                  ->orWhere('merk', 'like', '%' . $search . '%')
+                  ->orWhere('jumlah', 'like', '%' . $search . '%')
+                  ->orWhere('harga_toko', 'like', '%' . $search . '%')
+                  ->orWhere('harga_jual', 'like', '%' . $search . '%')
+                  ->orWhere('tipe', 'like', '%' . $search . '%');
+        }
+
+        // Ambil data yang sudah difilter
+        $sparepats = $query->get();
+
+        // Load view ke PDF
+        $pdf = Pdf::loadView('printpdfdatasparepat', compact('sparepats'));
+
+        //return $pdf->stream('Data_Sparepat.pdf');
+
+        // Download PDF
+        return $pdf->download('Data_Sparepat.pdf');
+
+
     }
 }

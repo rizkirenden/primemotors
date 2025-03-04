@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Datashowroom;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class DatashowroomController extends Controller
 {
@@ -132,5 +133,56 @@ class DatashowroomController extends Controller
 
         // Redirect ke halaman showroom
         return redirect()->route('datashowroom');
+    }
+    public function printPDF(Request $request)
+    {
+        // Ambil parameter pencarian dan tanggal dari request
+        $search = $request->input('search');
+        $date = $request->input('date');
+
+        // Query data showroom berdasarkan pencarian dan tanggal
+        $query = Datashowroom::query();
+
+        if ($search) {
+            $query->where('nomor_polisi', 'like', '%' . $search . '%')
+                ->orWhere('merk_model', 'like', '%' . $search . '%')
+                ->orWhere('tahun_pembuatan', 'like', '%' . $search . '%')
+                ->orWhere('nomor_rangka', 'like', '%' . $search . '%')
+                ->orWhere('nomor_mesin', 'like', '%' . $search . '%')
+                ->orWhere('bahan_bakar', 'like', '%' . $search . '%')
+                ->orWhere('kapasitas_mesin', 'like', '%' . $search . '%')
+                ->orWhere('jumlah_roda', 'like', '%' . $search . '%')
+                ->orWhere('harga', 'like', '%' . $search . '%')
+                ->orWhere('tanggal_registrasi', 'like', '%' . $search . '%')
+                ->orWhere('masa_berlaku_stnk', 'like', '%' . $search . '%')
+                ->orWhere('masa_berlaku_pajak', 'like', '%' . $search . '%')
+                ->orWhere('status_kepemilikan', 'like', '%' . $search . '%')
+                ->orWhere('kilometer', 'like', '%' . $search . '%')
+                ->orWhere('fitur_keamanan', 'like', '%' . $search . '%')
+                ->orWhere('riwayat_servis', 'like', '%' . $search . '%')
+                ->orWhere('status', 'like', '%' . $search . '%');
+        }
+
+        // Ambil data yang sudah difilter
+        $showrooms = $query->get();
+
+        // Pastikan path foto benar
+        foreach ($showrooms as $showroom) {
+            if ($showroom->foto) {
+                $showroom->foto = public_path('storage/' . $showroom->foto);  // Ganti asset() dengan public_path()
+            } else {
+                $showroom->foto = public_path('images/default-image.jpg'); // Default image
+            }
+        }
+
+
+        // Load view ke PDF
+        $pdf = Pdf::loadView('printpdfshowroom', compact('showrooms'));
+
+        // Stream PDF untuk preview
+        // return $pdf->stream('Data_ShowRoom.pdf');
+
+        // Download PDF
+        return $pdf->download('Data_ShowRoom.pdf');
     }
 }

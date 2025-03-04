@@ -245,6 +245,16 @@
                     <input type="email" id="email" name="email"
                         class="mt-1 px-4 py-2 w-full border border-gray-300 rounded-md">
                 </div>
+                <!-- Password field with show/hide functionality -->
+                <div class="mb-4">
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" name="password"
+                        class="mt-1 px-4 py-2 w-full border border-gray-300 rounded-md">
+                    <div class="mt-2 flex items-center">
+                        <input type="checkbox" id="showPassword" class="mr-2" onclick="togglePasswordVisibility()">
+                        <label for="showPassword" class="text-sm text-gray-600">Tampilkan Password</label>
+                    </div>
+                </div>
                 <div class="mb-4">
                     <label for="level" class="block text-sm font-medium text-gray-700">Level</label>
                     <select id="level" name="level"
@@ -263,6 +273,18 @@
             </form>
         </div>
     </div>
+    <script>
+        // Function to toggle password visibility
+        function togglePasswordVisibility() {
+            var passwordField = document.getElementById('password');
+            var showPasswordCheckbox = document.getElementById('showPassword');
+            if (showPasswordCheckbox.checked) {
+                passwordField.type = 'text'; // Show password
+            } else {
+                passwordField.type = 'password'; // Hide password
+            }
+        }
+    </script>
 </body>
 
 </html>

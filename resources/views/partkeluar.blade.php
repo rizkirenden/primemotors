@@ -145,20 +145,25 @@
                 <div class="mb-1 p-2">
                     <div class="flex justify-between items-center space-x-4">
                         <!-- Search -->
-                        <div class="flex items-center space-x-4 w-full">
-                            <input type="text" id="search-input" placeholder="Search..."
-                                class="px-4 py-2 rounded-full text-black w-64 bg-white border border-gray-300"
-                                onkeyup="searchTable()">
-                            <!-- Filter Date -->
-                            <input type="date" id="date-input"
-                                class="px-4 py-2 rounded-full text-black bg-white border border-gray-300"
-                                onchange="filterByDate()">
-                            <!-- Print PDF Button -->
-                            <button
-                                class="px-4 py-2 bg-white text-black rounded-full hover:bg-gray-200 border border-gray-300">
-                                <i class="fas fa-file-pdf text-black"></i> Print PDF
-                            </button>
-                        </div>
+                        <form action="{{ route('printpdfpartkeluar') }}" method="GET">
+                            <div class="flex items-center space-x-4 w-full">
+                                <!-- Search Input -->
+                                <input type="text" id="search-input" name="search" placeholder="Search..."
+                                    class="px-4 py-2 rounded-full text-black w-64 bg-white border border-gray-300"
+                                    value="{{ request('search') }}" onkeyup="searchTable()">
+
+                                <!-- Filter Date -->
+                                <input type="date" id="date-input" name="date"
+                                    class="px-4 py-2 rounded-full text-black bg-white border border-gray-300"
+                                    value="{{ request('date') }}" onchange="filterByDate()">
+
+                                <!-- Print PDF Button -->
+                                <button type="submit"
+                                    class="px-4 py-2 bg-white text-black rounded-full hover:bg-gray-200 border border-gray-300">
+                                    <i class="fas fa-file-pdf text-black"></i> Print PDF
+                                </button>
+                            </div>
+                        </form>
 
                         <!-- Add Data Button -->
                         <button onclick="openAddModal()"
