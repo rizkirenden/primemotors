@@ -66,3 +66,6 @@ Route::delete('/datashowroom/{id}', [DatashowroomController::class, 'destroy'])-
 Route::get('/printpdfshowroom', [DatashowroomController::class, 'printPDF'])->name('printpdfshowroom');
 
 Route::get('/dataservice', [DataserviceController::class, 'index'])->name('dataservice');
+Route::post('/dataservice', [DataserviceController::class, 'store'])->name('dataservice.store');
+Route::put('/dataservice/{id}', [DataserviceController::class, 'update'])->name('dataservice.update');
+Route::delete('/dataservice/{id}', [DataserviceController::class, 'destroy'])->name('dataservice.destroy');

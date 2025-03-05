@@ -315,7 +315,31 @@
 
             <!-- Pagination Section -->
             <div class="pagination-wrapper">
-                {{ $dataservices->links() }}
+                <div class="pagination-container" id="pagination">
+                    <!-- Previous Page Link -->
+                    @if ($sparepats->onFirstPage())
+                        <span class="disabled m-1 px-4 py-2 rounded-full">Prev</span>
+                    @else
+                        <a href="{{ $sparepats->previousPageUrl() }}"
+                            class="px-4 py-2 m-1 rounded-full hover:bg-black hover:text-white">Prev</a>
+                    @endif
+
+                    <!-- Page Number Links -->
+                    @for ($i = 1; $i <= $sparepats->lastPage(); $i++)
+                        <a href="{{ $sparepats->url($i) }}"
+                            class="px-4 py-2 m-1 rounded-full {{ $i == $sparepats->currentPage() ? 'bg-black text-white' : '' }}">
+                            {{ $i }}
+                        </a>
+                    @endfor
+
+                    <!-- Next Page Link -->
+                    @if ($sparepats->hasMorePages())
+                        <a href="{{ $sparepats->nextPageUrl() }}"
+                            class="px-4 py-2 m-1 rounded-full hover:bg-black hover:text-white">Next</a>
+                    @else
+                        <span class="disabled m-1 px-4 py-2 rounded-full">Next</span>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
