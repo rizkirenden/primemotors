@@ -74,7 +74,7 @@
         </li>
         <li class="mb-4 p-2 rounded flex items-center sidebar-item">
             <i class="fas fa-clipboard-list text-lg mr-2"></i>
-            <a href="#" class="text-sm ">Data Service</a>
+            <a href="{{ route('dataservice') }}" class="text-sm ">Data Service</a>
         </li>
         <li class="mb-4 p-2 rounded flex items-center sidebar-item">
             <i class="fas fa-file-alt text-lg mr-2"></i>

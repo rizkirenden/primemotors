@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DatamekanikController;
+use App\Http\Controllers\DataserviceController;
 use App\Http\Controllers\DatashowroomController;
 use App\Http\Controllers\DatasparepatController;
 use App\Http\Controllers\PartkeluarController;
@@ -63,3 +64,5 @@ Route::get('/datashowroom/{id}/edit', [DatashowroomController::class, 'edit'])->
 Route::put('/datashowroom/{id}', [DatashowroomController::class, 'update'])->name('datashowroom.update');
 Route::delete('/datashowroom/{id}', [DatashowroomController::class, 'destroy'])->name('datashowroom.destroy');
 Route::get('/printpdfshowroom', [DatashowroomController::class, 'printPDF'])->name('printpdfshowroom');
+
+Route::get('/dataservice', [DataserviceController::class, 'index'])->name('dataservice');
