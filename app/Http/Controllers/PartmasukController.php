@@ -131,6 +131,9 @@ public function printPDF(Request $request)
               ->orWhere('tanggal_masuk', 'like', '%' . $search . '%')
               ->orWhere('tipe', 'like', '%' . $search . '%');
     }
+    if ($request->has('date_start') && $request->has('date_end')) {
+        $query->whereBetween('tanggal_masuk', [$request->date_start, $request->date_end]);
+    }
 
     // Ambil data yang sudah difilter
     $partmasuks = $query->get();

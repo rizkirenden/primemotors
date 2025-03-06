@@ -19,7 +19,7 @@ class DataserviceController extends Controller
         // Ambil semua data mekanik
         $mekaniks = Datamekanik::all();
         $spareparts = Datasparepat::all();
-        return view('dataservice', compact('dataservices', 'mekaniks','sparepart'));
+        return view('dataservice', compact('dataservices', 'mekaniks','spareparts'));
     }
 
     // Menyimpan data service baru
@@ -33,57 +33,21 @@ class DataserviceController extends Controller
             'masuk' => 'required|date',
             'keluar' => 'nullable|date',
             'no_polisi' => 'required',
-            'nama_mekanik' => 'required', // Pastikan nama_mekanik diisi
             'tahun' => 'required|integer',
-            'tipe' => 'required',
+            'tipe_mobile' => 'required',
             'warna' => 'required',
             'no_rangka' => 'required',
             'no_mesin' => 'required',
             'keluhan_costumer' => 'required',
-            'kode_barang' => 'nullable|exists:datasparepats,kode_barang',
-            'nama_part' => 'nullable',
-            'tanggal_keluar' => 'nullable|date',
-            'jumlah' => 'nullable|integer|min:1',
-            'uraian_pekerjaan' => 'nullable',
-            'uraian_jasa_perbaikan' => 'nullable',
             'status' => 'required',
         ]);
 
         // Simpan data service
         $dataservice = Dataservice::create($request->all());
 
-        // Jika kode_barang dan jumlah diisi, maka kurangi stok
-        if ($request->kode_barang && $request->jumlah) {
-            $sparepart = Datasparepat::where('kode_barang', $request->kode_barang)->first();
-
-            // Validasi jika stok 0 atau jumlah yang diminta melebihi stok yang tersedia
-            if ($sparepart->jumlah == 0) {
-                return redirect()->back()->with('error', 'Stok barang sudah habis!');
-            }
-
-            if ($sparepart->jumlah < $request->jumlah) {
-                return redirect()->back()->with('error', 'Stok tidak mencukupi!');
-            }
-
-            // Simpan data part keluar
-            $partKeluar = Partkeluar::create([
-                'kode_barang' => $request->kode_barang,
-                'nama_part' => $request->nama_part,
-                'stn' => $sparepart->stn,
-                'tipe' => $sparepart->tipe,
-                'merk' => $sparepart->merk,
-                'tanggal_keluar' => $request->tanggal_keluar,
-                'jumlah' => $request->jumlah,
-            ]);
-
-            // Kurangi stok di tabel datasparepats
-            $sparepart->jumlah -= $request->jumlah;
-            $sparepart->save();
-        }
 
         return redirect()->route('dataservice')->with('success', 'Data service berhasil disimpan!');
     }
-
     // Mengupdate data service
     public function update(Request $request, $id)
     {
@@ -95,17 +59,20 @@ class DataserviceController extends Controller
             'masuk' => 'required|date',
             'keluar' => 'nullable|date',
             'no_polisi' => 'required',
-            'nama_mekanik' => 'required', // Pastikan nama_mekanik diisi
+            'nama_mekanik' => 'required',
             'tahun' => 'required|integer',
-            'tipe' => 'required',
+            'tipe_mobile' => 'required',
             'warna' => 'required',
             'no_rangka' => 'required',
             'no_mesin' => 'required',
             'keluhan_costumer' => 'required',
             'kode_barang' => 'nullable|exists:datasparepats,kode_barang',
             'nama_part' => 'nullable',
+            'stn' => 'nullable',
+            'merk' => 'nullable',
+            'tipe' => 'nullable',
+            'jumlah' => 'nullable|integer|min:0', // Ubah min menjadi 0 agar bisa kosong
             'tanggal_keluar' => 'nullable|date',
-            'jumlah' => 'nullable|integer|min:1',
             'uraian_pekerjaan' => 'nullable',
             'uraian_jasa_perbaikan' => 'nullable',
             'status' => 'required',
@@ -117,8 +84,8 @@ class DataserviceController extends Controller
         // Update data service
         $dataservice->update($request->all());
 
-        // Jika kode_barang dan jumlah diisi, maka update part keluar
-        if ($request->kode_barang && $request->jumlah) {
+        // Jika kode_barang dan jumlah diisi, simpan data ke Partkeluar
+        if ($request->kode_barang && $request->jumlah && $request->jumlah > 0) {
             $sparepart = Datasparepat::where('kode_barang', $request->kode_barang)->first();
 
             // Validasi jika stok 0 atau jumlah yang diminta melebihi stok yang tersedia
@@ -130,10 +97,14 @@ class DataserviceController extends Controller
                 return redirect()->back()->with('error', 'Stok tidak mencukupi!');
             }
 
-            // Update atau buat data part keluar
-            $partKeluar = Partkeluar::where('kode_barang', $request->kode_barang)->first();
+            // Cek apakah data Partkeluar sudah ada untuk dataservice ini
+            $partKeluar = Partkeluar::where('dataservice_id', $id)->first();
+
             if ($partKeluar) {
+                // Jika sudah ada, update data Partkeluar
                 $partKeluar->update([
+                    'dataservice_id' => $id, // Hubungkan dengan dataservice
+                    'kode_barang' => $request->kode_barang,
                     'nama_part' => $request->nama_part,
                     'stn' => $sparepart->stn,
                     'tipe' => $sparepart->tipe,
@@ -142,7 +113,9 @@ class DataserviceController extends Controller
                     'jumlah' => $request->jumlah,
                 ]);
             } else {
-                $partKeluar = Partkeluar::create([
+                // Jika belum ada, buat data Partkeluar baru
+                Partkeluar::create([
+                    'dataservice_id' => $id, // Hubungkan dengan dataservice
                     'kode_barang' => $request->kode_barang,
                     'nama_part' => $request->nama_part,
                     'stn' => $sparepart->stn,
@@ -152,10 +125,6 @@ class DataserviceController extends Controller
                     'jumlah' => $request->jumlah,
                 ]);
             }
-
-            // Kurangi stok di tabel datasparepats
-            $sparepart->jumlah -= $request->jumlah;
-            $sparepart->save();
         }
 
         return redirect()->route('dataservice')->with('success', 'Data service berhasil diupdate!');

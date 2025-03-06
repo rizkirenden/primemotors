@@ -55,6 +55,8 @@ Route::post('/partkeluar', [PartKeluarController::class, 'store'])->name('partke
 Route::put('/partkeluar/{id}', [PartkeluarController::class, 'update'])->name('partkeluar.update');
 Route::delete('/partkeluar/{id}', [PartKeluarController::class, 'destroy'])->name('partkeluar.destroy');
 Route::get('/printpdfpartkeluar', [PartkeluarController::class, 'printPDF'])->name('printpdfpartkeluar');
+Route::put('/partkeluar/{id}/approve', [PartkeluarController::class, 'approve'])->name('partkeluar.approve');
+Route::put('/partkeluar/{id}/cancel', [PartkeluarController::class, 'cancel'])->name('partkeluar.cancel');
 
 Route::get('/pengguna', [PenggunaController::class, 'index'])->name('pengguna');
 

@@ -154,10 +154,13 @@
                                     value="{{ request('search') }}" onkeyup="searchTable()">
 
                                 <!-- Filter Date -->
-                                <input type="date" id="date-input" name="date"
+                                <input type="date" id="date-start" name="date_start"
                                     class="px-4 py-2 rounded-full text-black bg-white border border-gray-300"
-                                    value="{{ request('date') }}" onchange="filterByDate()">
+                                    value="{{ request('date_start') }}">
 
+                                <input type="date" id="date-end" name="date_end"
+                                    class="px-4 py-2 rounded-full text-black bg-white border border-gray-300"
+                                    value="{{ request('date_end') }}">
                                 <!-- Print PDF Button -->
                                 <button type="submit"
                                     class="px-4 py-2 bg-white text-black rounded-full hover:bg-gray-200 border border-gray-300">
@@ -440,20 +443,32 @@
             });
         }
 
-        function filterByDate() {
-            let input = document.getElementById("date-input");
-            let filter = input.value;
-            let
-                table = document.querySelector("table tbody");
+        function filterByDateRange() {
+            let startDate = document.getElementById("date-start").value;
+            let endDate = document.getElementById("date-end").value;
+            let table = document.querySelector("table tbody");
             let rows = table.getElementsByTagName("tr");
+
             Array.from(rows).forEach(row => {
                 let cells = row.getElementsByTagName("td");
                 let date = cells[5] ? cells[5].textContent.trim() : "";
                 if (date) {
-                    row.style.display = date.includes(filter) || filter === "" ? "" : "none";
+                    let rowDate = new Date(date);
+                    let start = new Date(startDate);
+                    let end = new Date(endDate);
+
+                    if ((!startDate || rowDate >= start) && (!endDate || rowDate <= end)) {
+                        row.style.display = "";
+                    } else {
+                        row.style.display = "none";
+                    }
                 }
             });
         }
+
+        // Tambahkan event listener untuk input tanggal
+        document.getElementById("date-start").addEventListener("change", filterByDateRange);
+        document.getElementById("date-end").addEventListener("change", filterByDateRange);
     </script>
 </body>
 

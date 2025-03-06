@@ -20,7 +20,7 @@ class Dataservice extends Model
         'no_polisi',
         'nama_mekanik',
         'tahun',
-        'tipe',
+        'tipe_mobile',
         'warna',
         'no_rangka',
         'no_mesin',

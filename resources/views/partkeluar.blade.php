@@ -153,10 +153,14 @@
                                     class="px-4 py-2 rounded-full text-black w-64 bg-white border border-gray-300"
                                     value="{{ request('search') }}" onkeyup="searchTable()">
 
-                                <!-- Filter Date -->
-                                <input type="date" id="date-input" name="date"
+                                <!-- Filter Date Range -->
+                                <input type="date" id="date-start" name="date_start"
                                     class="px-4 py-2 rounded-full text-black bg-white border border-gray-300"
-                                    value="{{ request('date') }}" onchange="filterByDate()">
+                                    value="{{ request('date_start') }}">
+
+                                <input type="date" id="date-end" name="date_end"
+                                    class="px-4 py-2 rounded-full text-black bg-white border border-gray-300"
+                                    value="{{ request('date_end') }}">
 
                                 <!-- Print PDF Button -->
                                 <button type="submit"
@@ -187,6 +191,7 @@
                         <th class="px-4 py-2 text-left">Tipe</th>
                         <th class="px-4 py-2 text-left">Tanggal Keluar</th>
                         <th class="px-4 py-2 text-left">Jumlah</th>
+                        <th class="px-4 py-2 text-left">Status</th>
                         <th class="px-4 py-2 text-left">Action</th>
                     </tr>
                 </thead>
@@ -200,6 +205,28 @@
                             <td class="px-4 py-2">{{ $partKeluar->tipe }}</td>
                             <td class="px-4 py-2">{{ $partKeluar->tanggal_keluar }}</td>
                             <td class="px-4 py-2">{{ $partKeluar->jumlah }}</td>
+                            <td class="px-4 py-2">
+                                @if ($partKeluar->status === 'pending')
+                                    <form action="{{ route('partkeluar.approve', $partKeluar->id) }}" method="POST"
+                                        class="inline-block">
+                                        @csrf
+                                        @method('PUT')
+                                        <button type="submit" class="text-green-500 hover:text-green-700 mr-3">
+                                            <i class="fas fa-check"></i> Approve
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('partkeluar.cancel', $partKeluar->id) }}" method="POST"
+                                        class="inline-block">
+                                        @csrf
+                                        @method('PUT')
+                                        <button type="submit" class="text-red-500 hover:text-red-700">
+                                            <i class="fas fa-times"></i> Cancel
+                                        </button>
+                                    </form>
+                                @else
+                                    <span class="text-gray-500">{{ ucfirst($partKeluar->status) }}</span>
+                                @endif
+                            </td>
                             <td class="px-4 py-2">
                                 <!-- Tombol Edit -->
                                 <a href="#" class="text-blue-500 hover:text-blue-700 mr-3"
@@ -451,9 +478,9 @@
             });
         }
 
-        function filterByDate() {
-            let input = document.getElementById("date-input");
-            let filter = input.value;
+        function filterByDateRange() {
+            let startDate = document.getElementById("date-start").value;
+            let endDate = document.getElementById("date-end").value;
             let table = document.querySelector("table tbody");
             let rows = table.getElementsByTagName("tr");
 
@@ -461,10 +488,22 @@
                 let cells = row.getElementsByTagName("td");
                 let date = cells[5] ? cells[5].textContent.trim() : "";
                 if (date) {
-                    row.style.display = date.includes(filter) || filter === "" ? "" : "none";
+                    let rowDate = new Date(date);
+                    let start = new Date(startDate);
+                    let end = new Date(endDate);
+
+                    if ((!startDate || rowDate >= start) && (!endDate || rowDate <= end)) {
+                        row.style.display = "";
+                    } else {
+                        row.style.display = "none";
+                    }
                 }
             });
         }
+
+        // Tambahkan event listener untuk input tanggal
+        document.getElementById("date-start").addEventListener("change", filterByDateRange);
+        document.getElementById("date-end").addEventListener("change", filterByDateRange);
     </script>
 </body>
 
