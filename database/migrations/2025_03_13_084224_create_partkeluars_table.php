@@ -21,9 +21,10 @@ return new class extends Migration
             $table->string('merk');
             $table->date('tanggal_keluar');
             $table->integer('jumlah');
+            $table->text('uraian_jasa_perbaikan')->nullable();
+            $table->decimal('harga_jasa_perbaikan', 10, 2)->nullable();
             $table->string('status')->default('pending');
             $table->timestamps();
-
             $table->foreign('dataservice_id')->references('id')->on('dataservices')->onDelete('cascade');
         });
     }

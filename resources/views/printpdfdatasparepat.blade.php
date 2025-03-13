@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Mekanik - PDF</title>
+    <title>Data Sparepat - PDF</title>
     <!-- FontAwesome CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
@@ -117,6 +117,7 @@
                 <th>Tipe</th>
                 <th>Merk</th>
                 <th>Harga Toko</th>
+                <th>Margin Persen</th>
                 <th>Harga Jual</th>
                 <th>Jumlah</th>
             </tr>
@@ -129,8 +130,9 @@
                     <td>{{ $sparepat->stn }}</td>
                     <td>{{ $sparepat->tipe }}</td>
                     <td>{{ $sparepat->merk }}</td>
-                    <td>{{ $sparepat->harga_toko }}</td>
-                    <td>{{ $sparepat->harga_jual }}</td>
+                    <td>Rp. {{ number_format($sparepat->harga_toko, 0, ',', '.') }}</td>
+                    <td>Rp. {{ number_format($sparepat->margin_persen, 0, ',', '.') }}%</td>
+                    <td>Rp. {{ number_format($sparepat->harga_jual, 0, ',', '.') }}</td>
                     <td>{{ $sparepat->jumlah }}</td>
                 </tr>
             @endforeach

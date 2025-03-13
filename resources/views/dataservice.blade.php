@@ -21,6 +21,10 @@
 
         .description-row td {
             padding: 20px 10px;
+            white-space: normal;
+            /* Biarkan teks wrap */
+            word-wrap: break-word;
+            /* Memastikan teks tidak melebihi lebar sel */
         }
 
         .description-container {
@@ -138,6 +142,61 @@
             resize: vertical;
             min-height: 100px;
         }
+
+        /* CSS untuk Baris Part Keluar */
+        .part-keluar-row {
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* CSS untuk Container Part Keluar */
+        #part-keluar-container-edit {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .bg-red-500 {
+            background-color: #ef4444;
+        }
+
+        .bg-red-500:hover {
+            background-color: #dc2626;
+        }
+
+        .flex.items-end {
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .description-row {
+            display: none;
+            /* Sembunyikan secara default */
+        }
+
+        .description-row.visible {
+            display: table-row;
+            /* Tampilkan ketika diperlukan */
+        }
+
+        table {
+            width: 100%;
+            table-layout: fixed;
+            /* Memastikan lebar kolom tetap */
+        }
+
+        td,
+        th {
+            word-wrap: break-word;
+            /* Memastikan teks tidak melebihi lebar sel */
+            overflow: hidden;
+            /* Sembunyikan teks yang melebihi lebar sel */
+            text-overflow: ellipsis;
+            /* Tambahkan ellipsis jika teks terlalu panjang */
+        }
     </style>
 </head>
 
@@ -152,15 +211,34 @@
                 <div class="mb-1 p-2">
                     <div class="flex justify-between items-center space-x-4">
                         <!-- Search -->
-                        <form action="{{ route('dataservice') }}" method="GET">
+                        <form action="{{ route('printpdfdataspkawal') }}" method="GET">
                             <div class="flex items-center space-x-4 w-full">
                                 <!-- Search Input -->
-                                <input type="text" name="search" id="search-input" placeholder="Search..."
+                                <input type="text" id="search-input" name="search" placeholder="Search..."
                                     class="px-4 py-2 rounded-full text-black w-64 bg-white border border-gray-300"
                                     value="{{ request('search') }}" onkeyup="searchTable()">
+
+                                <!-- Filter Date Range -->
+                                <input type="date" id="date-start" name="date_start"
+                                    class="px-4 py-2 rounded-full text-black bg-white border border-gray-300"
+                                    value="{{ request('date_start') }}">
+                                <input type="date" id="date-end" name="date_end"
+                                    class="px-4 py-2 rounded-full text-black bg-white border border-gray-300"
+                                    value="{{ request('date_end') }}">
+
+                                <!-- Print PDF Button -->
+                                <button type="submit"
+                                    class="px-4 py-2 bg-white text-black rounded-full hover:bg-gray-200 border border-gray-300">
+                                    <i class="fas fa-file-pdf text-black"></i> Awal
+                                </button>
                             </div>
                         </form>
-
+                        <form action="{{ route('printpdfdataspkakhir') }}" method="GET">
+                            <button type="submit"
+                                class="px-4 py-2 bg-white text-black rounded-full hover:bg-gray-200 border border-gray-300">
+                                <i class="fas fa-file-pdf text-black"></i> Akhir
+                            </button>
+                        </form>
                         <!-- Add Data Button -->
                         <button onclick="openAddModal()"
                             class="px-6 py-2 bg-white text-black rounded-full hover:bg-gray-200 border border-gray-300 ml-auto flex items-center space-x-2">
@@ -176,197 +254,227 @@
                 <thead class="bg-white">
                     <tr>
                         <th class="px-4 py-2 text-left">No SPK</th>
-                        <th class="px-4 py-2 text-left">Tanggal</th>
                         <th class="px-4 py-2 text-left">Costumer</th>
                         <th class="px-4 py-2 text-left">Masuk</th>
                         <th class="px-4 py-2 text-left">Keluar</th>
                         <th class="px-4 py-2 text-left">No Polisi</th>
                         <th class="px-4 py-2 text-left">Mekanik</th>
-                        <th class="px-4 py-2 text-left">Status</th>
                         <th class="px-4 py-2 text-left">Detail</th>
                         <th class="px-4 py-2 text-left">Action</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white">
-                    @foreach ($dataservices as $dataservice)
-                        <tr>
-                            <td class="px-4 py-2">{{ $dataservice->no_spk }}</td>
-                            <td class="px-4 py-2">{{ $dataservice->tanggal }}</td>
-                            <td class="px-4 py-2">{{ $dataservice->costumer }}</td>
-                            <td class="px-4 py-2">{{ $dataservice->masuk }}</td>
-                            <td class="px-4 py-2">{{ $dataservice->keluar }}</td>
-                            <td class="px-4 py-2">{{ $dataservice->no_polisi }}</td>
-                            <td class="px-4 py-2">{{ $dataservice->nama_mekanik }}</td>
-                            <td class="px-4 py-2">{{ $dataservice->status }}</td>
-                            <td class="px-4 py-2">
-                                <button class="px-4 py-2 text-white bg-black rounded-full"
-                                    onclick="toggleDescription({{ $dataservice->id }})">
-                                    Lihat Detail
-                                </button>
-                            </td>
-                            <td class="px-4 py-2">
-                                <!-- Action Icons -->
-                                <a href="#" class="text-blue-500 hover:text-blue-700 mr-3"
-                                    onclick="openEditModal(
-        '{{ $dataservice->id }}',
-        '{{ $dataservice->no_spk }}',
-        '{{ $dataservice->tanggal }}',
-        '{{ $dataservice->costumer }}',
-        '{{ $dataservice->contact_person }}',
-        '{{ $dataservice->masuk }}',
-        '{{ $dataservice->keluar }}',
-        '{{ $dataservice->no_polisi }}',
-        '{{ $dataservice->nama_mekanik }}',
-        '{{ $dataservice->tahun }}',
-        '{{ $dataservice->tipe_mobile }}',
-        '{{ $dataservice->warna }}',
-        '{{ $dataservice->no_rangka }}',
-        '{{ $dataservice->no_mesin }}',
-        '{{ $dataservice->keluhan_costumer }}',
-        '{{ $dataservice->kode_barang }}',
-         '{{ $dataservice->stn }}',
-          '{{ $dataservice->tipe }}',
-           '{{ $dataservice->merk }}',
-        '{{ $dataservice->nama_part }}',
-        '{{ $dataservice->jumlah }}',
-        '{{ $dataservice->uraian_pekerjaan }}',
-        '{{ $dataservice->uraian_jasa_perbaikan }}',
-        '{{ $dataservice->status }}',
-        '{{ $dataservice->tanggal_keluar ?? '' }}'
-    )">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <form action="{{ route('dataservice.destroy', $dataservice->id) }}" method="POST"
-                                    class="inline-block">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:text-red-700">
-                                        <i class="fas fa-trash-alt"></i>
+                    @if (isset($dataservices) && $dataservices->count() > 0)
+                        @foreach ($dataservices as $dataservice)
+                            <tr data-id="{{ $dataservice->id }}">
+                                <td class="px-4 py-2">{{ $dataservice->no_spk }}</td>
+                                <td class="px-4 py-2">{{ $dataservice->costumer }}</td>
+                                <td class="px-4 py-2">{{ $dataservice->masuk }}</td>
+                                <td class="px-4 py-2">{{ $dataservice->keluar }}</td>
+                                <td class="px-4 py-2">{{ $dataservice->no_polisi }}</td>
+                                <td class="px-4 py-2">{{ $dataservice->nama_mekanik }}</td>
+                                <td class="px-4 py-2">
+                                    <button class="px-4 py-2 text-white bg-black rounded-full"
+                                        onclick="toggleDescription({{ $dataservice->id }})">
+                                        Lihat Detail
                                     </button>
-                                </form>
-                            </td>
-                        </tr>
-                        <!-- Detail Row -->
-                        <tr id="desc-{{ $dataservice->id }}" class="hidden description-row">
-                            <td colspan="12">
-                                <div class="description-container">
-                                    <!-- Baris Pertama: Tahun, Tipe, Warna, No Rangka, No Mesin -->
-                                    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-                                        <div><strong>Tahun:</strong> {{ $dataservice->contact_person }}</div>
-                                        <div><strong>Tahun:</strong> {{ $dataservice->tahun }}</div>
-                                        <div><strong>Tipe:</strong> {{ $dataservice->tipe_mobile }}</div>
-                                        <div><strong>Warna:</strong> {{ $dataservice->warna }}</div>
-                                        <div><strong>No Rangka:</strong> {{ $dataservice->no_rangka }}</div>
-                                        <div><strong>No Mesin:</strong> {{ $dataservice->no_mesin }}</div>
-                                    </div>
+                                </td>
+                                <td class="px-4 py-2">
+                                    <!-- Action Icons -->
+                                    <a href="#" class="text-blue-500 hover:text-blue-700 mr-3"
+                                        onclick="openEditModal(
+                                            '{{ $dataservice->id }}',
+                                            '{{ $dataservice->no_spk }}',
+                                            '{{ $dataservice->costumer }}',
+                                            '{{ $dataservice->contact_person }}',
+                                            '{{ $dataservice->masuk }}',
+                                            '{{ $dataservice->keluar }}',
+                                            '{{ $dataservice->no_polisi }}',
+                                            '{{ $dataservice->nama_mekanik }}',
+                                            '{{ $dataservice->tahun }}',
+                                            '{{ $dataservice->tipe_mobile }}',
+                                            '{{ $dataservice->warna }}',
+                                            '{{ $dataservice->no_rangka }}',
+                                            '{{ $dataservice->no_mesin }}',
+                                            '{{ $dataservice->kilometer }}',
+                                            '{{ $dataservice->keluhan_costumer }}',
+                                            '{{ $dataservice->kode_barang }}',
+                                            '{{ $dataservice->nama_part }}',
+                                            '{{ $dataservice->stn }}',
+                                            '{{ $dataservice->tipe }}',
+                                            '{{ $dataservice->merk }}',
+                                            '{{ $dataservice->jumlah }}',
+                                                                    '{{ $dataservice->uraian_jasa_perbaikan }}',
+                                            '{{ $dataservice->status }}',
+                                            '{{ $dataservice->tanggal_keluar ?? '' }}'
+                                        )">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ route('dataservice.destroy', $dataservice->id) }}" method="POST"
+                                        class="inline-block">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-500 hover:text-red-700">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                    <a href="{{ route('printpdfdataspkawal.perdata', $dataservice->id) }}"
+                                        class="text-black hover:text-black ml-3">
+                                        <i class="fas fa-print"></i> Awal
+                                    </a>
+                                    <a href="{{ route('printpdfdataspkakhir.perdata', $dataservice->id) }}"
+                                        class="text-black hover:text-black ml-3">
+                                        <i class="fas fa-print"></i> Akhir
+                                    </a>
+                                    <form action="{{ route('invoice.store', $dataservice->id) }}" method="POST"
+                                        style="display: inline;">
+                                        @csrf
+                                        <button type="submit" class="text-black hover:text-black ml-3">
+                                            <i class="fas fa-print"></i> Invoice
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <!-- Detail Row -->
+                            <tr id="desc-{{ $dataservice->id }}" class="description-row">
+                                <td colspan="20">
+                                    <div class="description-container">
+                                        <!-- First Row: Contact Person, Year, Type, Color, Chassis Number, Engine Number, Kilometer, Status -->
+                                        <div
+                                            style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                                            <div><strong>Contact Person:</strong> {{ $dataservice->contact_person }}
+                                            </div>
+                                            <div><strong>Tahun:</strong> {{ $dataservice->tahun }}</div>
+                                            <div><strong>Tipe:</strong> {{ $dataservice->tipe_mobile }}</div>
+                                            <div><strong>Warna:</strong> {{ $dataservice->warna }}</div>
+                                            <div><strong>No Rangka:</strong> {{ $dataservice->no_rangka }}</div>
+                                            <div><strong>No Mesin:</strong> {{ $dataservice->no_mesin }}</div>
+                                            <div><strong>Kilometer:</strong>
+                                                {{ rtrim(number_format($dataservice->kilometer, 2), '.00') }} KM</div>
+                                            <div><strong>Status:</strong> {{ $dataservice->status }}</div>
+                                        </div>
 
-                                    <!-- Baris Kedua: Keluhan Customer (Textarea) -->
-                                    <div style="margin-bottom: 20px;">
-                                        <div><strong>Keluhan Customer:</strong></div>
-                                        <textarea style="width: 100%; height: 80px; resize: vertical;" readonly>{{ $dataservice->keluhan_costumer }}</textarea>
-                                    </div>
+                                        <!-- Second Row: Customer Complaints -->
+                                        <div style="margin-bottom: 20px;">
+                                            <div><strong>Keluhan Customer:</strong></div>
+                                            <textarea style="width: 100%; height: 80px; resize: vertical;" readonly>{{ $dataservice->keluhan_costumer }}</textarea>
+                                        </div>
 
-                                    <!-- Baris Ketiga: Nama Part, Qty, Kode Barang (Tabel Kecil) -->
-                                    <div style="margin-bottom: 20px;">
-                                        <div><strong>Detail Part:</strong></div>
-                                        <table style="width: 100%; border-collapse: collapse;">
-                                            <thead>
-                                                <tr>
-                                                    <th style="border: 1px solid #000; padding: 5px;"><strong>Kode
-                                                            Barang</strong></th>
-                                                    <th style="border: 1px solid #000; padding: 5px;"><strong>Nama
-                                                            Part</strong></th>
-                                                    <th style="border: 1px solid #000; padding: 5px;">
-                                                        <strong>STN</strong>
-                                                    </th>
-                                                    <th style="border: 1px solid #000; padding: 5px;">
-                                                        <strong>Tipe</strong>
-                                                    </th>
-                                                    <th style="border: 1px solid #000; padding: 5px;">
-                                                        <strong>Merk</strong>
-                                                    </th>
-                                                    <th style="border: 1px solid #000; padding: 5px;"><strong>Tanggal
-                                                            Keluar</strong></th>
-                                                    <th style="border: 1px solid #000; padding: 5px;">
-                                                        <strong>Jumlah</strong>
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @if ($dataservice->partkeluar->count() > 0)
-                                                    @foreach ($dataservice->partkeluar as $part)
-                                                        <tr>
-                                                            <td style="border: 1px solid #000; padding: 5px;">
-                                                                {{ $part->kode_barang }}</td>
-                                                            <td style="border: 1px solid #000; padding: 5px;">
-                                                                {{ $part->nama_part }}</td>
-                                                            <td style="border: 1px solid #000; padding: 5px;">
-                                                                {{ $part->stn }}</td>
-                                                            <td style="border: 1px solid #000; padding: 5px;">
-                                                                {{ $part->tipe }}</td>
-                                                            <td style="border: 1px solid #000; padding: 5px;">
-                                                                {{ $part->merk }}</td>
-                                                            <td style="border: 1px solid #000; padding: 5px;">
-                                                                {{ $part->tanggal_keluar ?? '-' }}</td>
-                                                            <td style="border: 1px solid #000; padding: 5px;">
-                                                                {{ $part->jumlah }}</td>
-                                                        </tr>
-                                                    @endforeach
-                                                @else
+                                        <!-- Third Row: Work Descriptions -->
+                                        <div style="margin-bottom: 20px;">
+                                            <div><strong>Uraian Pekerjaan:</strong></div>
+                                            <table style="width: 100%; border-collapse: collapse;">
+                                                <thead>
                                                     <tr>
-                                                        <td colspan="7"
-                                                            style="border: 1px solid #000; padding: 5px; text-align: center;">
-                                                            Tidak ada data part yang keluar.
-                                                        </td>
+                                                        <th style="border: 1px solid #000; padding: 5px;"><strong>Jenis
+                                                                Pekerjaan:</strong></th>
+                                                        <th style="border: 1px solid #000; padding: 5px;"><strong>Jenis
+                                                                Mobil:</strong></th>
+                                                        <th style="border: 1px solid #000; padding: 5px;"><strong>Waktu
+                                                                Pengerjaan (jam):</strong></th>
+                                                        <th style="border: 1px solid #000; padding: 5px;">
+                                                            <strong>Ongkos Pengerjaan:</strong></th>
                                                     </tr>
-                                                @endif
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                                </thead>
+                                                <tbody>
+                                                    @if ($uraianPekerjaans->count() > 0)
+                                                        @foreach ($uraianPekerjaans as $uraian)
+                                                            <tr>
+                                                                <td style="border: 1px solid #000; padding: 5px;">
+                                                                    {{ $uraian->jenis_pekerjaan }}</td>
+                                                                <td style="border: 1px solid #000; padding: 5px;">
+                                                                    {{ $uraian->jenis_mobil }}</td>
+                                                                <td style="border: 1px solid #000; padding: 5px;">
+                                                                    {{ $uraian->waktu_pengerjaan }}</td>
+                                                                <td style="border: 1px solid #000; padding: 5px;">
+                                                                    {{ $uraian->ongkos_pengerjaan }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    @else
+                                                        <tr>
+                                                            <td colspan="4"
+                                                                style="border: 1px solid #000; padding: 5px; text-align: center;">
+                                                                Tidak ada data uraian pekerjaan.</td>
+                                                        </tr>
+                                                    @endif
+                                                </tbody>
+                                            </table>
+                                        </div>
 
-                                    <!-- Baris Keempat: Uraian Pekerjaan (Tabel) -->
-                                    <div style="margin-bottom: 20px;">
-                                        <div><strong>Uraian Pekerjaan:</strong></div>
-                                        <table style="width: 100%; border-collapse: collapse;">
-                                            <thead>
-                                                <tr>
-                                                    <th style="border: 1px solid #000; padding: 5px;">
-                                                        <strong>Deskripsi</strong>
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td style="border: 1px solid #000; padding: 5px;">
-                                                        {{ $dataservice->uraian_pekerjaan }}</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                        <!-- Fourth Row: Part Details -->
+                                        <div style="margin-bottom: 20px;">
+                                            <div><strong>Detail Part:</strong></div>
+                                            <table style="width: 100%; border-collapse: collapse;">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="border: 1px solid #000; padding: 5px;"><strong>Kode
+                                                                Barang</strong></th>
+                                                        <th style="border: 1px solid #000; padding: 5px;"><strong>Nama
+                                                                Part</strong></th>
+                                                        <th style="border: 1px solid #000; padding: 5px;">
+                                                            <strong>STN</strong></th>
+                                                        <th style="border: 1px solid #000; padding: 5px;">
+                                                            <strong>Tipe</strong></th>
+                                                        <th style="border: 1px solid #000; padding: 5px;">
+                                                            <strong>Merk</strong></th>
+                                                        <th style="border: 1px solid #000; padding: 5px;">
+                                                            <strong>Tanggal Keluar</strong></th>
+                                                        <th style="border: 1px solid #000; padding: 5px;">
+                                                            <strong>Jumlah</strong></th>
+                                                        <th style="border: 1px solid #000; padding: 5px;">
+                                                            <strong>Status</strong></th>
+                                                        <th style="border: 1px solid #000; padding: 5px;">
+                                                            <strong>Uraian Jasa Perbaikan</strong></th>
+                                                        <th style="border: 1px solid #000; padding: 5px;"><strong>Harga
+                                                                Jasa Perbaikan</strong></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @if ($dataservice->partkeluar->count() > 0)
+                                                        @foreach ($dataservice->partkeluar as $part)
+                                                            <tr>
+                                                                <td style="border: 1px solid #000; padding: 5px;">
+                                                                    {{ $part->kode_barang }}</td>
+                                                                <td style="border: 1px solid #000; padding: 5px;">
+                                                                    {{ $part->nama_part }}</td>
+                                                                <td style="border: 1px solid #000; padding: 5px;">
+                                                                    {{ $part->stn }}</td>
+                                                                <td style="border: 1px solid #000; padding: 5px;">
+                                                                    {{ $part->tipe }}</td>
+                                                                <td style="border: 1px solid #000; padding: 5px;">
+                                                                    {{ $part->merk }}</td>
+                                                                <td style="border: 1px solid #000; padding: 5px;">
+                                                                    {{ $part->tanggal_keluar ?? '-' }}</td>
+                                                                <td style="border: 1px solid #000; padding: 5px;">
+                                                                    {{ $part->jumlah }}</td>
+                                                                <td style="border: 1px solid #000; padding: 5px;">
+                                                                    {{ $part->status }}</td>
+                                                                <td style="border: 1px solid #000; padding: 5px;">
+                                                                    {{ $part->uraian_jasa_perbaikan }}</td>
+                                                                <td style="border: 1px solid #000; padding: 5px;">Rp.
+                                                                    {{ number_format($part->harga_jasa_perbaikan, 0, ',', '.') }}
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    @else
+                                                        <tr>
+                                                            <td colspan="10"
+                                                                style="border: 1px solid #000; padding: 5px; text-align: center;">
+                                                                Tidak ada data part yang keluar.</td>
+                                                        </tr>
+                                                    @endif
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
-
-                                    <!-- Baris Kelima: Uraian Jasa Perbaikan (Tabel) -->
-                                    <div style="margin-bottom: 20px;">
-                                        <div><strong>Uraian Jasa Perbaikan:</strong></div>
-                                        <table style="width: 100%; border-collapse: collapse;">
-                                            <thead>
-                                                <tr>
-                                                    <th style="border: 1px solid #000; padding: 5px;">
-                                                        <strong>Deskripsi</strong>
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td style="border: 1px solid #000; padding: 5px;">
-                                                        {{ $dataservice->uraian_jasa_perbaikan }}</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </td>
+                                </td>
+                            </tr>
+                        @endforeach
+                    @else
+                        <tr>
+                            <td colspan="10" class="text-center py-4">Tidak ada data ditemukan.</td>
                         </tr>
-                    @endforeach
+                    @endif
                 </tbody>
             </table>
 
@@ -415,11 +523,6 @@
                             required>
                     </div>
                     <div>
-                        <label for="tanggal">Tanggal</label>
-                        <input type="date" id="tanggal" name="tanggal" class="w-full p-2 border rounded"
-                            required>
-                    </div>
-                    <div>
                         <label for="costumer">Costumer</label>
                         <input type="text" id="costumer" name="costumer" class="w-full p-2 border rounded"
                             required>
@@ -430,15 +533,15 @@
                             class="w-full p-2 border rounded" required>
                     </div>
                     <div>
-                        <label for="masuk">Masuk</label>
-                        <input type="date" id="masuk" name="masuk" class="w-full p-2 border rounded"
+                        <label for="masuk">Tanggal Masuk</label>
+                        <input type="datetime-local" id="masuk" name="masuk" class="w-full p-2 border rounded"
                             required>
                     </div>
-
                     <!-- Baris 2 -->
                     <div>
-                        <label for="keluar">Keluar</label>
-                        <input type="date" id="keluar" name="keluar" class="w-full p-2 border rounded">
+                        <label for="keluar">Tanggal Keluar</label>
+                        <input type="datetime-local" id="keluar" name="keluar"
+                            class="w-full p-2 border rounded">
                     </div>
                     <div>
                         <label for="no_polisi">No Polisi</label>
@@ -472,16 +575,30 @@
                             required>
                     </div>
                     <div>
+                        <label for="kilometer">Jarak (Kilometer)</label>
+                        <input type="text" id="kilometer" name="kilometer" class="w-full p-2 border rounded"
+                            oninput="formatKilometer(this)" required>
+                    </div>
+                    <div>
                         <label for="keluhan_costumer">Keluhan Costumer</label>
                         <textarea id="keluhan_costumer" name="keluhan_costumer" class="w-full p-2 border rounded" required></textarea>
                     </div>
                     <div class="col-span-5">
-                        <label for="status">Status</label>
+                        <label for="status">Status Costumer</label>
                         <select id="status" name="status" class="w-full p-2 border rounded" required>
                             <option value="menunggu">Menunggu</option>
-                            <option value="sedang pengerjaan">Sedang Pengerjaan</option>
-                            <option value="selesai">Selesai</option>
+                            <option value="pulang">Pulang</option>
                         </select>
+                    </div>
+                    <div class="col-span-5">
+                        <label for="uraian_pekerjaan"></label>
+                        <div id="uraian-container">
+                            <!-- Baris input uraian pekerjaan akan ditambahkan di sini -->
+                        </div>
+                        <button type="button" onclick="tambahUraian()"
+                            class="bg-black text-white px-4 py-2 rounded-full mt-4">
+                            <i class="fas fa-plus"></i> Tambah Uraian
+                        </button>
                     </div>
                 </div>
                 <div class="mt-4 flex space-x-4 justify-center">
@@ -498,46 +615,46 @@
     <div id="modal-edit" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center hidden">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-[90vw] overflow-y-auto" style="max-height: 90vh;">
             <h2 class="text-xl font-bold mb-4">Edit Data Service</h2>
-            <form id="inputFormEdit" method="POST">
+            <form id="inputFormEdit" method="POST"
+                action="{{ route('dataservice.update', $dataservice->id ?? '') }}">
                 @csrf
                 @method('PUT')
-                <div class="modal-input-row grid grid-cols-5 gap-4">
+
+                <!-- Input fields untuk dataservice -->
+                <div class="grid grid-cols-5 gap-4">
                     <!-- Baris 1 -->
                     <div>
                         <label for="no_spk_edit">No SPK</label>
                         <input type="text" id="no_spk_edit" name="no_spk" class="w-full p-2 border rounded"
-                            required>
-                    </div>
-                    <div>
-                        <label for="tanggal_edit">Tanggal</label>
-                        <input type="date" id="tanggal_edit" name="tanggal" class="w-full p-2 border rounded"
-                            required>
+                            value="{{ $dataservice->no_spk ?? '' }}" required>
                     </div>
                     <div>
                         <label for="costumer_edit">Costumer</label>
                         <input type="text" id="costumer_edit" name="costumer" class="w-full p-2 border rounded"
-                            required>
+                            value="{{ $dataservice->costumer ?? '' }}" required>
                     </div>
                     <div>
                         <label for="contact_person_edit">Contact Person</label>
                         <input type="text" id="contact_person_edit" name="contact_person"
-                            class="w-full p-2 border rounded" required>
+                            class="w-full p-2 border rounded" value="{{ $dataservice->contact_person ?? '' }}"
+                            required>
                     </div>
                     <div>
-                        <label for="masuk_edit">Masuk</label>
+                        <label for="masuk_edit">Tanggal Masuk</label>
                         <input type="date" id="masuk_edit" name="masuk" class="w-full p-2 border rounded"
-                            required>
+                            value="{{ $dataservice->masuk ?? '' }}" required>
                     </div>
 
                     <!-- Baris 2 -->
                     <div>
-                        <label for="keluar_edit">Keluar</label>
-                        <input type="date" id="keluar_edit" name="keluar" class="w-full p-2 border rounded">
+                        <label for="keluar_edit">Tanggal Keluar</label>
+                        <input type="date" id="keluar_edit" name="keluar" class="w-full p-2 border rounded"
+                            value="{{ $dataservice->keluar ?? '' }}">
                     </div>
                     <div>
                         <label for="no_polisi_edit">No Polisi</label>
                         <input type="text" id="no_polisi_edit" name="no_polisi" class="w-full p-2 border rounded"
-                            required>
+                            value="{{ $dataservice->no_polisi ?? '' }}" required>
                     </div>
                     <div>
                         <label for="nama_mekanik_edit">Nama Mekanik</label>
@@ -545,98 +662,135 @@
                             required>
                             <option value="">Pilih Mekanik</option>
                             @foreach ($mekaniks as $mekanik)
-                                <option value="{{ $mekanik->nama_mekanik }}">{{ $mekanik->nama_mekanik }}</option>
+                                <option value="{{ $mekanik->nama_mekanik }}"
+                                    {{ ($dataservice->nama_mekanik ?? '') == $mekanik->nama_mekanik ? 'selected' : '' }}>
+                                    {{ $mekanik->nama_mekanik }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
                     <div>
                         <label for="tahun_edit">Tahun</label>
                         <input type="text" id="tahun_edit" name="tahun" class="w-full p-2 border rounded"
-                            required>
+                            value="{{ $dataservice->tahun ?? '' }}" required>
                     </div>
                     <div>
                         <label for="tipe_mobile_edit">Tipe Mobile</label>
                         <input type="text" id="tipe_mobile_edit" name="tipe_mobile"
-                            class="w-full p-2 border rounded" required>
+                            class="w-full p-2 border rounded" value="{{ $dataservice->tipe_mobile ?? '' }}" required>
                     </div>
 
                     <!-- Baris 3 -->
                     <div>
                         <label for="warna_edit">Warna</label>
                         <input type="text" id="warna_edit" name="warna" class="w-full p-2 border rounded"
-                            required>
+                            value="{{ $dataservice->warna ?? '' }}" required>
                     </div>
                     <div>
                         <label for="no_rangka_edit">No Rangka</label>
                         <input type="text" id="no_rangka_edit" name="no_rangka" class="w-full p-2 border rounded"
-                            required>
+                            value="{{ $dataservice->no_rangka ?? '' }}" required>
                     </div>
                     <div>
                         <label for="no_mesin_edit">No Mesin</label>
                         <input type="text" id="no_mesin_edit" name="no_mesin" class="w-full p-2 border rounded"
-                            required>
+                            value="{{ $dataservice->no_mesin ?? '' }}" required>
+                    </div>
+                    <div>
+                        <label for="kilometer_edit">Kilometer</label>
+                        <input type="number" id="kilometer_edit" name="kilometer" class="w-full p-2 border rounded"
+                            value="{{ $dataservice->kilometer ?? '' }}" required>
                     </div>
                     <div>
                         <label for="keluhan_costumer_edit">Keluhan Costumer</label>
-                        <textarea id="keluhan_costumer_edit" name="keluhan_costumer" class="w-full p-2 border rounded" required></textarea>
+                        <textarea id="keluhan_costumer_edit" name="keluhan_costumer" class="w-full p-2 border rounded" required>{{ $dataservice->keluhan_costumer ?? '' }}</textarea>
                     </div>
                     <div>
-                        <label for="kode_barang_edit">Kode Barang</label>
-                        <select id="kode_barang_edit" name="kode_barang" class="w-full p-2 border rounded">
-                            <option value="">Pilih Kode Barang</option>
-                            @foreach ($spareparts as $sparepart)
-                                <option value="{{ $sparepart->kode_barang }}">{{ $sparepart->kode_barang }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label for="nama_part_edit">Nama Part</label>
-                        <input type="text" id="nama_part_edit" name="nama_part" class="w-full p-2 border rounded"
-                            readonly>
-                    </div>
-                    <div>
-                        <label for="stn_edit">STN</label>
-                        <input type="text" id="stn_edit" name="stn" class="w-full p-2 border rounded"
-                            readonly>
-                    </div>
-                    <div>
-                        <label for="merk_edit">Merk</label>
-                        <input type="text" id="merk_edit" name="merk" class="w-full p-2 border rounded"
-                            readonly>
-                    </div>
-                    <div>
-                        <label for="tipe_edit">Tipe</label>
-                        <input type="text" id="tipe_edit" name="tipe" class="w-full p-2 border rounded"
-                            readonly>
-                    </div>
-                    <div>
-                        <label for="jumlah_edit">Jumlah</label>
-                        <input type="number" id="jumlah_edit" name="jumlah" class="w-full p-2 border rounded"
-                            value="0">
-                    </div>
-                    <div>
-                        <label for="tanggal_keluar_edit">Tanggal Keluar</label>
-                        <input type="date" id="tanggal_keluar_edit" name="tanggal_keluar"
-                            class="w-full p-2 border rounded">
-                    </div>
-                    <!-- Baris 5 -->
-                    <div class="col-span-5">
-                        <label for="uraian_pekerjaan_edit">Uraian Pekerjaan</label>
-                        <textarea id="uraian_pekerjaan_edit" name="uraian_pekerjaan" class="w-full p-2 border rounded"></textarea>
-                    </div>
-                    <div class="col-span-5">
-                        <label for="uraian_jasa_perbaikan_edit">Uraian Jasa Perbaikan</label>
-                        <textarea id="uraian_jasa_perbaikan_edit" name="uraian_jasa_perbaikan" class="w-full p-2 border rounded"></textarea>
-                    </div>
-                    <div class="col-span-5">
                         <label for="status_edit">Status</label>
                         <select id="status_edit" name="status" class="w-full p-2 border rounded" required>
-                            <option value="menunggu">Menunggu</option>
-                            <option value="sedang pengerjaan">Sedang Pengerjaan</option>
-                            <option value="selesai">Selesai</option>
+                            <option value="menunggu"
+                                {{ ($dataservice->status ?? '') == 'menunggu' ? 'selected' : '' }}>
+                                Menunggu</option>
+                            <option value="sedang pengerjaan"
+                                {{ ($dataservice->status ?? '') == 'pulang' ? 'selected' : '' }}>pulang
+                            </option>
                         </select>
                     </div>
                 </div>
+
+                <!-- Part Keluar -->
+                <div class="col-span-5 mt-4">
+                    <div id="part-keluar-container-edit" class="mt-4">
+                        @if (isset($dataservice) && $dataservice->partkeluar->count() > 0)
+                            @foreach ($dataservice->partkeluar as $part)
+                                <div class="part-keluar-row grid grid-cols-5 gap-4 mt-4">
+                                    <div>
+                                        <label for="kode_barang_edit">Kode Barang</label>
+                                        <select name="kode_barang[]"
+                                            class="w-full p-2 border rounded kode-barang-select"
+                                            onchange="fetchSparepartDataEdit(event)">
+                                            <option value="">Pilih Kode Barang</option>
+                                            @foreach ($spareparts as $sparepart)
+                                                <option value="{{ $sparepart->kode_barang }}"
+                                                    {{ $part->kode_barang == $sparepart->kode_barang ? 'selected' : '' }}>
+                                                    {{ $sparepart->kode_barang }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="nama_part_edit">Nama Part</label>
+                                        <input type="text" name="nama_part[]"
+                                            class="w-full p-2 border rounded nama-part-input"
+                                            value="{{ $part->nama_part }}" readonly>
+                                    </div>
+                                    <div>
+                                        <label for="stn_edit">STN</label>
+                                        <input type="text" name="stn[]"
+                                            class="w-full p-2 border rounded stn-input" value="{{ $part->stn }}"
+                                            readonly>
+                                    </div>
+                                    <div>
+                                        <label for="merk_edit">Merk</label>
+                                        <input type="text" name="merk[]"
+                                            class="w-full p-2 border rounded merk-input" value="{{ $part->merk }}"
+                                            readonly>
+                                    </div>
+                                    <div>
+                                        <label for="jumlah_edit">Jumlah</label>
+                                        <input type="number" name="jumlah[]"
+                                            class="w-full p-2 border rounded jumlah-input"
+                                            value="{{ $part->jumlah }}">
+                                    </div>
+                                    <div>
+                                        <label for="tanggal_keluar">tanggal_keluar</label>
+                                        <input type="date" name="tanggal_keluar[]"
+                                            class="w-full p-2 border rounded" value="{{ $part->tanggal_keluar }}">
+                                    </div>
+                                    <div>
+                                        <label for="uraian_jasa_perbaikan_edit">Uraian Jasa Perbaikan</label>
+                                        <textarea name="uraian_jasa_perbaikan[]" class="w-full p-2 border rounded">{{ $part->uraian_jasa_perbaikan }}</textarea>
+                                    </div>
+                                    <div>
+                                        <label for="harga_jasa_perbaikan_edit">Harga Jasa Perbaikan</label>
+                                        <input type="text" name="harga_jasa_perbaikan[]"
+                                            class="w-full p-2 border rounded harga-jasa-input"
+                                            value="{{ $part->harga_jasa_perbaikan ? number_format($part->harga_jasa_perbaikan, 0, ',', '.') : '' }}">
+                                    </div>
+                                </div>
+                            @endforeach
+                        @else
+                            <p>Tidak ada data part yang keluar.</p>
+                        @endif
+                    </div>
+
+                    <!-- Tombol Tambah Part -->
+                    <button type="button" onclick="tambahPartKeluarEdit()"
+                        class="bg-black text-white px-4 py-2 rounded-full mt-4">
+                        <i class="fas fa-plus"></i> Tambah Part
+                    </button>
+                </div>
+                <!-- Tombol Submit -->
                 <div class="mt-4 flex space-x-4 justify-center">
                     <button type="button" onclick="closeEditModal()"
                         class="bg-black text-white hover:bg-red-700 px-4 py-2 rounded-full w-full sm:w-auto">Cancel</button>
@@ -648,127 +802,154 @@
     </div>
 
     <script>
-        function showErrorPopup(message) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: message,
+        const uraianPekerjaans = @json($uraianPekerjaans);
+
+        function tambahUraian() {
+            console.log("Tombol Tambah Uraian Diklik"); // Debugging
+            const container = document.getElementById('uraian-container');
+            const newUraian = document.createElement('div');
+            newUraian.classList.add('uraian-row', 'grid', 'grid-cols-4', 'gap-4', 'mt-4');
+            newUraian.innerHTML = `
+            <div>
+                <label for="uraian_pekerjaan_ids">Pilih Uraian Pekerjaan:</label>
+                <select name="uraian_pekerjaan_ids[]" class="w-full p-2 border rounded uraian-pekerjaan-select" onchange="fillUraianData(event)">
+                    <option value="">Pilih Uraian Pekerjaan</option>
+                    ${uraianPekerjaans.map(uraian => `
+                                                                                                                            <option value="${uraian.id}">${uraian.jenis_pekerjaan}</option>
+                                                                                                                        `).join('')}
+                </select>
+            </div>
+            <div>
+                <label for="jenis_mobil">Jenis Mobil</label>
+                <input type="text" name="jenis_mobil[]" class="w-full p-2 border rounded jenis-mobil-input" readonly>
+            </div>
+            <div>
+                <label for="waktu_pengerjaan">Waktu Pengerjaan (jam)</label>
+                <input type="number" name="waktu_pengerjaan[]" class="w-full p-2 border rounded waktu-pengerjaan-input" readonly>
+            </div>
+            <div>
+                <label for="ongkos_pengerjaan">Ongkos Pengerjaan</label>
+                <input type="text" name="ongkos_pengerjaan[]" class="w-full p-2 border rounded ongkos-pengerjaan-input" readonly>
+            </div>
+            <div class="flex items-end">
+                <button type="button" onclick="hapusUraian(this)" class="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-700">
+                    <i class="fas fa-trash"></i> Hapus
+                </button>
+            </div>
+        `;
+            container.appendChild(newUraian);
+        }
+
+        function hapusUraian(button) {
+            const row = button.closest('.uraian-row');
+            if (row) {
+                row.remove();
+            }
+        }
+
+        function fillUraianData(event) {
+            const selectElement = event.target;
+            const row = selectElement.closest('.uraian-row');
+            const selectedId = selectElement.value;
+
+            const selectedUraian = uraianPekerjaans.find(uraian => uraian.id == selectedId);
+
+            if (selectedUraian) {
+                row.querySelector('.jenis-mobil-input').value = selectedUraian.jenis_mobil;
+                row.querySelector('.waktu-pengerjaan-input').value = selectedUraian.waktu_pengerjaan;
+                row.querySelector('.ongkos-pengerjaan-input').value = selectedUraian.ongkos_pengerjaan;
+            } else {
+                row.querySelector('.jenis-mobil-input').value = '';
+                row.querySelector('.waktu-pengerjaan-input').value = '';
+                row.querySelector('.ongkos-pengerjaan-input').value = '';
+            }
+        }
+
+        function formatKilometer(input) {
+            let value = input.value.replace(/[^0-9.]/g, ''); // Hapus semua karakter selain angka dan titik
+            input.value = value + ' KM'; // Tambahkan 'KM' di akhir
+        }
+
+        function cleanHargaJasaBeforeSubmit() {
+            document.querySelectorAll('.harga-jasa-input').forEach(input => {
+                // Hapus "Rp." dan pemisah ribuan (titik)
+                input.value = input.value.replace(/[^0-9]/g, '');
             });
         }
 
-        @if (session('error'))
-            showErrorPopup("{{ session('error') }}");
-        @endif
+        // Tambahkan event listener untuk form submit
+        document.getElementById('inputFormEdit').addEventListener('submit', function(e) {
+            cleanHargaJasaBeforeSubmit(); // Bersihkan nilai sebelum submit
+        });
 
+        document.getElementById('inputFormAdd').addEventListener('submit', function(e) {
+            cleanHargaJasaBeforeSubmit(); // Bersihkan nilai sebelum submit
+        });
 
-        document.getElementById('kode_barang_edit').addEventListener('change', fetchSparepartDataEdit);
+        // Fungsi untuk memformat input harga jasa perbaikan (tanpa "Rp")
+        function formatCurrencyInput(input) {
+            input.addEventListener('input', function(e) {
+                // Hapus karakter non-digit
+                let value = this.value.replace(/[^0-9]/g, '');
 
-        function fetchSparepartDataEdit() {
-            const kodeBarang = document.getElementById('kode_barang_edit').value;
+                // Format angka ke dalam format mata uang (tanpa "Rp")
+                if (value) {
+                    value = new Intl.NumberFormat('id-ID').format(value);
+                }
 
-            if (kodeBarang) {
-                fetch(`/spareparts/${kodeBarang}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data) {
-                            document.getElementById('nama_part_edit').value = data.nama_part;
-                            document.getElementById('stn_edit').value = data.stn;
-                            document.getElementById('tipe_edit').value = data.tipe;
-                            document.getElementById('merk_edit').value = data.merk;
-                        } else {
-                            alert('Kode barang tidak ditemukan!');
-                            document.getElementById('nama_part_edit').value = '';
-                            document.getElementById('stn_edit').value = '';
-                            document.getElementById('tipe_edit').value = '';
-                            document.getElementById('merk_edit').value = '';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-            } else {
-                document.getElementById('nama_part_edit').value = '';
-                document.getElementById('stn_edit').value = '';
-                document.getElementById('tipe_edit').value = '';
-                document.getElementById('merk_edit').value = '';
-            }
-        }
-        // Modal logic for opening and closing add/edit modals
-        function openAddModal() {
-            document.getElementById("modal-add").classList.remove("hidden");
-            fetchSparepartData();
+                // Update nilai input
+                this.value = value;
+            });
+
+            input.addEventListener('blur', function(e) {
+                // Hapus pemisah ribuan saat input kehilangan fokus
+                let value = this.value.replace(/\./g, '');
+                this.value = value;
+            });
+
+            input.addEventListener('focus', function(e) {
+                // Format kembali ke mata uang saat input mendapatkan fokus
+                let value = this.value.replace(/[^0-9]/g, '');
+                if (value) {
+                    this.value = new Intl.NumberFormat('id-ID').format(value);
+                }
+            });
         }
 
-        function closeAddModal() {
-            document.getElementById("modal-add").classList.add("hidden");
+        // Terapkan formatCurrencyInput ke semua input harga_jasa_perbaikan
+        document.querySelectorAll('.harga-jasa-input').forEach(input => {
+            formatCurrencyInput(input);
+        });
+
+        function formatCurrencyInput(input) {
+            input.addEventListener('input', function(e) {
+                // Hapus karakter non-digit
+                let value = this.value.replace(/[^0-9]/g, '');
+
+                // Format angka ke dalam format mata uang
+                if (value) {
+                    value = 'Rp. ' + new Intl.NumberFormat('id-ID').format(value);
+                }
+
+                // Update nilai input
+                this.value = value;
+            });
+
+            input.addEventListener('blur', function(e) {
+                // Hapus format "Rp." saat input kehilangan fokus
+                let value = this.value.replace(/[^0-9]/g, '');
+                this.value = value;
+            });
+
+            input.addEventListener('focus', function(e) {
+                // Format kembali ke mata uang saat input mendapatkan fokus
+                let value = this.value.replace(/[^0-9]/g, '');
+                if (value) {
+                    this.value = 'Rp. ' + new Intl.NumberFormat('id-ID').format(value);
+                }
+            });
         }
 
-        // Fungsi untuk membuka modal tambah
-        function openAddModal() {
-            document.getElementById("modal-add").classList.remove("hidden");
-            fetchSparepartData();
-        }
-
-        // Fungsi untuk menutup modal tambah
-        function closeAddModal() {
-            document.getElementById("modal-add").classList.add("hidden");
-        }
-
-        function toggleDescription(rowId) {
-            const descriptionRow = document.getElementById('desc-' + rowId);
-            descriptionRow.classList.toggle('hidden');
-        }
-
-        // Fungsi untuk membuka modal edit dan mengisi data
-        function openEditModal(
-            id, no_spk, tanggal, costumer, contact_person, masuk, keluar, no_polisi, nama_mekanik, tahun,
-            tipe_mobile, warna, no_rangka, no_mesin, keluhan_costumer, kode_barang, nama_part, stn, merk, tipe, jumlah,
-            uraian_pekerjaan,
-            uraian_jasa_perbaikan, status, tanggal_keluar // Pastikan parameter ini ada
-        ) {
-            document.getElementById("modal-edit").classList.remove("hidden");
-
-            // Isi form edit dengan data yang dipilih
-            document.getElementById('no_spk_edit').value = no_spk;
-            document.getElementById('tanggal_edit').value = tanggal;
-            document.getElementById('costumer_edit').value = costumer;
-            document.getElementById('contact_person_edit').value = contact_person;
-            document.getElementById('masuk_edit').value = masuk;
-            document.getElementById('keluar_edit').value = keluar;
-            document.getElementById('no_polisi_edit').value = no_polisi;
-            document.getElementById('nama_mekanik_edit').value = nama_mekanik;
-            document.getElementById('tahun_edit').value = tahun;
-            document.getElementById('tipe_mobile_edit').value = tipe_mobile;
-            document.getElementById('warna_edit').value = warna;
-            document.getElementById('no_rangka_edit').value = no_rangka;
-            document.getElementById('no_mesin_edit').value = no_mesin;
-            document.getElementById('keluhan_costumer_edit').value = keluhan_costumer;
-            document.getElementById('kode_barang_edit').value = kode_barang;
-            document.getElementById('stn_edit').value = stn;
-            document.getElementById('merk_edit').value = merk;
-            document.getElementById('tipe_edit').value = tipe;
-            document.getElementById('nama_part_edit').value = nama_part;
-            document.getElementById('jumlah_edit').value = jumlah;
-            document.getElementById('uraian_pekerjaan_edit').value = uraian_pekerjaan;
-            document.getElementById('uraian_jasa_perbaikan_edit').value = uraian_jasa_perbaikan;
-            document.getElementById('status_edit').value = status;
-            document.getElementById('tanggal_keluar_edit').value = tanggal_keluar; // Pastikan ini diisi
-            document.getElementById("inputFormEdit").action = "/dataservice/" + id;
-        }
-
-        // Fungsi untuk menutup modal edit
-        function closeEditModal() {
-            document.getElementById("modal-edit").classList.add("hidden");
-        }
-
-        function closeEditModal() {
-            document.getElementById("modal-edit").classList.add("hidden");
-        }
-
-        function toggleDescription(id) {
-            const descriptionRow = document.getElementById('desc-' + id);
-            descriptionRow.classList.toggle('hidden');
-        }
 
         function searchTable() {
             let input = document.getElementById("search-input");
@@ -777,6 +958,11 @@
             let rows = table.getElementsByTagName("tr");
 
             Array.from(rows).forEach(row => {
+                // Skip rows that are description rows
+                if (row.classList.contains('description-row')) {
+                    return; // Jangan proses baris detail
+                }
+
                 let cells = row.getElementsByTagName("td");
                 let found = false;
 
@@ -789,8 +975,413 @@
 
                 // Show or hide the row based on the search result
                 row.style.display = found ? "" : "none";
+
+                // Tampilkan atau sembunyikan baris detail terkait
+                let descriptionRow = table.querySelector(`#desc-${row.dataset.id}`);
+                if (descriptionRow) {
+                    descriptionRow.style.display = found ? "" : "none";
+                }
             });
         }
+
+        function filterByDateRange() {
+            let startDate = document.getElementById("date-start").value;
+            let endDate = document.getElementById("date-end").value;
+            let table = document.querySelector("table tbody");
+            let rows = table.getElementsByTagName("tr");
+
+            // Konversi tanggal ke objek Date
+            let start = startDate ? new Date(startDate) : null;
+            let end = endDate ? new Date(endDate) : null;
+
+            Array.from(rows).forEach(row => {
+                // Skip rows that are description rows
+                if (row.classList.contains('description-row')) {
+                    return; // Jangan proses baris detail
+                }
+
+                let cells = row.getElementsByTagName("td");
+                let dateCell = cells[1]; // Kolom tanggal (index 1)
+
+                if (dateCell) {
+                    let rowDate = new Date(dateCell.textContent.trim());
+
+                    // Filter berdasarkan rentang tanggal
+                    let isWithinRange = true;
+
+                    if (start && rowDate < start) {
+                        isWithinRange = false;
+                    }
+                    if (end && rowDate > end) {
+                        isWithinRange = false;
+                    }
+
+                    // Tampilkan atau sembunyikan baris berdasarkan hasil filter
+                    row.style.display = isWithinRange ? "" : "none";
+
+                    // Jangan sembunyikan baris detail terkait
+                    let descriptionRow = table.querySelector(`#desc-${row.dataset.id}`);
+                    if (descriptionRow) {
+                        descriptionRow.style.display = isWithinRange ? "" : "none";
+                    }
+                }
+            });
+        }
+
+        // Tambahkan event listener ke input tanggal
+        document.getElementById("date-start").addEventListener("change", filterByDateRange);
+        document.getElementById("date-end").addEventListener("change", filterByDateRange);
+
+        function filterTable() {
+            let search = document.getElementById("search-input").value.toLowerCase();
+            let startDate = document.getElementById("date-start").value;
+            let endDate = document.getElementById("date-end").value;
+            let table = document.querySelector("table tbody");
+            let rows = table.getElementsByTagName("tr");
+
+            // Konversi tanggal ke objek Date
+            let start = startDate ? new Date(startDate) : null;
+            let end = endDate ? new Date(endDate) : null;
+
+            Array.from(rows).forEach(row => {
+                // Skip rows that are description rows
+                if (row.classList.contains('description-row')) {
+                    return; // Jangan proses baris detail
+                }
+
+                let cells = row.getElementsByTagName("td");
+                let found = false;
+
+                // Cek apakah baris cocok dengan pencarian
+                Array.from(cells).forEach(cell => {
+                    if (cell && cell.textContent.toLowerCase().includes(search)) {
+                        found = true;
+                    }
+                });
+
+                // Cek apakah tanggal dalam rentang yang dipilih
+                let dateCell = cells[1]; // Kolom tanggal (index 1)
+                if (dateCell) {
+                    let rowDate = new Date(dateCell.textContent.trim());
+
+                    if (start && rowDate < start) {
+                        found = false;
+                    }
+                    if (end && rowDate > end) {
+                        found = false;
+                    }
+                }
+
+                // Tampilkan atau sembunyikan baris berdasarkan hasil filter
+                row.style.display = found ? "" : "none";
+
+                // Tampilkan atau sembunyikan baris detail terkait
+                let descriptionRow = table.querySelector(`#desc-${row.dataset.id}`);
+                if (descriptionRow) {
+                    descriptionRow.style.display = found ? "" : "none";
+                }
+            });
+        }
+
+        // Tambahkan event listener ke input pencarian dan tanggal
+        document.getElementById("search-input").addEventListener("keyup", filterTable);
+        document.getElementById("date-start").addEventListener("change", filterTable);
+        document.getElementById("date-end").addEventListener("change", filterTable);
+
+        document.getElementById('kode_barang_edit').addEventListener('change', fetchSparepartDataEdit);
+
+        function fetchSparepartDataEdit(event) {
+            const kodeBarang = event.target.value;
+            const row = event.target.closest('.part-keluar-row');
+
+            if (kodeBarang) {
+                fetch(`/spareparts/${kodeBarang}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data) {
+                            row.querySelector('.nama-part-input').value = data.nama_part;
+                            row.querySelector('.stn-input').value = data.stn;
+                            row.querySelector('.merk-input').value = data.merk;
+                            row.querySelector('.tipe-input').value = data.merk;
+                        } else {
+                            alert('Kode barang tidak ditemukan!');
+                            row.querySelector('.nama-part-input').value = '';
+                            row.querySelector('.stn-input').value = '';
+                            row.querySelector('.merk-input').value = '';
+                            row.querySelector('.tipe-input').value = '';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            } else {
+                row.querySelector('.nama-part-input').value = '';
+                row.querySelector('.stn-input').value = '';
+                row.querySelector('.merk-input').value = '';
+            }
+        }
+
+        function openAddModal() {
+            document.getElementById("modal-add").classList.remove("hidden");
+            fetchSparepartData();
+        }
+
+        function closeAddModal() {
+            document.getElementById("modal-add").classList.add("hidden");
+        }
+
+        function toggleDescription(rowId) {
+            const descriptionRow = document.getElementById('desc-' + rowId);
+
+            // Toggle visibility of the description row
+            if (descriptionRow.classList.contains('hidden')) {
+                descriptionRow.classList.remove('hidden');
+                descriptionRow.style.display = 'table-row'; // Tampilkan baris detail
+            } else {
+                descriptionRow.classList.add('hidden');
+                descriptionRow.style.display = 'none'; // Sembunyikan baris detail
+            }
+        }
+
+        function tambahPartKeluarEdit() {
+            const container = document.getElementById('part-keluar-container-edit');
+            const newRow = document.createElement('div');
+            newRow.classList.add('part-keluar-row', 'grid', 'grid-cols-6', 'gap-4', 'mt-4');
+
+            newRow.innerHTML = `
+        <div>
+            <label for="kode_barang_edit">Kode Barang</label>
+            <select name="kode_barang[]" class="w-full p-2 border rounded kode-barang-select" onchange="fetchSparepartDataEdit(event)">
+                <option value="">Pilih Kode Barang</option>
+                @foreach ($spareparts as $sparepart)
+                    <option value="{{ $sparepart->kode_barang }}">{{ $sparepart->kode_barang }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label for="nama_part_edit">Nama Part</label>
+            <input type="text" name="nama_part[]" class="w-full p-2 border rounded nama-part-input" readonly>
+        </div>
+        <div>
+            <label for="stn_edit">STN</label>
+            <input type="text" name="stn[]" class="w-full p-2 border rounded stn-input" readonly>
+        </div>
+        <div>
+            <label for="merk_edit">Merk</label>
+            <input type="text" name="merk[]" class="w-full p-2 border rounded merk-input" readonly>
+        </div>
+        <div>
+            <label for="jumlah_edit">Jumlah</label>
+            <input type="number" name="jumlah[]" class="w-full p-2 border rounded jumlah-input" value="0">
+        </div>
+        <div>
+            <label for="tanggal_keluar_edit">Tanggal Keluar</label>
+            <input type="date" name="tanggal_keluar[]" class="w-full p-2 border rounded">
+        </div>
+        <div>
+            <label for="uraian_jasa_perbaikan_edit">Uraian Pekerjaan</label>
+            <textarea name="uraian_jasa_perbaikan[]" class="w-full p-2 border rounded"></textarea>
+        </div>
+        <div>
+            <label for="harga_jasa_perbaikan_edit">Harga Jasa Perbaikan</label>
+            <input type="text" name="harga_jasa_perbaikan[]" class="w-full p-2 border rounded harga-jasa-input">
+        </div>
+        <div class="flex items-end">
+            <button type="button" onclick="hapusPartKeluar(this)" class="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-700">
+                <i class="fas fa-trash"></i> Hapus
+            </button>
+        </div>
+    `;
+
+            container.appendChild(newRow);
+
+            // Tambahkan event listener untuk select kode barang
+            const kodeBarangSelect = newRow.querySelector('.kode-barang-select');
+            kodeBarangSelect.addEventListener('change', fetchSparepartDataEdit);
+            const hargaJasaInput = newRow.querySelector('.harga-jasa-input');
+            hargaJasaInput.addEventListener('input', function(e) {
+                // Hapus karakter non-digit
+                let value = this.value.replace(/[^0-9]/g, '');
+
+                // Format angka ke dalam format mata uang
+                if (value) {
+                    value = 'Rp. ' + new Intl.NumberFormat('id-ID').format(value);
+                }
+
+                // Update nilai input
+                this.value = value;
+            });
+
+            hargaJasaInput.addEventListener('blur', function(e) {
+                // Hapus format "Rp." saat input kehilangan fokus
+                let value = this.value.replace(/[^0-9]/g, '');
+                this.value = value;
+            });
+        }
+
+        function hapusPartKeluar(button) {
+            console.log("Tombol hapus diklik"); // Debugging
+            const row = button.closest('.part-keluar-row');
+            if (row) {
+                console.log("Baris ditemukan:", row); // Debugging
+                row.remove();
+            } else {
+                console.log("Baris tidak ditemukan"); // Debugging
+            }
+        }
+
+        function formatCurrencyInput(input) {
+            input.addEventListener('input', function(e) {
+                // Hapus karakter non-digit
+                let value = this.value.replace(/[^0-9]/g, '');
+
+                // Format angka ke dalam format mata uang (tanpa "Rp")
+                if (value) {
+                    value = new Intl.NumberFormat('id-ID').format(value);
+                }
+
+                // Update nilai input
+                this.value = value;
+            });
+
+            input.addEventListener('blur', function(e) {
+                // Hapus pemisah ribuan saat input kehilangan fokus
+                let value = this.value.replace(/\./g, '');
+                this.value = value;
+            });
+
+            input.addEventListener('focus', function(e) {
+                // Format kembali ke mata uang saat input mendapatkan fokus
+                let value = this.value.replace(/[^0-9]/g, '');
+                if (value) {
+                    this.value = new Intl.NumberFormat('id-ID').format(value);
+                }
+            });
+        }
+
+        // Terapkan formatCurrencyInput ke semua input harga_jasa_perbaikan
+        document.querySelectorAll('.harga-jasa-input').forEach(input => {
+            formatCurrencyInput(input);
+        });
+
+        // Fungsi untuk menghapus pemisah ribuan sebelum submit form
+        document.getElementById('inputFormEdit').addEventListener('submit', function(e) {
+            document.querySelectorAll('.harga-jasa-input').forEach(input => {
+                input.value = input.value.replace(/\./g, '');
+            });
+        });
+
+        // Fungsi untuk membuka modal edit dan memformat nilai yang sudah ada
+        function openEditModal(
+            id, no_spk, costumer, contact_person, masuk, keluar, no_polisi, nama_mekanik, tahun,
+            tipe_mobile, warna, no_rangka, no_mesin, kilometer, keluhan_costumer, kode_barang, nama_part, jumlah,
+            uraian_jasa_perbaikan, status, tanggal_keluar, partData, spareparts, harga_jasa_perbaikan
+        ) {
+            document.getElementById("modal-edit").classList.remove("hidden");
+
+            // Isi form edit dengan data yang dipilih
+            document.getElementById('no_spk_edit').value = no_spk;
+            document.getElementById('costumer_edit').value = costumer;
+            document.getElementById('contact_person_edit').value = contact_person;
+            document.getElementById('masuk_edit').value = masuk;
+            document.getElementById('keluar_edit').value = keluar;
+            document.getElementById('no_polisi_edit').value = no_polisi;
+            document.getElementById('nama_mekanik_edit').value = nama_mekanik;
+            document.getElementById('tahun_edit').value = tahun;
+            document.getElementById('tipe_mobile_edit').value = tipe_mobile;
+            document.getElementById('warna_edit').value = warna;
+            document.getElementById('no_rangka_edit').value = no_rangka;
+            document.getElementById('no_mesin_edit').value = no_mesin;
+            document.getElementById('kilometer_edit').value = kilometer;
+            document.getElementById('keluhan_costumer_edit').value = keluhan_costumer;
+            document.getElementById('kode_barang_edit').value = kode_barang;
+            document.getElementById('nama_part_edit').value = nama_part;
+            document.getElementById('stn_edit').value = stn;
+            document.getElementById('merk_edit').value = merk;
+            document.getElementById('tipe_edit').value = tipe;
+            document.getElementById('jumlah_edit').value = jumlah;
+            document.getElementById('uraian_jasa_perbaikan_edit').value = uraian_jasa_perbaikan;
+            document.getElementById('harga_jasa_perbaikan_edit').value = harga_jasa_perbaikan ? 'Rp. ' + new Intl
+                .NumberFormat('id-ID').format(harga_jasa_perbaikan) : '';
+            document.getElementById('status_edit').value = status;
+            document.getElementById('tanggal_keluar_edit').value = tanggal_keluar;
+            document.getElementById("inputFormEdit").action = "/dataservice/" + id;
+
+            // Isi part keluar yang sudah ada
+            const partKeluarContainer = document.getElementById('part-keluar-container-edit');
+            partKeluarContainer.innerHTML = ''; // Kosongkan container
+
+            // Loop melalui partData untuk menambahkan baris
+            partData.forEach(part => {
+                const newRow = document.createElement('div');
+                newRow.classList.add('part-keluar-row', 'grid', 'grid-cols-5', 'gap-4', 'mt-4');
+
+                newRow.innerHTML = `
+                <div>
+                    <label for="kode_barang_edit">Kode Barang</label>
+                    <select name="kode_barang[]" class="w-full p-2 border rounded kode-barang-select">
+                        <option value="">Pilih Kode Barang</option>
+                        ${spareparts.map(sparepart => `
+                                                                                                                                                                                                                                                                                                                                                                                                                                    <option value="${sparepart.kode_barang}" ${part.kode_barang == sparepart.kode_barang ? 'selected' : ''}>
+                                                                                                                                                                                                                                                                                                                                                                                                                                        ${sparepart.kode_barang}
+                                                                                                                                                                                                                                                                                                                                                                                                                                    </option>
+                                                                                                                                                                                                                                                                                                                                                                                                                                `).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label for="nama_part_edit">Nama Part</label>
+                    <input type="text" name="nama_part[]" class="w-full p-2 border rounded nama-part-input" value="${part.nama_part}" readonly>
+                </div>
+                <div>
+                    <label for="stn_edit">STN</label>
+                    <input type="text" name="stn[]" class="w-full p-2 border rounded stn-input" value="${part.stn}" readonly>
+                </div>
+                <div>
+                    <label for="merk_edit">Merk</label>
+                    <input type="text" name="merk[]" class="w-full p-2 border rounded merk-input" value="${part.merk}" readonly>
+                </div>
+                <div>
+                    <label for="jumlah_edit">Jumlah</label>
+                    <input type="number" name="jumlah[]" class="w-full p-2 border rounded jumlah-input" value="${part.jumlah}">
+                </div>
+                <div>
+                    <label for="tanggal_keluar_edit">Tanggal Keluar</label>
+                    <input type="date" name="tanggal_keluar[]" class="w-full p-2 border rounded" value="${part.tanggal_keluar || ''}">
+                </div>
+                <div>
+                    <label for="uraian_jasa_perbaikan_edit">Uraian Jasa Perbaikan</label>
+                    <textarea name="uraian_jasa_perbaikan[]" class="w-full p-2 border rounded">${part.uraian_jasa_perbaikan}</textarea>
+                </div>
+               <div>
+    <label for="harga_jasa_perbaikan_edit">Harga Jasa Perbaikan</label>
+    <input type="text" name="harga_jasa_perbaikan[]" class="w-full p-2 border rounded harga-jasa-input" value="${part.harga_jasa_perbaikan ? new Intl.NumberFormat('id-ID').format(part.harga_jasa_perbaikan) : ''}">
+</div>
+            `;
+
+                partKeluarContainer.appendChild(newRow);
+
+                // Terapkan formatCurrencyInput ke input baru
+                const hargaJasaInput = newRow.querySelector('.harga-jasa-input');
+                formatCurrencyInput(hargaJasaInput);
+            });
+        }
+
+        function closeEditModal() {
+            document.getElementById("modal-edit").classList.add("hidden");
+        }
+
+        function showErrorPopup(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: message,
+            });
+        }
+
+        @if (session('error'))
+            console.log("Session Error: ", "{{ session('error') }}");
+            showErrorPopup("{{ session('error') }}");
+        @endif
     </script>
 </body>
 

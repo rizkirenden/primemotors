@@ -210,7 +210,6 @@
             <table class="min-w-full table-auto text-black">
                 <thead class="bg-white">
                     <tr>
-                        <th class="px-4 py-2 text-left">ID</th>
                         <th class="px-4 py-2 text-left">Nomor Polisi</th>
                         <th class="px-4 py-2 text-left">Merk/Model</th>
                         <th class="px-4 py-2 text-left">Tahun Pembuatan</th>
@@ -224,7 +223,6 @@
                 <tbody class="bg-white">
                     @foreach ($showrooms as $showroom)
                         <tr>
-                            <td class="px-4 py-2">{{ $showroom->id }}</td>
                             <td class="px-4 py-2">{{ $showroom->nomor_polisi }}</td>
                             <td class="px-4 py-2">{{ $showroom->merk_model }}</td>
                             <td class="px-4 py-2">{{ $showroom->tahun_pembuatan }}</td>

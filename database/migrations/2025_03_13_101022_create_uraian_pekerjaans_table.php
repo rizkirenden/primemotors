@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('datamekaniks', function (Blueprint $table) {
+        Schema::create('uraian_pekerjaans', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_mekanik');
-            $table->string('nomor_hp');
-            $table->string('alamat');
-            $table->date('tanggal_lahir');
-            $table->date('tanggal_masuk_karyawan');
+            $table->string('jenis_pekerjaan');
+            $table->string('jenis_mobil');
+            $table->integer('waktu_pengerjaan');
+            $table->decimal('ongkos_pengerjaan', 10, 2);
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('datamekaniks');
+        Schema::dropIfExists('uraian_pekerjaans');
     }
 };

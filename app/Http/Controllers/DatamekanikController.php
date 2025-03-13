@@ -24,6 +24,7 @@ class DatamekanikController extends Controller
             'nomor_hp' => 'required',
             'alamat' => 'required',
             'tanggal_lahir' => 'required|date',
+            'tanggal_masuk_karyawan' => 'required|date',
         ]);
 
         // Create a new record in the database
@@ -50,6 +51,7 @@ class DatamekanikController extends Controller
             'nomor_hp' => 'required',
             'alamat' => 'required',
             'tanggal_lahir' => 'required|date',
+            'tanggal_masuk_karyawan' => 'required|date',
         ]);
 
         // Find the mekanik by ID

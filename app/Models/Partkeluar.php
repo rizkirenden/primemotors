@@ -19,9 +19,15 @@ class Partkeluar extends Model
         'tanggal_keluar',
         'status',
         'jumlah',
+        'uraian_jasa_perbaikan',
+        'harga_jasa_perbaikan',
     ];
-    public function dataservice() {
-        return $this->belongsTo(Dataservice::class);
+    public function dataservice()
+    {
+        return $this->belongsTo(Dataservice::class, 'dataservice_id');
     }
-
+    public function datasparepat()
+    {
+        return $this->belongsTo(Datasparepat::class, 'kode_barang', 'kode_barang');
+    }
 }

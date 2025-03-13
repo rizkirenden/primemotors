@@ -2,12 +2,15 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DatamekanikController;
-use App\Http\Controllers\DataserviceController;
 use App\Http\Controllers\DatashowroomController;
 use App\Http\Controllers\DatasparepatController;
 use App\Http\Controllers\PartkeluarController;
 use App\Http\Controllers\PartmasukController;
 use App\Http\Controllers\PenggunaController;
+use App\Http\Controllers\DataserviceController;
+use App\Http\Controllers\InsentifController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\UraianpekerjaanController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,6 +28,10 @@ Route::get('/', function () {
     return view('login');
 });
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/get-invoice-data', [DashboardController::class, 'getInvoiceDataByYear']);
+Route::get('/get-part-keluar-data', [DashboardController::class, 'getPartKeluarDataByYear']);
+Route::get('/get-part-masuk-data', [DashboardController::class, 'getPartMasukDataByYear']);
+Route::get('/get-data-by-year', [DashboardController::class, 'getDataByYear']);
 
 Route::get('/datamekanik', [DatamekanikController::class, 'index'])->name('datamekanik');
 Route::post('/datamekanik', [DatamekanikController::class, 'store'])->name('datamekanik.store');
@@ -71,3 +78,24 @@ Route::get('/dataservice', [DataserviceController::class, 'index'])->name('datas
 Route::post('/dataservice', [DataserviceController::class, 'store'])->name('dataservice.store');
 Route::put('/dataservice/{id}', [DataserviceController::class, 'update'])->name('dataservice.update');
 Route::delete('/dataservice/{id}', [DataserviceController::class, 'destroy'])->name('dataservice.destroy');
+Route::get('/printpdfdataspkawal', [DataserviceController::class, 'printspkawalPDF'])->name('printpdfdataspkawal');
+Route::get('/printpdfdatasakhir', [DataserviceController::class, 'printspkakhirPDF'])->name('printpdfdataspkakhir');
+Route::get('/printpdfdataspkawalperdata/{id}', [DataserviceController::class, 'printAwalPerData'])->name('printpdfdataspkawal.perdata');
+Route::get('/printpdfdataspkakhirperdata/{id}', [DataserviceController::class, 'printAkhirPerData'])->name('printpdfdataspkakhir.perdata');
+
+Route::get('/laporantransaksi', [InvoiceController::class, 'index'])->name('laporantransaksi');
+Route::post('/invoice/{id}', [InvoiceController::class, 'store'])->name('invoice.store');
+Route::post('/invoice/update/{id}', [InvoiceController::class, 'update'])->name('invoice.update');
+Route::delete('/invoice/{id}', [InvoiceController::class, 'destroy'])->name('invoice.destroy');
+Route::get('/printpdfinvoice/{id}', [InvoiceController::class, 'print'])->name('invoice.print');
+Route::get('/printpdfinvoiceall', [InvoiceController::class, 'printPDF'])->name('invoice.printall');
+
+Route::get('/insentif', [InsentifController::class, 'index'])->name('insentif');
+Route::get('/printpdfinsentifperdata/{nama_mekanik}', [InsentifController::class, 'printInsentif'])->name('insentif.print');
+Route::get('/insentif/print-all', [InsentifController::class, 'printAllInsentif'])->name('printpdfinsentif');
+
+Route::get('/uraianpekerjaan', [UraianpekerjaanController::class, 'index'])->name('uraianpekerjaan');
+Route::post('/uraianpekerjaan', [UraianpekerjaanController::class, 'store'])->name('uraianpekerjaan.store');
+Route::put('/uraianpekerjaan/{id}', [UraianpekerjaanController::class, 'update'])->name('uraianpekerjaan.update');
+Route::delete('/uraianpekerjaan/{id}', [UraianpekerjaanController::class, 'destroy'])->name('uraianpekerjaan.destroy');
+

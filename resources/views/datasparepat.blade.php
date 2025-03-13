@@ -146,7 +146,8 @@
                 <div class="mb-1 p-2">
                     <div class="flex justify-between items-center space-x-4">
                         <!-- Search -->
-                        <form action="{{ route('printpdfdatasparepat') }}" method="GET">
+                        <form id="print-pdf-form" action="{{ route('printpdfdatasparepat') }}" method="GET"
+                            target="_blank">
                             <div class="flex items-center space-x-4 w-full">
                                 <!-- Search Input -->
                                 <input type="text" name="search" id="search-input" placeholder="Search..."
@@ -154,7 +155,7 @@
                                     value="{{ request('search') }}" onkeyup="searchTable()">
 
                                 <!-- Print PDF Button -->
-                                <button type="submit"
+                                <button type="button" onclick="printPDF()"
                                     class="px-4 py-2 bg-white text-black rounded-full hover:bg-gray-200 border border-gray-300">
                                     <i class="fas fa-file-pdf text-black"></i> Print PDF
                                 </button>
@@ -175,10 +176,11 @@
             <table class="min-w-full table-auto text-black">
                 <thead class="bg-white">
                     <tr>
-                        <th class="px-4 py-2 text-left">ID</th>
+
                         <th class="px-4 py-2 text-left">Kode Barang</th>
                         <th class="px-4 py-2 text-left">Nama Part</th>
                         <th class="px-4 py-2 text-left">Harga Toko</th>
+                        <th class="px-4 py-2 text-left">Margin Keuntungan</th>
                         <th class="px-4 py-2 text-left">Harga Jual</th>
                         <th class="px-4 py-2 text-left">Jumlah</th>
                         <th class="px-4 py-2 text-left">Detail</th>
@@ -188,10 +190,11 @@
                 <tbody class="bg-white">
                     @foreach ($sparepats as $sparepat)
                         <tr>
-                            <td class="px-4 py-2">{{ $sparepat->id }}</td>
+
                             <td class="px-4 py-2">{{ $sparepat->kode_barang }}</td>
                             <td class="px-4 py-2">{{ $sparepat->nama_part }}</td>
                             <td class="px-4 py-2">Rp {{ number_format($sparepat->harga_toko, 0, ',', '.') }}</td>
+                            <td class="px-4 py-2">{{ number_format($sparepat->margin_persen, 0, ',', '.') }}%</td>
                             <td class="px-4 py-2">Rp {{ number_format($sparepat->harga_jual, 0, ',', '.') }}</td>
                             <td class="px-4 py-2">{{ $sparepat->jumlah }}</td>
                             <td class="px-4 py-2">
@@ -203,7 +206,7 @@
                             <td class="px-4 py-2">
                                 <!-- Action Icons -->
                                 <a href="#" class="text-blue-500 hover:text-blue-700 mr-3"
-                                    onclick="openEditModal({{ $sparepat->id }}, '{{ $sparepat->kode_barang }}','{{ $sparepat->nama_part }}','{{ $sparepat->stn }}','{{ $sparepat->tipe }}','{{ $sparepat->merk }}','{{ $sparepat->harga_toko }}','{{ $sparepat->harga_jual }}','{{ $sparepat->jumlah }}')">
+                                    onclick="openEditModal({{ $sparepat->id }}, '{{ $sparepat->kode_barang }}', '{{ $sparepat->nama_part }}', '{{ $sparepat->stn }}', '{{ $sparepat->tipe }}', '{{ $sparepat->merk }}', '{{ $sparepat->harga_toko }}', '{{ $sparepat->harga_jual }}', '{{ $sparepat->jumlah }}', '{{ str_replace('%', '', $sparepat->margin_persen) }}')">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <form action="{{ route('datasparepat.destroy', $sparepat->id) }}" method="POST"
@@ -294,13 +297,19 @@
                     <div>
                         <label for="harga_toko">Harga Toko</label>
                         <input type="text" id="harga_toko" name="harga_toko" required
-                            oninput="formatCurrency(this)" placeholder="Masukkan Angka">
+                            oninput="formatCurrency(this); calculateHargaJual()" placeholder="Masukkan Harga Toko">
                     </div>
                     <div>
-                        <label for="harga_toko">Harga
-                            Jual</label>
-                        <input type="text" id="harga_jual" name="harga_jual" required
-                            oninput="formatCurrency(this)" placeholder="Masukkan Angka">
+                        <label for="margin_persen">Margin Persen (%)</label>
+                        <input type="text" id="margin_persen" name="margin_persen" required
+                            oninput="calculateHargaJual()" placeholder="Masukkan Margin Persen">
+                    </div>
+                    <div>
+                        <label for="harga_jual">Harga Jual</label>
+                        <input type="text" id="harga_jual" name="harga_jual" required readonly
+                            placeholder="Harga Jual Akan Dihitung Otomatis">
+                        <!-- Hidden input to send the value to the server -->
+                        <input type="hidden" id="harga_jual_hidden" name="harga_jual">
                     </div>
                     <div>
                         <label for="jumlah">Jumlah</label>
@@ -352,8 +361,14 @@
                             oninput="formatCurrency(this)">
                     </div>
                     <div>
+                        <label for="margin_persen-edit">Margin Persen (%)</label>
+                        <input type="text" id="margin_persen-edit" name="margin_persen" required
+                            onfocus="removePercent(this)" onblur="addPercent(this)"
+                            placeholder="Masukkan Persentase">
+                    </div>
+                    <div>
                         <label for="harga_toko-edit">Harga Jual</label>
-                        <input type="text" id="harga_jual-edit" name="harga_jual" required
+                        <input type="text" id="harga_jual-edit" name="harga_jual" required readonly
                             oninput="formatCurrency(this)">
                     </div>
                     <div>
@@ -372,6 +387,84 @@
     </div>
 
     <script>
+        function printPDF() {
+            // Ambil form
+            var form = document.getElementById('print-pdf-form');
+
+            // Buka form di tab baru
+            form.submit();
+        }
+        // Fungsi untuk menghapus tanda persen saat input mendapatkan fokus
+        function removePercent(input) {
+            if (input.value.includes('%')) {
+                input.value = input.value.replace('%', ''); // Hapus tanda persen
+            }
+        }
+
+        // Fungsi untuk menambahkan tanda persen saat input kehilangan fokus
+        function addPercent(input) {
+            if (input.value && !input.value.includes('%')) {
+                input.value += '%'; // Tambahkan tanda persen
+            }
+        }
+
+        // Sebelum submit, pastikan tanda persen dihapus
+        document.getElementById('inputFormAdd').addEventListener('submit', function(event) {
+            let marginPersenInput = document.getElementById('margin_persen');
+            marginPersenInput.value = marginPersenInput.value.replace('%', ''); // Hapus tanda persen
+        });
+
+        // Untuk form edit
+        document.getElementById('inputFormEdit').addEventListener('submit', function(event) {
+            let marginPersenInput = document.getElementById('margin_persen-edit');
+            marginPersenInput.value = marginPersenInput.value.replace('%', ''); // Hapus tanda persen
+        });
+
+        // Fungsi untuk menghitung harga jual
+        function calculateHargaJual() {
+            let hargaToko = document.getElementById('harga_toko').value.replace(/\D/g, '');
+            let marginPersen = document.getElementById('margin_persen').value.replace('%', '');
+
+            hargaToko = parseFloat(hargaToko);
+            marginPersen = parseFloat(marginPersen);
+
+            if (!isNaN(hargaToko) && !isNaN(marginPersen)) {
+                let hargaJual = hargaToko + (hargaToko * (marginPersen / 100));
+                document.getElementById('harga_jual').value = 'Rp ' + hargaJual.toLocaleString();
+                document.getElementById('harga_jual_hidden').value = hargaJual; // Set the hidden input value
+            } else {
+                document.getElementById('harga_jual').value = '';
+                document.getElementById('harga_jual_hidden').value = ''; // Clear the hidden input value
+            }
+        }
+        // Fungsi untuk menghitung harga jual di modal edit
+        function calculateHargaJualEdit() {
+            // Ambil nilai dari input harga_toko dan margin_persen di modal edit
+            let hargaToko = document.getElementById('harga_toko-edit').value.replace(/\D/g, ''); // Hapus semua non-digit
+            let marginPersen = document.getElementById('margin_persen-edit').value.replace('%', ''); // Hapus simbol '%'
+
+            // Konversi nilai menjadi angka
+            hargaToko = parseFloat(hargaToko);
+            marginPersen = parseFloat(marginPersen);
+
+            // Cek apakah nilai valid
+            if (!isNaN(hargaToko) && !isNaN(marginPersen)) {
+                // Hitung harga jual
+                let hargaJual = hargaToko + (hargaToko * (marginPersen / 100));
+
+                // Format harga jual dengan format lokal, tambahkan prefix 'Rp '
+                document.getElementById('harga_jual-edit').value = 'Rp ' + hargaJual.toLocaleString();
+            } else {
+                // Kosongkan field jika input tidak valid
+                document.getElementById('harga_jual-edit').value = '';
+            }
+        }
+
+        // Tambahkan event listener untuk menghitung harga jual saat input berubah
+        document.getElementById('harga_toko-edit').addEventListener('input', calculateHargaJualEdit);
+        document.getElementById('margin_persen-edit').addEventListener('input', calculateHargaJualEdit);
+
+        // Fungsi untuk memformat input sebagai mata uang
         function formatCurrency(input) {
             let value = input.value.replace(/\D/g, ''); // Hapus semua karakter non-angka
             if (value) {
@@ -384,12 +477,14 @@
         // Sebelum submit, pastikan nilai yang dikirim adalah nilai asli
         document.getElementById('inputFormAdd').addEventListener('submit', function(event) {
             let hargaTokoInput = document.getElementById('harga_toko');
+            let marginPersenInput = document.getElementById('margin_persen');
             let hargaJualInput = document.getElementById('harga_jual');
 
+            // Hapus "Rp" dan tanda pemisah ribuan sebelum submit
             hargaTokoInput.value = hargaTokoInput.getAttribute('data-raw-value');
-            hargaJualInput.value = hargaJualInput.getAttribute('data-raw-value');
+            marginPersenInput.value = marginPersenInput.value.replace('%', '');
+            hargaJualInput.value = hargaJualInput.value.replace(/\D/g, '');
         });
-
         // Modal logic for opening and closing add/edit modals
         function openAddModal() {
             document.getElementById("modal-add").classList.remove("hidden");
@@ -426,29 +521,17 @@
             });
         }
 
-        // Filter by date
-        function filterByDate() {
-            let input = document.getElementById("date-input");
-            let filter = input.value;
-            let table = document.querySelector("table tbody");
-            let rows = table.getElementsByTagName("tr");
-
-            Array.from(rows).forEach(row => {
-                let cells = row.getElementsByTagName("td");
-                let date = cells[6] ? cells[6].textContent.trim() : ""; // Assuming the date is in the 6th column
-                if (date) {
-                    row.style.display = date.includes(filter) || filter === "" ? "" : "none";
-                }
-            });
-        }
 
         // Format nilai input saat mengisi form edit
-        function openEditModal(id, kode_barang, nama_part, stn, tipe, merk, harga_toko, harga_jual, jumlah) {
+        function openEditModal(id, kode_barang, nama_part, stn, tipe, merk, harga_toko, harga_jual, jumlah, margin_persen) {
             document.getElementById("modal-edit").classList.remove("hidden");
 
             // Format harga toko dan harga jual dengan "Rp"
             let formattedHargaToko = 'Rp ' + parseInt(harga_toko).toLocaleString();
             let formattedHargaJual = 'Rp ' + parseInt(harga_jual).toLocaleString();
+
+            // Format margin_persen dengan tanda persen
+            let formattedMarginPersen = margin_persen + '%';
 
             // Fill the edit form with data
             document.getElementById('kode-barang-edit').value = kode_barang;
@@ -459,19 +542,24 @@
             document.getElementById('harga_toko-edit').value = formattedHargaToko;
             document.getElementById('harga_jual-edit').value = formattedHargaJual;
             document.getElementById('jumlah-edit').value = jumlah;
+            document.getElementById('margin_persen-edit').value = formattedMarginPersen;
 
             // Set the action to the edit route
             document.getElementById("inputFormEdit").action = "/datasparepat/" + id;
         }
 
-        // Sebelum submit, pastikan nilai yang dikirim adalah nilai asli
+        // Sebelum submit, pastikan tanda persen dihapus
         document.getElementById('inputFormEdit').addEventListener('submit', function(event) {
             let hargaTokoInput = document.getElementById('harga_toko-edit');
             let hargaJualInput = document.getElementById('harga_jual-edit');
+            let marginPersenInput = document.getElementById('margin_persen-edit');
 
             // Hapus "Rp" dan tanda pemisah ribuan sebelum submit
             hargaTokoInput.value = hargaTokoInput.value.replace(/\D/g, '');
             hargaJualInput.value = hargaJualInput.value.replace(/\D/g, '');
+
+            // Hapus tanda persen sebelum submit
+            marginPersenInput.value = marginPersenInput.value.replace('%', '');
         });
 
         // Fungsi untuk menutup modal edit

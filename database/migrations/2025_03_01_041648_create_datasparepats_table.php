@@ -18,8 +18,9 @@ return new class extends Migration
             $table->string('stn');
             $table->string('tipe');
             $table->string('merk');
-            $table->decimal('harga_toko', 15, 2);
-            $table->decimal('harga_jual', 15, 2);
+            $table->decimal('harga_toko', 15, 3);
+            $table->decimal('harga_jual', 15, 3);
+            $table->decimal('margin_persen', 5, 2)->nullable();
             $table->integer('jumlah')->default(0);
             $table->timestamps();
         });

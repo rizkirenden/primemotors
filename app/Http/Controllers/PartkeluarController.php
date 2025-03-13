@@ -150,40 +150,39 @@ public function cancel($id)
         return redirect()->back()->with('error', 'Data sudah dibatalkan sebelumnya!');
     }
 
-    // Kembalikan stok terlepas dari status sebelumnya
-    $sparepart = Datasparepat::where('kode_barang', $partKeluar->kode_barang)->first();
-    if ($sparepart) {
-        $sparepart->jumlah += $partKeluar->jumlah; // Kembalikan stok
-        $sparepart->save();
-    }
+    // Update status menjadi canceled
+    $partKeluar->status = 'canceled';
+    $partKeluar->save();
 
-    // Hapus data part keluar
-    $partKeluar->delete();
-
-    return redirect()->route('partkeluar')->with('success', 'Data part keluar berhasil dibatalkan dan dihapus!');
+    return redirect()->route('partkeluar')->with('success', 'Status part keluar berhasil diperbarui menjadi canceled!');
 }
 
-
-    public function printPDF(Request $request)
+public function printPDF(Request $request)
 {
     // Ambil parameter pencarian dan tanggal dari request
     $search = $request->input('search');
-    $date = $request->input('date');
+    $dateStart = $request->input('date_start');
+    $dateEnd = $request->input('date_end');
 
-    // Query data mekanik berdasarkan pencarian dan tanggal
+    // Query data Partkeluar
     $query = Partkeluar::query();
 
+    // Filter berdasarkan pencarian (search)
     if ($search) {
-        $query->where('kode_barang', 'like', '%' . $search . '%')
+        $query->where(function ($q) use ($search) {
+            $q->where('kode_barang', 'like', '%' . $search . '%')
               ->orWhere('nama_part', 'like', '%' . $search . '%')
-              ->orWhere('stn', 'like', '%' . $search . '%')
               ->orWhere('merk', 'like', '%' . $search . '%')
+              ->orWhere('stn', 'like', '%' . $search . '%')
+              ->orWhere('tipe', 'like', '%' . $search . '%')
               ->orWhere('jumlah', 'like', '%' . $search . '%')
-              ->orWhere('tanggal_keluar', 'like', '%' . $search . '%')
-              ->orWhere('tipe', 'like', '%' . $search . '%');
+              ->orWhere('tanggal_keluar', 'like', '%' . $search . '%');
+        });
     }
-    if ($request->has('date_start') && $request->has('date_end')) {
-        $query->whereBetween('tanggal_keluar', [$request->date_start, $request->date_end]);
+
+    // Filter berdasarkan rentang tanggal (date to date)
+    if ($dateStart && $dateEnd) {
+        $query->whereBetween('tanggal_keluar', [$dateStart, $dateEnd]);
     }
 
     // Ambil data yang sudah difilter
@@ -192,11 +191,7 @@ public function cancel($id)
     // Load view ke PDF
     $pdf = Pdf::loadView('printpdfpartkeluar', compact('partkeluars'));
 
-    //return $pdf->stream('Data_Sparepat.pdf');
-
     // Download PDF
     return $pdf->download('Data_Partkeluar.pdf');
-
-
 }
 }

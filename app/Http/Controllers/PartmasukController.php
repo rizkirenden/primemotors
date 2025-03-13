@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\PartMasuk; // Pastikan nama model benar
+use App\Models\Partmasuk; // Pastikan nama model benar
 use App\Models\Datasparepat; // Pastikan nama model benar
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -12,7 +12,7 @@ class PartmasukController extends Controller
     // Menampilkan halaman part masuk
     public function index()
     {
-        $partMasuks = PartMasuk::paginate(10); // Ambil semua data part masuk
+        $partMasuks = Partmasuk::paginate(10); // Ambil semua data part masuk
         $spareparts = Datasparepat::all(); // Ambil semua data sparepart
         return view('partmasuk', compact('partMasuks', 'spareparts')); // Kirim data ke view
     }
@@ -31,7 +31,7 @@ class PartmasukController extends Controller
         ]);
 
         // Simpan data part masuk
-        $partMasuk = PartMasuk::create($request->all());
+        $partMasuk = Partmasuk::create($request->all());
 
         // Update stok di tabel datasparepats
         $sparepart = Datasparepat::where('kode_barang', $request->kode_barang)->first();
@@ -65,7 +65,7 @@ class PartmasukController extends Controller
 public function destroy($id)
 {
     // Ambil data part masuk yang akan dihapus
-    $partMasuk = PartMasuk::findOrFail($id);
+    $partMasuk = Partmasuk::findOrFail($id);
 
     // Update stok di tabel datasparepats (kembalikan stok)
     $sparepart = Datasparepat::where('kode_barang', $partMasuk->kode_barang)->first();
@@ -92,7 +92,7 @@ public function update(Request $request, $id)
     ]);
 
     // Ambil data part masuk yang akan diupdate
-    $partMasuk = PartMasuk::findOrFail($id);
+    $partMasuk = Partmasuk::findOrFail($id);
 
     // Update stok di tabel datasparepats (kembalikan stok lama dan kurangi stok baru)
     $sparepart = Datasparepat::where('kode_barang', $partMasuk->kode_barang)->first();
@@ -115,24 +115,30 @@ public function update(Request $request, $id)
 }
 public function printPDF(Request $request)
 {
-    // Ambil parameter pencarian dan tanggal dari request
+    // Ambil parameter dari request
     $search = $request->input('search');
-    $date = $request->input('date');
+    $dateStart = $request->input('date_start');
+    $dateEnd = $request->input('date_end');
 
-    // Query data mekanik berdasarkan pencarian dan tanggal
-    $query = PartMasuk::query();
+    // Query awal
+    $query = Partmasuk::query();
 
+    // Filter berdasarkan pencarian (search)
     if ($search) {
-        $query->where('kode_barang', 'like', '%' . $search . '%')
+        $query->where(function ($q) use ($search) {
+            $q->where('kode_barang', 'like', '%' . $search . '%')
               ->orWhere('nama_part', 'like', '%' . $search . '%')
               ->orWhere('stn', 'like', '%' . $search . '%')
               ->orWhere('merk', 'like', '%' . $search . '%')
+              ->orWhere('tipe', 'like', '%' . $search . '%')
               ->orWhere('jumlah', 'like', '%' . $search . '%')
-              ->orWhere('tanggal_masuk', 'like', '%' . $search . '%')
-              ->orWhere('tipe', 'like', '%' . $search . '%');
+              ->orWhere('tanggal_masuk', 'like', '%' . $search . '%');
+        });
     }
-    if ($request->has('date_start') && $request->has('date_end')) {
-        $query->whereBetween('tanggal_masuk', [$request->date_start, $request->date_end]);
+
+    // Filter berdasarkan rentang tanggal (date to date)
+    if ($dateStart && $dateEnd) {
+        $query->whereBetween('tanggal_masuk', [$dateStart, $dateEnd]);
     }
 
     // Ambil data yang sudah difilter
@@ -141,11 +147,7 @@ public function printPDF(Request $request)
     // Load view ke PDF
     $pdf = Pdf::loadView('printpdfpartmasuk', compact('partmasuks'));
 
-    //return $pdf->stream('Data_Sparepat.pdf');
-
     // Download PDF
     return $pdf->download('Data_Partmasuk.pdf');
-
-
 }
 }

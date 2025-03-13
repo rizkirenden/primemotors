@@ -16,6 +16,7 @@ class Datasparepat extends Model
         'tipe',
         'merk',
         'harga_toko',
+        'margin_persen',
         'harga_jual',
         'jumlah',
     ];

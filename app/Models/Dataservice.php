@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Dataservice extends Model
 {
     use HasFactory;
+    protected $primaryKey = 'id';
     protected $table = 'dataservices';
 
     protected $fillable = [
         'no_spk',
-        'tanggal',
         'costumer',
         'contact_person',
         'masuk',
@@ -24,6 +24,7 @@ class Dataservice extends Model
         'warna',
         'no_rangka',
         'no_mesin',
+        'kilometer',
         'keluhan_costumer',
         'kode_barang',
         'nama_part',
@@ -36,6 +37,15 @@ class Dataservice extends Model
 
     public function partkeluar()
     {
-        return $this->hasMany(Partkeluar::class, 'kode_barang', 'kode_barang');
+        return $this->hasMany(Partkeluar::class, 'dataservice_id');
     }
+public function datasparepat()
+{
+    return $this->belongsTo(Datasparepat::class, 'kode_barang', 'kode_barang');
+}
+public function uraianPekerjaan()
+{
+    return $this->belongsToMany(UraianPekerjaan::class);
+}
+
 }

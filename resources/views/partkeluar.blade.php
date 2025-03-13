@@ -151,9 +151,9 @@
                                 <!-- Search Input -->
                                 <input type="text" id="search-input" name="search" placeholder="Search..."
                                     class="px-4 py-2 rounded-full text-black w-64 bg-white border border-gray-300"
-                                    value="{{ request('search') }}" onkeyup="searchTable()">
+                                    value="{{ request('search') }}">
 
-                                <!-- Filter Date Range -->
+                                <!-- Filter Date -->
                                 <input type="date" id="date-start" name="date_start"
                                     class="px-4 py-2 rounded-full text-black bg-white border border-gray-300"
                                     value="{{ request('date_start') }}">
@@ -184,11 +184,11 @@
             <table class="min-w-full table-auto text-black">
                 <thead class="bg-white">
                     <tr>
-                        <th class="px-4 py-2 text-left">ID</th>
                         <th class="px-4 py-2 text-left">Kode Barang</th>
                         <th class="px-4 py-2 text-left">Nama Part</th>
-                        <th class="px-4 py-2 text-left">Merk</th>
+                        <th class="px-4 py-2 text-left">Stn</th>
                         <th class="px-4 py-2 text-left">Tipe</th>
+                        <th class="px-4 py-2 text-left">Merk</th>
                         <th class="px-4 py-2 text-left">Tanggal Keluar</th>
                         <th class="px-4 py-2 text-left">Jumlah</th>
                         <th class="px-4 py-2 text-left">Status</th>
@@ -198,11 +198,11 @@
                 <tbody class="bg-white">
                     @foreach ($partKeluars as $partKeluar)
                         <tr>
-                            <td class="px-4 py-2">{{ $partKeluar->id }}</td>
                             <td class="px-4 py-2">{{ $partKeluar->kode_barang }}</td>
                             <td class="px-4 py-2">{{ $partKeluar->nama_part }}</td>
-                            <td class="px-4 py-2">{{ $partKeluar->merk }}</td>
+                            <td class="px-4 py-2">{{ $partKeluar->stn }}</td>
                             <td class="px-4 py-2">{{ $partKeluar->tipe }}</td>
+                            <td class="px-4 py-2">{{ $partKeluar->merk }}</td>
                             <td class="px-4 py-2">{{ $partKeluar->tanggal_keluar }}</td>
                             <td class="px-4 py-2">{{ $partKeluar->jumlah }}</td>
                             <td class="px-4 py-2">
@@ -294,15 +294,19 @@
             <form id="inputFormAdd" method="POST" action="{{ route('partkeluar.store') }}">
                 @csrf
                 <div class="modal-input-row">
-                    <div>
-                        <label for="kode_barang">Kode Barang</label>
-                        <select id="kode_barang" name="kode_barang" required onchange="fetchSparepartData()">
+                    <div style="margin-bottom: 1rem;">
+                        <label for="kode_barang"
+                            style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Kode
+                            Barang</label>
+                        <select id="kode_barang" name="kode_barang" required onchange="fetchSparepartData()"
+                            style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem;">
                             <option value="">Pilih Kode Barang</option>
                             @foreach ($spareparts as $sparepart)
                                 <option value="{{ $sparepart->kode_barang }}">{{ $sparepart->kode_barang }}</option>
                             @endforeach
                         </select>
                     </div>
+
                     <div>
                         <label for="nama_part">Nama Part</label>
                         <input type="text" id="nama_part" name="nama_part" readonly>
@@ -384,20 +388,119 @@
     </div>
 
     <script>
-        // Fungsi untuk menampilkan pop-up error
         // Fungsi untuk menampilkan pop-up error menggunakan SweetAlert
-        function showErrorPopup(message) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: message,
+        document.querySelector('form').addEventListener('submit', function(e) {
+            let search = document.getElementById('search-input').value;
+            let dateStart = document.getElementById('date-start').value;
+            let dateEnd = document.getElementById('date-end').value;
+
+            if (!search && !dateStart && !dateEnd) {
+                e.preventDefault(); // Mencegah pengiriman form
+                alert('Silakan isi kolom pencarian atau rentang tanggal terlebih dahulu.');
+            }
+        });
+        // Fungsi untuk memfilter tabel berdasarkan rentang tanggal
+        // Fungsi untuk memfilter tabel berdasarkan rentang tanggal
+        function filterByDateRange() {
+            let startDate = document.getElementById("date-start").value;
+            let endDate = document.getElementById("date-end").value;
+            let table = document.querySelector("table tbody");
+            let rows = table.getElementsByTagName("tr");
+
+            Array.from(rows).forEach(row => {
+                let cells = row.getElementsByTagName("td");
+                let date = cells[5] ? cells[5].textContent.trim() : ""; // Kolom tanggal (index 4)
+                if (date) {
+                    let rowDate = new Date(date);
+                    let start = new Date(startDate);
+                    let end = new Date(endDate);
+
+                    // Jika tanggal dalam rentang yang dipilih, tampilkan baris
+                    if ((!startDate || rowDate >= start) && (!endDate || rowDate <= end)) {
+                        row.style.display = "";
+                    } else {
+                        row.style.display = "none";
+                    }
+                }
             });
         }
 
-        // Cek jika ada pesan error dari controller
-        @if (session('error'))
-            showErrorPopup("{{ session('error') }}");
-        @endif
+        // Tambahkan event listener ke input tanggal
+        document.getElementById("date-start").addEventListener("change", filterByDateRange);
+        document.getElementById("date-end").addEventListener("change", filterByDateRange);
+
+        // Fungsi untuk mencari data di tabel
+        function searchTable() {
+            let input = document.getElementById("search-input");
+            let filter = input.value.toLowerCase();
+            let table = document.querySelector("table tbody");
+            let rows = table.getElementsByTagName("tr");
+
+            Array.from(rows).forEach(row => {
+                let cells = row.getElementsByTagName("td");
+                let found = false;
+
+                Array.from(cells).forEach(cell => {
+                    if (cell && cell.textContent.toLowerCase().includes(filter)) {
+                        found = true;
+                    }
+                });
+
+                row.style.display = found ? "" : "none";
+            });
+        }
+
+        document.getElementById("search-input").addEventListener("keyup", searchTable);
+
+        // Fungsi untuk memfilter tabel berdasarkan pencarian dan rentang tanggal
+        function filterTable() {
+            let search = document.getElementById("search-input").value.toLowerCase();
+            let startDate = document.getElementById("date-start").value;
+            let endDate = document.getElementById("date-end").value;
+            let table = document.querySelector("table tbody");
+            let rows = table.getElementsByTagName("tr");
+
+            Array.from(rows).forEach(row => {
+                let cells = row.getElementsByTagName("td");
+                let found = false;
+
+                // Cek apakah baris cocok dengan pencarian
+                Array.from(cells).forEach(cell => {
+                    if (cell && cell.textContent.toLowerCase().includes(search)) {
+                        found = true;
+                    }
+                });
+
+                // Cek apakah tanggal dalam rentang yang dipilih
+                let date = cells[5] ? cells[5].textContent.trim() : ""; // Kolom tanggal (index 4)
+                if (date) {
+                    let rowDate = new Date(date);
+                    let start = new Date(startDate);
+                    let end = new Date(endDate);
+
+                    if (startDate && rowDate < start) {
+                        found = false;
+                    }
+                    if (endDate && rowDate > end) {
+                        found = false;
+                    }
+                }
+
+                // Tampilkan atau sembunyikan baris berdasarkan hasil filter
+                row.style.display = found ? "" : "none";
+            });
+        }
+
+        // Tambahkan event listener ke input pencarian dan tanggal
+        document.getElementById("search-input").addEventListener("keyup", filterTable);
+        document.getElementById("date-start").addEventListener("change", filterTable);
+        document.getElementById("date-end").addEventListener("change", filterTable);
+
+        // Panggil fungsi filter saat halaman dimuat
+        document.addEventListener("DOMContentLoaded", function() {
+            filterTable();
+        });
+
         function fetchSparepartData() {
             const kodeBarang = document.getElementById('kode_barang').value;
 
@@ -458,52 +561,18 @@
             document.getElementById("modal-edit").classList.add("hidden");
         }
 
-        function searchTable() {
-            let input = document.getElementById("search-input");
-            let filter = input.value.toLowerCase();
-            let table = document.querySelector("table tbody");
-            let rows = table.getElementsByTagName("tr");
-
-            Array.from(rows).forEach(row => {
-                let cells = row.getElementsByTagName("td");
-                let found = false;
-                for (let i = 0; i < cells.length; i++) {
-                    let cell = cells[i];
-                    if (cell && cell.textContent.toLowerCase().includes(filter)) {
-                        found = true;
-                        break;
-                    }
-                }
-                row.style.display = found ? "" : "none";
+        function showErrorPopup(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: message,
             });
         }
 
-        function filterByDateRange() {
-            let startDate = document.getElementById("date-start").value;
-            let endDate = document.getElementById("date-end").value;
-            let table = document.querySelector("table tbody");
-            let rows = table.getElementsByTagName("tr");
-
-            Array.from(rows).forEach(row => {
-                let cells = row.getElementsByTagName("td");
-                let date = cells[5] ? cells[5].textContent.trim() : "";
-                if (date) {
-                    let rowDate = new Date(date);
-                    let start = new Date(startDate);
-                    let end = new Date(endDate);
-
-                    if ((!startDate || rowDate >= start) && (!endDate || rowDate <= end)) {
-                        row.style.display = "";
-                    } else {
-                        row.style.display = "none";
-                    }
-                }
-            });
-        }
-
-        // Tambahkan event listener untuk input tanggal
-        document.getElementById("date-start").addEventListener("change", filterByDateRange);
-        document.getElementById("date-end").addEventListener("change", filterByDateRange);
+        // Cek jika ada pesan error dari controller
+        @if (session('error'))
+            showErrorPopup("{{ session('error') }}");
+        @endif
     </script>
 </body>
 

@@ -111,12 +111,6 @@
                                 <input type="text" name="search" id="search-input" placeholder="Search..."
                                     class="px-4 py-2 rounded-full text-black w-64 bg-white border border-gray-300"
                                     value="{{ request('search') }}">
-
-                                <!-- Filter Date -->
-                                <input type="date" name="date" id="date-input"
-                                    class="px-4 py-2 rounded-full text-black bg-white border border-gray-300"
-                                    value="{{ request('date') }}">
-
                                 <!-- Print PDF Button -->
                                 <button type="submit"
                                     class="px-4 py-2 bg-white text-black rounded-full hover:bg-gray-200 border border-gray-300">
@@ -139,22 +133,22 @@
             <table class="min-w-full table-auto text-black">
                 <thead class="bg-white">
                     <tr>
-                        <th class="px-4 py-2 text-left">ID</th>
                         <th class="px-4 py-2 text-left">Nama Mekanik</th>
                         <th class="px-4 py-2 text-left">Nomor HP</th>
                         <th class="px-4 py-2 text-left">Alamat</th>
                         <th class="px-4 py-2 text-left">Tanggal Lahir</th>
+                        <th class="px-4 py-2 text-left">Tanggal Masuk</th>
                         <th class="px-4 py-2 text-left">Action</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white">
                     @foreach ($mekaniks as $mekanik)
                         <tr>
-                            <td class="px-4 py-2">{{ $mekanik->id }}</td>
                             <td class="px-4 py-2">{{ $mekanik->nama_mekanik }}</td>
                             <td class="px-4 py-2">{{ $mekanik->nomor_hp }}</td>
                             <td class="px-4 py-2">{{ $mekanik->alamat }}</td>
                             <td class="px-4 py-2">{{ $mekanik->tanggal_lahir }}</td>
+                            <td class="px-4 py-2">{{ $mekanik->tanggal_masuk_karyawan }}</td>
                             <td class="px-4 py-2">
                                 <a href="#" class="text-blue-500 hover:text-blue-700 mr-3"
                                     onclick="openEditModal({{ $mekanik->id }}, '{{ $mekanik->nama_mekanik }}', '{{ $mekanik->nomor_hp }}', '{{ $mekanik->alamat }}', '{{ $mekanik->tanggal_lahir }}')">
@@ -225,6 +219,8 @@
                     class="mb-2 w-full px-4 py-2 border border-gray-300 rounded-full" required>
                 <input type="date" name="tanggal_lahir"
                     class="mb-4 w-full px-4 py-2 border border-gray-300 rounded-full" required>
+                <input type="date" name="tanggal_masuk_karyawan"
+                    class="mb-4 w-full px-4 py-2 border border-gray-300 rounded-full" required>
                 <button type="submit"
                     class="w-full px-4 py-2 bg-black text-white rounded-full hover:bg-gray-700">Tambah Data</button>
             </form>
@@ -248,6 +244,8 @@
                 <input type="text" id="edit-alamat" name="alamat"
                     class="mb-2 w-full px-4 py-2 border border-gray-300 rounded-full" required>
                 <input type="date" id="edit-tanggal_lahir" name="tanggal_lahir"
+                    class="mb-4 w-full px-4 py-2 border border-gray-300 rounded-full" required>
+                <input type="date" id="edit-tanggal_masuk_karyawan" name="tanggal_masuk_karyawan"
                     class="mb-4 w-full px-4 py-2 border border-gray-300 rounded-full" required>
                 <button type="submit"
                     class="w-full px-4 py-2 bg-black text-white rounded-full hover:bg-gray-700">Update Data</button>
@@ -302,13 +300,14 @@
             });
         });
 
-        function openEditModal(id, nama_mekanik, nomor_hp, alamat, tanggal_lahir) {
+        function openEditModal(id, nama_mekanik, nomor_hp, alamat, tanggal_lahir, tanggal_masuk_karyawan) {
             // Menetapkan nilai untuk input di modal edit
             document.getElementById("edit-id").value = id;
             document.getElementById("edit-nama_mekanik").value = nama_mekanik;
             document.getElementById("edit-nomor_hp").value = nomor_hp;
             document.getElementById("edit-alamat").value = alamat;
             document.getElementById("edit-tanggal_lahir").value = tanggal_lahir;
+            document.getElementById("edit-tanggal_masuk_mekanik").value = tanggal_masuk_karyawan;
 
             // Update form action untuk mencocokkan dengan ID yang akan diupdate
             const formAction = document.querySelector("#edit-modal form");

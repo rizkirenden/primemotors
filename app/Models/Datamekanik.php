@@ -12,5 +12,5 @@ class Datamekanik extends Model
     protected $table = 'datamekaniks'; // Make sure your table name matches
 
     // Specify the columns that are mass assignable
-    protected $fillable = ['nama_mekanik', 'nomor_hp', 'alamat', 'tanggal_lahir'];
+    protected $fillable = ['nama_mekanik', 'nomor_hp', 'alamat', 'tanggal_lahir', 'tanggal_masuk_karyawan'];
 }
