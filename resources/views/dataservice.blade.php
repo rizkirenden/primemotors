@@ -373,28 +373,57 @@
                                                         <th style="border: 1px solid #000; padding: 5px;"><strong>Waktu
                                                                 Pengerjaan (jam):</strong></th>
                                                         <th style="border: 1px solid #000; padding: 5px;">
-                                                            <strong>Ongkos Pengerjaan:</strong></th>
+                                                            <strong>Ongkos Pengerjaan:</strong>
+                                                        </th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @if ($uraianPekerjaans->count() > 0)
-                                                        @foreach ($uraianPekerjaans as $uraian)
+                                                    @php
+                                                        $jenisPekerjaan = json_decode(
+                                                            $dataservice->jenis_pekerjaan,
+                                                            true,
+                                                        );
+                                                        $jenisMobil = json_decode($dataservice->jenis_mobil, true);
+                                                        $waktuPengerjaan = json_decode(
+                                                            $dataservice->waktu_pengerjaan,
+                                                            true,
+                                                        );
+                                                        $ongkosPengerjaan = json_decode(
+                                                            $dataservice->ongkos_pengerjaan,
+                                                            true,
+                                                        );
+                                                    @endphp
+
+                                                    @if (!empty($jenisPekerjaan) && is_array($jenisPekerjaan))
+                                                        @foreach ($jenisPekerjaan as $index => $jenis)
                                                             <tr>
                                                                 <td style="border: 1px solid #000; padding: 5px;">
-                                                                    {{ $uraian->jenis_pekerjaan }}</td>
+                                                                    {{ $jenis }}
+                                                                </td>
                                                                 <td style="border: 1px solid #000; padding: 5px;">
-                                                                    {{ $uraian->jenis_mobil }}</td>
+                                                                    {{ $jenisMobil[$index] ?? '-' }}
+                                                                </td>
                                                                 <td style="border: 1px solid #000; padding: 5px;">
-                                                                    {{ $uraian->waktu_pengerjaan }}</td>
+                                                                    {{ $waktuPengerjaan[$index] ?? '-' }}
+                                                                </td>
                                                                 <td style="border: 1px solid #000; padding: 5px;">
-                                                                    {{ $uraian->ongkos_pengerjaan }}</td>
+                                                                    @php
+                                                                        // Decode data JSON ongkos_pengerjaan
+                                                                        $ongkosPekerjaan = json_decode(
+                                                                            $dataservice->ongkos_pengerjaan,
+                                                                            true,
+                                                                        );
+                                                                    @endphp
+                                                                    {{ isset($ongkosPekerjaan[$index]) ? 'Rp. ' . number_format((float) $ongkosPekerjaan[$index], 0, ',', '.') : '-' }}
+                                                                </td>
                                                             </tr>
                                                         @endforeach
                                                     @else
                                                         <tr>
                                                             <td colspan="4"
                                                                 style="border: 1px solid #000; padding: 5px; text-align: center;">
-                                                                Tidak ada data uraian pekerjaan.</td>
+                                                                Tidak ada data uraian pekerjaan.
+                                                            </td>
                                                         </tr>
                                                     @endif
                                                 </tbody>
@@ -412,19 +441,26 @@
                                                         <th style="border: 1px solid #000; padding: 5px;"><strong>Nama
                                                                 Part</strong></th>
                                                         <th style="border: 1px solid #000; padding: 5px;">
-                                                            <strong>STN</strong></th>
+                                                            <strong>STN</strong>
+                                                        </th>
                                                         <th style="border: 1px solid #000; padding: 5px;">
-                                                            <strong>Tipe</strong></th>
+                                                            <strong>Tipe</strong>
+                                                        </th>
                                                         <th style="border: 1px solid #000; padding: 5px;">
-                                                            <strong>Merk</strong></th>
+                                                            <strong>Merk</strong>
+                                                        </th>
                                                         <th style="border: 1px solid #000; padding: 5px;">
-                                                            <strong>Tanggal Keluar</strong></th>
+                                                            <strong>Tanggal Keluar</strong>
+                                                        </th>
                                                         <th style="border: 1px solid #000; padding: 5px;">
-                                                            <strong>Jumlah</strong></th>
+                                                            <strong>Jumlah</strong>
+                                                        </th>
                                                         <th style="border: 1px solid #000; padding: 5px;">
-                                                            <strong>Status</strong></th>
+                                                            <strong>Status</strong>
+                                                        </th>
                                                         <th style="border: 1px solid #000; padding: 5px;">
-                                                            <strong>Uraian Jasa Perbaikan</strong></th>
+                                                            <strong>Uraian Jasa Perbaikan</strong>
+                                                        </th>
                                                         <th style="border: 1px solid #000; padding: 5px;"><strong>Harga
                                                                 Jasa Perbaikan</strong></th>
                                                     </tr>
@@ -593,7 +629,7 @@
                     <div class="col-span-5">
                         <label for="uraian_pekerjaan"></label>
                         <div id="uraian-container">
-                            <!-- Baris input uraian pekerjaan akan ditambahkan di sini -->
+
                         </div>
                         <button type="button" onclick="tambahUraian()"
                             class="bg-black text-white px-4 py-2 rounded-full mt-4">
@@ -619,7 +655,6 @@
                 action="{{ route('dataservice.update', $dataservice->id ?? '') }}">
                 @csrf
                 @method('PUT')
-
                 <!-- Input fields untuk dataservice -->
                 <div class="grid grid-cols-5 gap-4">
                     <!-- Baris 1 -->
@@ -641,15 +676,15 @@
                     </div>
                     <div>
                         <label for="masuk_edit">Tanggal Masuk</label>
-                        <input type="date" id="masuk_edit" name="masuk" class="w-full p-2 border rounded"
-                            value="{{ $dataservice->masuk ?? '' }}" required>
+                        <input type="datetime-local" id="masuk_edit" name="masuk"
+                            class="w-full p-2 border rounded" value="{{ $dataservice->masuk ?? '' }}" required>
                     </div>
 
                     <!-- Baris 2 -->
                     <div>
                         <label for="keluar_edit">Tanggal Keluar</label>
-                        <input type="date" id="keluar_edit" name="keluar" class="w-full p-2 border rounded"
-                            value="{{ $dataservice->keluar ?? '' }}">
+                        <input type="datetime-local" id="keluar_edit" name="keluar"
+                            class="w-full p-2 border rounded" value="{{ $dataservice->keluar ?? '' }}">
                     </div>
                     <div>
                         <label for="no_polisi_edit">No Polisi</label>
@@ -802,68 +837,85 @@
     </div>
 
     <script>
-        const uraianPekerjaans = @json($uraianPekerjaans);
-
         function tambahUraian() {
-            console.log("Tombol Tambah Uraian Diklik"); // Debugging
             const container = document.getElementById('uraian-container');
             const newUraian = document.createElement('div');
             newUraian.classList.add('uraian-row', 'grid', 'grid-cols-4', 'gap-4', 'mt-4');
             newUraian.innerHTML = `
-            <div>
-                <label for="uraian_pekerjaan_ids">Pilih Uraian Pekerjaan:</label>
-                <select name="uraian_pekerjaan_ids[]" class="w-full p-2 border rounded uraian-pekerjaan-select" onchange="fillUraianData(event)">
-                    <option value="">Pilih Uraian Pekerjaan</option>
-                    ${uraianPekerjaans.map(uraian => `
-                                                                                                                            <option value="${uraian.id}">${uraian.jenis_pekerjaan}</option>
-                                                                                                                        `).join('')}
-                </select>
-            </div>
-            <div>
-                <label for="jenis_mobil">Jenis Mobil</label>
-                <input type="text" name="jenis_mobil[]" class="w-full p-2 border rounded jenis-mobil-input" readonly>
-            </div>
-            <div>
-                <label for="waktu_pengerjaan">Waktu Pengerjaan (jam)</label>
-                <input type="number" name="waktu_pengerjaan[]" class="w-full p-2 border rounded waktu-pengerjaan-input" readonly>
-            </div>
-            <div>
-                <label for="ongkos_pengerjaan">Ongkos Pengerjaan</label>
-                <input type="text" name="ongkos_pengerjaan[]" class="w-full p-2 border rounded ongkos-pengerjaan-input" readonly>
-            </div>
-            <div class="flex items-end">
-                <button type="button" onclick="hapusUraian(this)" class="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-700">
-                    <i class="fas fa-trash"></i> Hapus
-                </button>
-            </div>
-        `;
-            container.appendChild(newUraian);
-        }
+       <div>
+    <label for="jenis_pekerjaan">Pilih Jenis Pekerjaan:</label>
+    <select name="jenis_pekerjaan[]" class="w-full p-2 border rounded jenis-pekerjaan-select" onchange="fillUraianData(event)">
+        <option value="">Pilih Jenis Pekerjaan</option>
+        @foreach ($uraianPekerjaans as $uraian)
+            <option value="{{ $uraian->jenis_pekerjaan }}" data-mobil="{{ $uraian->jenis_mobil }}" data-waktu="{{ $uraian->waktu_pengerjaan }}" data-ongkos="{{ $uraian->ongkos_pengerjaan }}">
+                {{ $uraian->jenis_pekerjaan }}
+            </option>
+        @endforeach
+    </select>
+</div>
+<div>
+    <label for="jenis_mobil">Jenis Mobil</label>
+    <input type="text" name="jenis_mobil[]" class="w-full p-2 border rounded jenis-mobil-input" readonly>
+</div>
+<div>
+    <label for="waktu_pengerjaan">Waktu Pengerjaan (jam)</label>
+    <input type="number" name="waktu_pengerjaan[]" class="w-full p-2 border rounded waktu-pengerjaan-input" readonly>
+</div>
+<div>
+    <label for="ongkos_pengerjaan">Ongkos Pengerjaan</label>
+    <input type="text" name="ongkos_pengerjaan[]" class="w-full p-2 border rounded ongkos-pengerjaan-input" readonly>
+</div>
+<div class="flex items-end">
+    <button type="button" onclick="hapusUraian(this)" class="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-700">
+        <i class="fas fa-trash"></i> Hapus
+    </button>
+</div>
 
-        function hapusUraian(button) {
-            const row = button.closest('.uraian-row');
-            if (row) {
-                row.remove();
-            }
+    `;
+
+            container.appendChild(newUraian);
+
+            // Tambahkan event listener untuk select jenis pekerjaan
+            const jenisPekerjaanSelect = newUraian.querySelector('.jenis-pekerjaan-select');
+            jenisPekerjaanSelect.addEventListener('change', fillUraianData);
         }
 
         function fillUraianData(event) {
-            const selectElement = event.target;
-            const row = selectElement.closest('.uraian-row');
-            const selectedId = selectElement.value;
+            // Get the selected option
+            const selectedOption = event.target.selectedOptions[0];
 
-            const selectedUraian = uraianPekerjaans.find(uraian => uraian.id == selectedId);
+            if (selectedOption.value) {
+                // Retrieve the associated data from the selected option
+                const jenisMobil = selectedOption.getAttribute('data-mobil');
+                const waktuPengerjaan = selectedOption.getAttribute('data-waktu');
+                const ongkosPengerjaan = selectedOption.getAttribute('data-ongkos');
 
-            if (selectedUraian) {
-                row.querySelector('.jenis-mobil-input').value = selectedUraian.jenis_mobil;
-                row.querySelector('.waktu-pengerjaan-input').value = selectedUraian.waktu_pengerjaan;
-                row.querySelector('.ongkos-pengerjaan-input').value = selectedUraian.ongkos_pengerjaan;
+                // Populate the other fields
+                const mobilInput = event.target.closest('div').nextElementSibling.querySelector('input');
+                const waktuInput = mobilInput.closest('div').nextElementSibling.querySelector('input');
+                const ongkosInput = waktuInput.closest('div').nextElementSibling.querySelector('input');
+
+                mobilInput.value = jenisMobil;
+                waktuInput.value = waktuPengerjaan;
+                ongkosInput.value = ongkosPengerjaan;
             } else {
-                row.querySelector('.jenis-mobil-input').value = '';
-                row.querySelector('.waktu-pengerjaan-input').value = '';
-                row.querySelector('.ongkos-pengerjaan-input').value = '';
+                // Clear the fields if no job is selected
+                const mobilInput = event.target.closest('div').nextElementSibling.querySelector('input');
+                const waktuInput = mobilInput.closest('div').nextElementSibling.querySelector('input');
+                const ongkosInput = waktuInput.closest('div').nextElementSibling.querySelector('input');
+
+                mobilInput.value = '';
+                waktuInput.value = '';
+                ongkosInput.value = '';
             }
         }
+
+        function hapusUraian(button) {
+            // Find the parent div and remove it from the DOM
+            const parentDiv = button.closest('div').parentElement;
+            parentDiv.remove();
+        }
+
 
         function formatKilometer(input) {
             let value = input.value.replace(/[^0-9.]/g, ''); // Hapus semua karakter selain angka dan titik
@@ -1317,46 +1369,46 @@
                 newRow.classList.add('part-keluar-row', 'grid', 'grid-cols-5', 'gap-4', 'mt-4');
 
                 newRow.innerHTML = `
-                <div>
-                    <label for="kode_barang_edit">Kode Barang</label>
-                    <select name="kode_barang[]" class="w-full p-2 border rounded kode-barang-select">
-                        <option value="">Pilih Kode Barang</option>
-                        ${spareparts.map(sparepart => `
-                                                                                                                                                                                                                                                                                                                                                                                                                                    <option value="${sparepart.kode_barang}" ${part.kode_barang == sparepart.kode_barang ? 'selected' : ''}>
-                                                                                                                                                                                                                                                                                                                                                                                                                                        ${sparepart.kode_barang}
-                                                                                                                                                                                                                                                                                                                                                                                                                                    </option>
-                                                                                                                                                                                                                                                                                                                                                                                                                                `).join('')}
-                    </select>
-                </div>
-                <div>
-                    <label for="nama_part_edit">Nama Part</label>
-                    <input type="text" name="nama_part[]" class="w-full p-2 border rounded nama-part-input" value="${part.nama_part}" readonly>
-                </div>
-                <div>
-                    <label for="stn_edit">STN</label>
-                    <input type="text" name="stn[]" class="w-full p-2 border rounded stn-input" value="${part.stn}" readonly>
-                </div>
-                <div>
-                    <label for="merk_edit">Merk</label>
-                    <input type="text" name="merk[]" class="w-full p-2 border rounded merk-input" value="${part.merk}" readonly>
-                </div>
-                <div>
-                    <label for="jumlah_edit">Jumlah</label>
-                    <input type="number" name="jumlah[]" class="w-full p-2 border rounded jumlah-input" value="${part.jumlah}">
-                </div>
-                <div>
-                    <label for="tanggal_keluar_edit">Tanggal Keluar</label>
-                    <input type="date" name="tanggal_keluar[]" class="w-full p-2 border rounded" value="${part.tanggal_keluar || ''}">
-                </div>
-                <div>
-                    <label for="uraian_jasa_perbaikan_edit">Uraian Jasa Perbaikan</label>
-                    <textarea name="uraian_jasa_perbaikan[]" class="w-full p-2 border rounded">${part.uraian_jasa_perbaikan}</textarea>
-                </div>
-               <div>
-    <label for="harga_jasa_perbaikan_edit">Harga Jasa Perbaikan</label>
-    <input type="text" name="harga_jasa_perbaikan[]" class="w-full p-2 border rounded harga-jasa-input" value="${part.harga_jasa_perbaikan ? new Intl.NumberFormat('id-ID').format(part.harga_jasa_perbaikan) : ''}">
-</div>
-            `;
+            <div>
+                <label for="kode_barang_edit">Kode Barang</label>
+                <select name="kode_barang[]" class="w-full p-2 border rounded kode-barang-select">
+                    <option value="">Pilih Kode Barang</option>
+                    ${spareparts.map(sparepart => `
+                                <option value="${sparepart.kode_barang}" ${part.kode_barang == sparepart.kode_barang ? 'selected' : ''}>
+                                    ${sparepart.kode_barang}
+                                </option>
+                            `).join('')}
+                </select>
+            </div>
+            <div>
+                <label for="nama_part_edit">Nama Part</label>
+                <input type="text" name="nama_part[]" class="w-full p-2 border rounded nama-part-input" value="${part.nama_part}" readonly>
+            </div>
+            <div>
+                <label for="stn_edit">STN</label>
+                <input type="text" name="stn[]" class="w-full p-2 border rounded stn-input" value="${part.stn}" readonly>
+            </div>
+            <div>
+                <label for="merk_edit">Merk</label>
+                <input type="text" name="merk[]" class="w-full p-2 border rounded merk-input" value="${part.merk}" readonly>
+            </div>
+            <div>
+                <label for="jumlah_edit">Jumlah</label>
+                <input type="number" name="jumlah[]" class="w-full p-2 border rounded jumlah-input" value="${part.jumlah}">
+            </div>
+            <div>
+                <label for="tanggal_keluar_edit">Tanggal Keluar</label>
+                <input type="date" name="tanggal_keluar[]" class="w-full p-2 border rounded" value="${part.tanggal_keluar || ''}">
+            </div>
+            <div>
+                <label for="uraian_jasa_perbaikan_edit">Uraian Jasa Perbaikan</label>
+                <textarea name="uraian_jasa_perbaikan[]" class="w-full p-2 border rounded">${part.uraian_jasa_perbaikan}</textarea>
+            </div>
+            <div>
+                <label for="harga_jasa_perbaikan_edit">Harga Jasa Perbaikan</label>
+                <input type="text" name="harga_jasa_perbaikan[]" class="w-full p-2 border rounded harga-jasa-input" value="${part.harga_jasa_perbaikan ? new Intl.NumberFormat('id-ID').format(part.harga_jasa_perbaikan) : ''}">
+            </div>
+        `;
 
                 partKeluarContainer.appendChild(newRow);
 

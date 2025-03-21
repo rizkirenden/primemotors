@@ -24,13 +24,16 @@ class Dataservice extends Model
         'warna',
         'no_rangka',
         'no_mesin',
+        'jenis_pekerjaan',
+        'jenis_mobil',
+        'waktu_pengerjaan',
+        'ongkos_pengerjaan',
         'kilometer',
         'keluhan_costumer',
         'kode_barang',
         'nama_part',
         'tanggal_keluar',
         'jumlah',
-        'uraian_pekerjaan',
         'uraian_jasa_perbaikan',
         'status',
     ];
@@ -43,9 +46,8 @@ public function datasparepat()
 {
     return $this->belongsTo(Datasparepat::class, 'kode_barang', 'kode_barang');
 }
-public function uraianPekerjaan()
+public function uraianpekerjan()
 {
-    return $this->belongsToMany(UraianPekerjaan::class);
+    return $this->belongsTo(UraianPekerjaan::class, 'jenis_pekerjaan', 'jenis_pekerjaan');
 }
-
 }

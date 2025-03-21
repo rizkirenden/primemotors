@@ -27,10 +27,6 @@ class DataserviceController extends Controller
         // Ambil semua data uraian pekerjaan
         $uraianPekerjaans = UraianPekerjaan::all();
 
-        foreach ($dataservices as $dataservice) {
-            $dataservice->uraian_pekerjaan = $dataservice->uraian_pekerjaan_ids ? UraianPekerjaan::whereIn('id', json_decode($dataservice->uraian_pekerjaan_ids))->get() : [];
-        }
-
 
         return view('dataservice', compact('dataservices', 'mekaniks', 'spareparts', 'uraianPekerjaans'));
     }
@@ -38,12 +34,13 @@ class DataserviceController extends Controller
     // Menyimpan data service baru
     public function store(Request $request)
     {
+        // Validasi data
         $request->validate([
             'no_spk' => 'required|unique:dataservices,no_spk',
             'costumer' => 'required',
             'contact_person' => 'required',
-            'masuk' => 'required|date',
-            'keluar' => 'nullable|date',
+       'masuk' => 'required|date_format:Y-m-d\TH:i',
+    'keluar' => 'nullable|date_format:Y-m-d\TH:i',
             'no_polisi' => 'required',
             'tahun' => 'required|integer',
             'tipe_mobile' => 'required',
@@ -53,66 +50,89 @@ class DataserviceController extends Controller
             'kilometer' => 'required|regex:/^\d+(\.\d{1,2})?\s*KM$/i',
             'keluhan_costumer' => 'required',
             'status' => 'required',
-            'uraian_pekerjaan_ids' => 'nullable|array', // ID uraian pekerjaan yang dipilih
-            'uraian_pekerjaan_ids.*' => 'exists:uraian_pekerjaans,id', // Pastikan ID ada di tabel uraian_pekerjaans
+            'jenis_pekerjaan' => 'nullable|array',
+            'jenis_pekerjaan.*' => 'nullable|string',
+            'jenis_mobil' => 'nullable|array',
+            'jenis_mobil.*' => 'nullable|string',
+            'waktu_pengerjaan' => 'nullable|array',
+            'waktu_pengerjaan.*' => 'nullable|integer',
+            'ongkos_pengerjaan' => 'nullable|array',
+            'ongkos_pengerjaan.*' => 'nullable|numeric',
         ]);
 
-        // Clean the kilometer input
-        $kilometer = str_replace(' KM', '', $request->kilometer);
-        $kilometer = (float) $kilometer;
+        // Bersihkan input kilometer dengan menghapus "KM"
+        $kilometer = str_replace(' KM', '', $request->kilometer); // Hapus "KM"
+        $kilometer = (float) $kilometer; // Konversi ke float
 
-        // Create the dataservice
-        $dataservice = Dataservice::create(array_merge($request->except('kilometer', 'uraian_pekerjaan_ids'), [
-            'kilometer' => $kilometer,
-            // Menyimpan ID uraian pekerjaan yang dipilih
-            'uraian_pekerjaan_ids' => $request->uraian_pekerjaan_ids ? json_encode($request->uraian_pekerjaan_ids) : null,
-        ]));
+        // Simpan data ke dalam tabel dataservices
+        $dataService = new DataService();
+        $dataService->no_spk = $request->no_spk;
+        $dataService->costumer = $request->costumer;
+        $dataService->contact_person = $request->contact_person;
+        $dataService->masuk = $request->masuk; // Pastikan format sudah benar
+        $dataService->keluar = $request->keluar;
+        $dataService->no_polisi = $request->no_polisi;
+        $dataService->tahun = $request->tahun;
+        $dataService->tipe_mobile = $request->tipe_mobile;
+        $dataService->warna = $request->warna;
+        $dataService->no_rangka = $request->no_rangka;
+        $dataService->no_mesin = $request->no_mesin;
+        $dataService->kilometer = $kilometer;
+        $dataService->keluhan_costumer = $request->keluhan_costumer;
+        $dataService->status = $request->status;
+
+        // Jika jenis_pekerjaan adalah array, Anda mungkin perlu menyimpannya dengan relasi atau format JSON
+        $dataService->jenis_pekerjaan = json_encode($request->jenis_pekerjaan);
+        $dataService->jenis_mobil = json_encode($request->jenis_mobil);
+        $dataService->waktu_pengerjaan = json_encode($request->waktu_pengerjaan);
+        $dataService->ongkos_pengerjaan = json_encode($request->ongkos_pengerjaan);
+
+        $dataService->save(); // Menyimpan data ke database
 
         return redirect()->route('dataservice')->with('success', 'Data service berhasil disimpan!');
     }
+
     // Mengupdate data service
     public function update(Request $request, $id)
 {
     $request->validate([
-        'no_spk' => 'required|unique:dataservices,no_spk,' . $id,
-        'costumer' => 'required',
-        'contact_person' => 'required',
-        'masuk' => 'required|date|date_format:Y-m-d H:i:s',
-        'keluar' => 'nullable|date|date_format:Y-m-d H:i:s',
-        'no_polisi' => 'required',
-        'nama_mekanik' => 'required',
-        'tahun' => 'required|integer',
-        'tipe_mobile' => 'required',
-        'warna' => 'required',
-        'no_rangka' => 'required',
-        'no_mesin' => 'required',
-        'kilometer' => 'required|numeric',
-        'keluhan_costumer' => 'required',
-        'kode_barang' => 'nullable|array',
-        'kode_barang.*' => 'exists:datasparepats,kode_barang',
-        'nama_part' => 'nullable|array',
-        'nama_part.*' => 'nullable|string',
-        'stn' => 'nullable|array',
-        'stn.*' => 'nullable|string',
-        'merk' => 'nullable|array',
-        'merk.*' => 'nullable|string',
-        'jumlah' => 'nullable|array',
-        'jumlah.*' => 'integer|min:0',
-        'tanggal_keluar' => 'nullable|array',
-        'tanggal_keluar.*' => 'date',
-        'uraian_jasa_perbaikan' => 'nullable|array',
-        'uraian_jasa_perbaikan.*' => 'nullable|string',
-        'harga_jasa_perbaikan' => 'nullable|array',
-        'harga_jasa_perbaikan.*' => 'nullable|numeric|min:0',
-        'status' => 'required',
-    ]);
-
+    'no_spk' => 'required|unique:dataservices,no_spk,' . $id,
+    'costumer' => 'required',
+    'contact_person' => 'required',
+    'masuk' => 'required|date_format:Y-m-d\TH:i',
+    'keluar' => 'nullable|date_format:Y-m-d\TH:i',
+    'no_polisi' => 'required',
+    'nama_mekanik' => 'required',
+    'tahun' => 'required|integer',
+    'tipe_mobile' => 'required',
+    'warna' => 'required',
+    'no_rangka' => 'required',
+    'no_mesin' => 'required',
+    'kilometer' => 'required|regex:/^\d+(\.\d{1,2})?\s*KM$/i',
+    'keluhan_costumer' => 'required',
+    'kode_barang' => 'nullable|array',
+    'kode_barang.*' => 'exists:datasparepats,kode_barang',
+    'nama_part' => 'nullable|array',
+    'nama_part.*' => 'nullable|string',
+    'stn' => 'nullable|array',
+    'stn.*' => 'nullable|string',
+    'merk' => 'nullable|array',
+    'merk.*' => 'nullable|string',
+    'jumlah' => 'nullable|array',
+    'jumlah.*' => 'integer|min:0',
+    'tanggal_keluar' => 'nullable|array',
+    'tanggal_keluar.*' => 'date',
+    'uraian_jasa_perbaikan' => 'nullable|array',
+    'uraian_jasa_perbaikan.*' => 'nullable|string',
+    'harga_jasa_perbaikan' => 'nullable|array',
+    'harga_jasa_perbaikan.*' => 'nullable|numeric|min:0',
+    'status' => 'required',
+]);
     // Ambil data service yang akan diupdate
+    dd($request->all()); // Debug data yang dikirim dari form
     $dataservice = Dataservice::findOrFail($id);
-
-    // Update data service
-    $dataservice->update($request->except(['kode_barang', 'nama_part', 'stn', 'merk', 'jumlah', 'tanggal_keluar', 'uraian_jasa_perbaikan','harga_jasa_perbaikan']));
-
+    dd($dataservice); // Debug data yang akan diupdate
+$dataservice->update($request->except(['kode_barang', 'nama_part', 'stn', 'merk', 'jumlah', 'tanggal_keluar', 'uraian_jasa_perbaikan', 'harga_jasa_perbaikan']));
     // Initialize arrays if they are null
     $kode_barang = $request->kode_barang ?? [];
     $nama_part = $request->nama_part ?? [];
@@ -130,19 +150,16 @@ class DataserviceController extends Controller
             $jumlah_item = $jumlah[$index] ?? 0;
             $uraian_jasa_perbaikan_item = $uraian_jasa_perbaikan[$index] ?? null;
 
-            // Skip if kode_barang is empty or jumlah <= 0
             if (!$kode_barang_item || $jumlah_item <= 0) {
                 continue;
             }
 
-            // Fetch spare part data
             $sparepart = Datasparepat::where('kode_barang', $kode_barang_item)->first();
 
             if (!$sparepart) {
                 return redirect()->back()->with('error', 'Barang tidak ditemukan!');
             }
 
-            // Validasi jika stok 0 atau jumlah yang diminta melebihi stok yang tersedia
             if ($sparepart->jumlah == 0) {
                 return redirect()->back()->with('error', 'Stok barang sudah habis!');
             }
@@ -151,7 +168,6 @@ class DataserviceController extends Controller
                 return redirect()->back()->with('error', 'Stok tidak mencukupi!');
             }
 
-            // Cek jika Partkeluar dengan kode_barang dan tanggal_keluar yang sama sudah ada
             $existingPart = Partkeluar::where('kode_barang', $kode_barang_item)
                 ->where('tanggal_keluar', $tanggal_keluar_item)
                 ->where('dataservice_id', '!=', $id)
@@ -161,14 +177,12 @@ class DataserviceController extends Controller
                 return redirect()->back()->with('error', 'Part dengan kode barang dan tanggal keluar yang sama sudah ada!');
             }
 
-            // Cek jika Partkeluar dengan kode_barang dan tanggal_keluar yang sama sudah ada
             $partKeluar = Partkeluar::where('dataservice_id', $id)
                 ->where('kode_barang', $kode_barang_item)
                 ->where('tanggal_keluar', $tanggal_keluar_item)
                 ->first();
 
             if ($partKeluar) {
-                // Update data partKeluar
                 $partKeluar->update([
                     'dataservice_id' => $id,
                     'kode_barang' => $kode_barang_item,
@@ -182,7 +196,6 @@ class DataserviceController extends Controller
                     'harga_jasa_perbaikan' => $harga_jasa_perbaikan[$index] ?? null,
                 ]);
             } else {
-                // Jika Partkeluar tidak ada, buat data partKeluar baru
                 Partkeluar::create([
                     'dataservice_id' => $id,
                     'kode_barang' => $kode_barang_item,
@@ -197,7 +210,6 @@ class DataserviceController extends Controller
                 ]);
             }
 
-            // Kurangi stok spare part
             $sparepart->jumlah -= $jumlah_item;
             $sparepart->save();
         }

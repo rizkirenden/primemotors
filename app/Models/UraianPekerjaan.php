@@ -16,8 +16,4 @@ class UraianPekerjaan extends Model
         'waktu_pengerjaan',
         'ongkos_pengerjaan',
     ];
-    public function dataservices()
-    {
-        return $this->belongsToMany(Dataservice::class);
-    }
 }

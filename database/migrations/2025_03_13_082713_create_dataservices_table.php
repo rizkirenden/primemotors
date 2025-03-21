@@ -25,6 +25,10 @@
                 $table->string('warna');
                 $table->string('no_rangka');
                 $table->string('no_mesin');
+                $table->json('jenis_pekerjaan')->nullable();
+                $table->json('jenis_mobil')->nullable();
+                $table->json('waktu_pengerjaan')->nullable();
+                $table->json('ongkos_pengerjaan')->nullable();
                 $table->decimal('kilometer', 15, 2);
                 $table->text('keluhan_costumer');
                 $table->string('kode_barang')->nullable();
@@ -34,7 +38,6 @@
                 $table->string('merk')->nullable();
                 $table->date('tanggal_keluar')->nullable();
                 $table->integer('jumlah')->nullable();
-                $table->text('uraian_pekerjaan')->nullable();
                 $table->text('uraian_jasa_perbaikan')->nullable();
                 $table->enum('status', ['menunggu', 'pulang'])->default('menunggu');
                 $table->timestamps();
