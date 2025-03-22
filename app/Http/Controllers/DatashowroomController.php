@@ -77,7 +77,7 @@ class DatashowroomController extends Controller
         $request->validate([
             'nomor_polisi' => 'required|string|max:10',
             'merk_model' => 'required|string|max:255',
-            'tahun_pembuatan' => 'required|date',
+            'tahun_pembuatan' => 'required|integer',
             'nomor_rangka' => 'required|string|max:20',
             'nomor_mesin' => 'required|string|max:20',
             'bahan_bakar' => 'required|string|max:20',
@@ -91,7 +91,7 @@ class DatashowroomController extends Controller
             'kilometer' => 'required|integer',
             'fitur_keamanan' => 'required|string',
             'riwayat_servis' => 'required|string',
-            'status' => 'required|in:tersedia,terjual',
+            'status' => 'required|in:terjual,tersedia',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validasi upload foto
         ]);
 
@@ -134,6 +134,7 @@ class DatashowroomController extends Controller
         // Redirect ke halaman showroom
         return redirect()->route('datashowroom');
     }
+
     public function printPDF(Request $request)
     {
         // Ambil parameter pencarian dan tanggal dari request
@@ -174,7 +175,6 @@ class DatashowroomController extends Controller
                 $showroom->foto = public_path('images/default-image.jpg'); // Default image
             }
         }
-
 
         // Load view ke PDF
         $pdf = Pdf::loadView('printpdfshowroom', compact('showrooms'));
