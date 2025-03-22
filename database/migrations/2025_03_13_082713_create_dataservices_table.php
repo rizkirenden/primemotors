@@ -39,6 +39,7 @@
                 $table->date('tanggal_keluar')->nullable();
                 $table->integer('jumlah')->nullable();
                 $table->text('uraian_jasa_perbaikan')->nullable();
+                $table->decimal('harga_jasa_perbaikan', 10, 2)->nullable();
                 $table->enum('status', ['menunggu', 'pulang'])->default('menunggu');
                 $table->timestamps();
             });

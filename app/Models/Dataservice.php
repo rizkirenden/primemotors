@@ -32,9 +32,13 @@ class Dataservice extends Model
         'keluhan_costumer',
         'kode_barang',
         'nama_part',
+        'stn',
+        'tipe',
+        'merk',
         'tanggal_keluar',
         'jumlah',
         'uraian_jasa_perbaikan',
+        'harga_jasa_perbaikan',
         'status',
     ];
 

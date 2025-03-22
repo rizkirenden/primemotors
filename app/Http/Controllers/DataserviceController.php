@@ -39,8 +39,8 @@ class DataserviceController extends Controller
             'no_spk' => 'required|unique:dataservices,no_spk',
             'costumer' => 'required',
             'contact_person' => 'required',
-       'masuk' => 'required|date_format:Y-m-d\TH:i',
-    'keluar' => 'nullable|date_format:Y-m-d\TH:i',
+            'masuk' => 'required|date_format:Y-m-d\TH:i',
+            'keluar' => 'nullable|date_format:Y-m-d\TH:i',
             'no_polisi' => 'required',
             'tahun' => 'required|integer',
             'tipe_mobile' => 'required',
@@ -94,129 +94,152 @@ class DataserviceController extends Controller
 
     // Mengupdate data service
     public function update(Request $request, $id)
-{
-    $request->validate([
-    'no_spk' => 'required|unique:dataservices,no_spk,' . $id,
-    'costumer' => 'required',
-    'contact_person' => 'required',
-    'masuk' => 'required|date_format:Y-m-d\TH:i',
-    'keluar' => 'nullable|date_format:Y-m-d\TH:i',
-    'no_polisi' => 'required',
-    'nama_mekanik' => 'required',
-    'tahun' => 'required|integer',
-    'tipe_mobile' => 'required',
-    'warna' => 'required',
-    'no_rangka' => 'required',
-    'no_mesin' => 'required',
-    'kilometer' => 'required|regex:/^\d+(\.\d{1,2})?\s*KM$/i',
-    'keluhan_costumer' => 'required',
-    'kode_barang' => 'nullable|array',
-    'kode_barang.*' => 'exists:datasparepats,kode_barang',
-    'nama_part' => 'nullable|array',
-    'nama_part.*' => 'nullable|string',
-    'stn' => 'nullable|array',
-    'stn.*' => 'nullable|string',
-    'merk' => 'nullable|array',
-    'merk.*' => 'nullable|string',
-    'jumlah' => 'nullable|array',
-    'jumlah.*' => 'integer|min:0',
-    'tanggal_keluar' => 'nullable|array',
-    'tanggal_keluar.*' => 'date',
-    'uraian_jasa_perbaikan' => 'nullable|array',
-    'uraian_jasa_perbaikan.*' => 'nullable|string',
-    'harga_jasa_perbaikan' => 'nullable|array',
-    'harga_jasa_perbaikan.*' => 'nullable|numeric|min:0',
-    'status' => 'required',
-]);
-    // Ambil data service yang akan diupdate
-    dd($request->all()); // Debug data yang dikirim dari form
-    $dataservice = Dataservice::findOrFail($id);
-    dd($dataservice); // Debug data yang akan diupdate
-$dataservice->update($request->except(['kode_barang', 'nama_part', 'stn', 'merk', 'jumlah', 'tanggal_keluar', 'uraian_jasa_perbaikan', 'harga_jasa_perbaikan']));
-    // Initialize arrays if they are null
-    $kode_barang = $request->kode_barang ?? [];
-    $nama_part = $request->nama_part ?? [];
-    $stn = $request->stn ?? [];
-    $merk = $request->merk ?? [];
-    $jumlah = $request->jumlah ?? [];
-    $tanggal_keluar = $request->tanggal_keluar ?? [];
-    $uraian_jasa_perbaikan = $request->uraian_jasa_perbaikan ?? [];
-    $harga_jasa_perbaikan = $request->harga_jasa_perbaikan ?? [];
-
-    // Jika ada input kode_barang, simpan data ke Partkeluar
-    if (!empty($kode_barang)) {
-        foreach ($kode_barang as $index => $kode_barang_item) {
-            $tanggal_keluar_item = $tanggal_keluar[$index] ?? null;
-            $jumlah_item = $jumlah[$index] ?? 0;
-            $uraian_jasa_perbaikan_item = $uraian_jasa_perbaikan[$index] ?? null;
-
-            if (!$kode_barang_item || $jumlah_item <= 0) {
-                continue;
+    {
+        // Bersihkan nilai harga_jasa_perbaikan dari karakter non-digit
+        if ($request->has('harga_jasa_perbaikan')) {
+            $harga_jasa_perbaikan = $request->harga_jasa_perbaikan;
+            foreach ($harga_jasa_perbaikan as &$harga) {
+                $harga = preg_replace('/[^0-9]/', '', $harga); // Remove non-digit characters
             }
-
-            $sparepart = Datasparepat::where('kode_barang', $kode_barang_item)->first();
-
-            if (!$sparepart) {
-                return redirect()->back()->with('error', 'Barang tidak ditemukan!');
-            }
-
-            if ($sparepart->jumlah == 0) {
-                return redirect()->back()->with('error', 'Stok barang sudah habis!');
-            }
-
-            if ($sparepart->jumlah < $jumlah_item) {
-                return redirect()->back()->with('error', 'Stok tidak mencukupi!');
-            }
-
-            $existingPart = Partkeluar::where('kode_barang', $kode_barang_item)
-                ->where('tanggal_keluar', $tanggal_keluar_item)
-                ->where('dataservice_id', '!=', $id)
-                ->first();
-
-            if ($existingPart) {
-                return redirect()->back()->with('error', 'Part dengan kode barang dan tanggal keluar yang sama sudah ada!');
-            }
-
-            $partKeluar = Partkeluar::where('dataservice_id', $id)
-                ->where('kode_barang', $kode_barang_item)
-                ->where('tanggal_keluar', $tanggal_keluar_item)
-                ->first();
-
-            if ($partKeluar) {
-                $partKeluar->update([
-                    'dataservice_id' => $id,
-                    'kode_barang' => $kode_barang_item,
-                    'nama_part' => $nama_part[$index] ?? null,
-                    'stn' => $sparepart->stn,
-                    'merk' => $sparepart->merk,
-                    'tipe' => $sparepart->tipe,
-                    'tanggal_keluar' => $tanggal_keluar_item,
-                    'jumlah' => $jumlah_item,
-                    'uraian_jasa_perbaikan' => $uraian_jasa_perbaikan_item,
-                    'harga_jasa_perbaikan' => $harga_jasa_perbaikan[$index] ?? null,
-                ]);
-            } else {
-                Partkeluar::create([
-                    'dataservice_id' => $id,
-                    'kode_barang' => $kode_barang_item,
-                    'nama_part' => $nama_part[$index] ?? null,
-                    'stn' => $sparepart->stn,
-                    'merk' => $sparepart->merk,
-                    'tipe' => $sparepart->tipe,
-                    'jumlah' => $jumlah_item,
-                    'tanggal_keluar' => $tanggal_keluar_item,
-                    'uraian_jasa_perbaikan' => $uraian_jasa_perbaikan_item,
-                    'harga_jasa_perbaikan' => $harga_jasa_perbaikan[$index] ?? null,
-                ]);
-            }
-
-            $sparepart->jumlah -= $jumlah_item;
-            $sparepart->save();
+            $request->merge(['harga_jasa_perbaikan' => $harga_jasa_perbaikan]);
         }
-    }
 
-    return redirect()->route('dataservice')->with('success', 'Data service berhasil diupdate!');
-}
+        // Bersihkan nilai kilometer (hilangkan karakter non-digit selain titik desimal)
+        if ($request->has('kilometer')) {
+            // Remove non-numeric characters (except the dot for decimal numbers)
+            $kilometer = preg_replace('/[^0-9.]/', '', $request->kilometer);
+            $request->merge(['kilometer' => $kilometer]);
+        }
+
+        // Validasi data
+        $request->validate([
+            'no_spk' => 'required|unique:dataservices,no_spk,' . $id,
+            'costumer' => 'required',
+            'contact_person' => 'required',
+            'masuk' => 'required|date_format:Y-m-d\TH:i',
+            'keluar' => 'nullable|date_format:Y-m-d\TH:i',
+            'no_polisi' => 'required',
+            'nama_mekanik' => 'required',
+            'tahun' => 'required|integer',
+            'tipe_mobile' => 'required',
+            'warna' => 'required',
+            'no_rangka' => 'required',
+            'no_mesin' => 'required',
+            'kilometer' => 'required|regex:/^\d+(\.\d{1,2})?$/i', // Only numbers and up to 2 decimal points
+            'keluhan_costumer' => 'required',
+            'kode_barang' => 'nullable|array',
+            'kode_barang.*' => 'exists:datasparepats,kode_barang',
+            'nama_part' => 'nullable|array',
+            'nama_part.*' => 'nullable|string',
+            'stn' => 'nullable|array',
+            'stn.*' => 'nullable|string',
+            'tipe' => 'nullable|array',
+            'tipe.*' => 'nullable|string',
+            'merk' => 'nullable|array',
+            'merk.*' => 'nullable|string',
+            'jumlah' => 'nullable|array',
+            'jumlah.*' => 'integer|min:0',
+            'tanggal_keluar' => 'nullable|array',
+            'tanggal_keluar.*' => 'date',
+            'uraian_jasa_perbaikan' => 'nullable|array',
+            'uraian_jasa_perbaikan.*' => 'nullable|string',
+            'harga_jasa_perbaikan' => 'nullable|array',
+            'harga_jasa_perbaikan.*' => 'nullable|numeric',
+            'status' => 'required',
+        ]);
+
+        // Ambil data service yang akan diupdate
+        $dataservice = Dataservice::findOrFail($id);
+
+        // Update data service
+        $dataservice->update($request->except(['kode_barang', 'nama_part', 'stn','tipe', 'merk', 'jumlah', 'tanggal_keluar', 'uraian_jasa_perbaikan', 'harga_jasa_perbaikan']));
+
+        // Proses part keluar
+        $kode_barang = $request->kode_barang ?? [];
+        $nama_part = $request->nama_part ?? [];
+        $stn = $request->stn ?? [];
+        $merk = $request->merk ?? [];
+        $tipe = $request->tipe ?? [];
+        $jumlah = $request->jumlah ?? [];
+        $tanggal_keluar = $request->tanggal_keluar ?? [];
+        $uraian_jasa_perbaikan = $request->uraian_jasa_perbaikan ?? [];
+        $harga_jasa_perbaikan = $request->harga_jasa_perbaikan ?? [];
+
+        // Jika ada input kode_barang, simpan data ke Partkeluar
+        if (!empty($kode_barang)) {
+            foreach ($kode_barang as $index => $kode_barang_item) {
+                $tanggal_keluar_item = $tanggal_keluar[$index] ?? null;
+                $jumlah_item = $jumlah[$index] ?? 0;
+                $uraian_jasa_perbaikan_item = $uraian_jasa_perbaikan[$index] ?? null;
+                $harga_jasa_perbaikan_item = $harga_jasa_perbaikan[$index] ?? null;
+
+                if (!$kode_barang_item || $jumlah_item <= 0) {
+                    continue;
+                }
+
+                $sparepart = Datasparepat::where('kode_barang', $kode_barang_item)->first();
+
+                if (!$sparepart) {
+                    return redirect()->back()->with('error', 'Barang tidak ditemukan!');
+                }
+
+                if ($sparepart->jumlah == 0) {
+                    return redirect()->back()->with('error', 'Stok barang sudah habis!');
+                }
+
+                if ($sparepart->jumlah < $jumlah_item) {
+                    return redirect()->back()->with('error', 'Stok tidak mencukupi!');
+                }
+
+                $existingPart = Partkeluar::where('kode_barang', $kode_barang_item)
+                    ->where('tanggal_keluar', $tanggal_keluar_item)
+                    ->where('dataservice_id', '!=', $id)
+                    ->first();
+
+                if ($existingPart) {
+                    return redirect()->back()->with('error', 'Part dengan kode barang dan tanggal keluar yang sama sudah ada!');
+                }
+
+                $partKeluar = Partkeluar::where('dataservice_id', $id)
+                    ->where('kode_barang', $kode_barang_item)
+                    ->where('tanggal_keluar', $tanggal_keluar_item)
+                    ->first();
+
+                if ($partKeluar) {
+                    $partKeluar->update([
+                        'dataservice_id' => $id,
+                        'kode_barang' => $kode_barang_item,
+                        'nama_part' => $nama_part[$index] ?? null,
+                        'stn' => $sparepart->stn,
+                        'merk' => $sparepart->merk,
+                        'tipe' => $sparepart->tipe,
+                        'tanggal_keluar' => $tanggal_keluar_item,
+                        'jumlah' => $jumlah_item,
+                        'uraian_jasa_perbaikan' => $uraian_jasa_perbaikan_item,
+                        'harga_jasa_perbaikan' => $harga_jasa_perbaikan_item,
+                    ]);
+                } else {
+                    Partkeluar::create([
+                        'dataservice_id' => $id,
+                        'kode_barang' => $kode_barang_item,
+                        'nama_part' => $nama_part[$index] ?? null,
+                        'stn' => $sparepart->stn,
+                        'merk' => $sparepart->merk,
+                        'tipe' => $sparepart->tipe,
+                        'jumlah' => $jumlah_item,
+                        'tanggal_keluar' => $tanggal_keluar_item,
+                        'uraian_jasa_perbaikan' => $uraian_jasa_perbaikan_item,
+                        'harga_jasa_perbaikan' => $harga_jasa_perbaikan_item,
+                    ]);
+                }
+
+                $sparepart->jumlah -= $jumlah_item;
+                $sparepart->save();
+            }
+        }
+
+        return redirect()->route('dataservice')->with('success', 'Data service berhasil diupdate!');
+    }
 
     // Menghapus data service
     public function destroy($id)

@@ -733,9 +733,10 @@
                     </div>
                     <div>
                         <label for="kilometer_edit">Kilometer</label>
-                        <input type="number" id="kilometer_edit" name="kilometer" class="w-full p-2 border rounded"
-                            value="{{ $dataservice->kilometer ?? '' }}" required>
+                        <input type="text" id="kilometer_edit" name="kilometer" class="w-full p-2 border rounded"
+                            value="{{ $dataservice->kilometer ?? '' }}" oninput="formatKilometer(this)" required>
                     </div>
+
                     <div>
                         <label for="keluhan_costumer_edit">Keluhan Costumer</label>
                         <textarea id="keluhan_costumer_edit" name="keluhan_costumer" class="w-full p-2 border rounded" required>{{ $dataservice->keluhan_costumer ?? '' }}</textarea>
@@ -746,8 +747,8 @@
                             <option value="menunggu"
                                 {{ ($dataservice->status ?? '') == 'menunggu' ? 'selected' : '' }}>
                                 Menunggu</option>
-                            <option value="sedang pengerjaan"
-                                {{ ($dataservice->status ?? '') == 'pulang' ? 'selected' : '' }}>pulang
+                            <option value="pulang" {{ ($dataservice->status ?? '') == 'pulang' ? 'selected' : '' }}>
+                                pulang
                             </option>
                         </select>
                     </div>
@@ -808,9 +809,11 @@
                                     </div>
                                     <div>
                                         <label for="harga_jasa_perbaikan_edit">Harga Jasa Perbaikan</label>
-                                        <input type="text" name="harga_jasa_perbaikan[]"
+                                        <input type="text" id="harga_jasa_perbaikan_edit"
+                                            name="harga_jasa_perbaikan[]"
                                             class="w-full p-2 border rounded harga-jasa-input"
                                             value="{{ $part->harga_jasa_perbaikan ? number_format($part->harga_jasa_perbaikan, 0, ',', '.') : '' }}">
+
                                     </div>
                                 </div>
                             @endforeach
@@ -916,6 +919,30 @@
             parentDiv.remove();
         }
 
+        function formatKilometer(input) {
+            // Remove non-numeric characters, except decimal point
+            let value = input.value.replace(/[^0-9.]/g, '');
+
+            // Ensure only one decimal point
+            if ((value.match(/\./g) || []).length > 1) {
+                value = value.replace(/\.+$/, ''); // Remove extra dots
+            }
+
+            // Convert to a float and ensure two decimal places
+            let number = parseFloat(value);
+
+            // If number is NaN, set it to 0
+            if (isNaN(number)) {
+                number = 0;
+            }
+
+            // Format number to 2 decimal places and append 'KM'
+            let formattedValue = number.toFixed(2);
+
+            // Set the formatted value back to the input, ensuring it ends with 'KM'
+            input.value = formattedValue + ' KM';
+        }
+
 
         function formatKilometer(input) {
             let value = input.value.replace(/[^0-9.]/g, ''); // Hapus semua karakter selain angka dan titik
@@ -923,48 +950,46 @@
         }
 
         function cleanHargaJasaBeforeSubmit() {
+            // Terapkan formatCurrencyInput ke semua input harga_jasa_perbaikan
             document.querySelectorAll('.harga-jasa-input').forEach(input => {
-                // Hapus "Rp." dan pemisah ribuan (titik)
-                input.value = input.value.replace(/[^0-9]/g, '');
+                formatCurrencyInput(input);
             });
         }
 
-        // Tambahkan event listener untuk form submit
         document.getElementById('inputFormEdit').addEventListener('submit', function(e) {
-            cleanHargaJasaBeforeSubmit(); // Bersihkan nilai sebelum submit
+            // Bersihkan nilai harga_jasa_perbaikan sebelum submit
+            document.querySelectorAll('.harga-jasa-input').forEach(input => {
+                input.value = input.value.replace(/[^0-9]/g, '');
+            });
         });
 
         document.getElementById('inputFormAdd').addEventListener('submit', function(e) {
-            cleanHargaJasaBeforeSubmit(); // Bersihkan nilai sebelum submit
+            // Bersihkan nilai harga_jasa_perbaikan sebelum submit
+            document.querySelectorAll('.harga-jasa-input').forEach(input => {
+                input.value = input.value.replace(/[^0-9]/g, '');
+            });
         });
 
         // Fungsi untuk memformat input harga jasa perbaikan (tanpa "Rp")
         function formatCurrencyInput(input) {
             input.addEventListener('input', function(e) {
-                // Hapus karakter non-digit
+                // Hapus semua karakter non-digit
                 let value = this.value.replace(/[^0-9]/g, '');
 
-                // Format angka ke dalam format mata uang (tanpa "Rp")
-                if (value) {
-                    value = new Intl.NumberFormat('id-ID').format(value);
-                }
-
-                // Update nilai input
+                // Update nilai input dengan angka saja
                 this.value = value;
             });
 
             input.addEventListener('blur', function(e) {
-                // Hapus pemisah ribuan saat input kehilangan fokus
-                let value = this.value.replace(/\./g, '');
+                // Pastikan nilai tetap berupa angka tanpa format
+                let value = this.value.replace(/[^0-9]/g, '');
                 this.value = value;
             });
 
             input.addEventListener('focus', function(e) {
-                // Format kembali ke mata uang saat input mendapatkan fokus
+                // Tidak perlu menambahkan format "Rp" saat input aktif
                 let value = this.value.replace(/[^0-9]/g, '');
-                if (value) {
-                    this.value = new Intl.NumberFormat('id-ID').format(value);
-                }
+                this.value = value;
             });
         }
 
@@ -1195,6 +1220,40 @@
             }
         }
 
+        function formatCurrencyInput(input) {
+            input.addEventListener('input', function(e) {
+                // Hapus karakter non-digit
+                let value = this.value.replace(/[^0-9]/g, '');
+
+                // Format angka ke dalam format mata uang (tanpa "Rp")
+                if (value) {
+                    value = new Intl.NumberFormat('id-ID').format(value);
+                }
+
+                // Update nilai input
+                this.value = value;
+            });
+
+            input.addEventListener('blur', function(e) {
+                // Hapus pemisah ribuan saat input kehilangan fokus
+                let value = this.value.replace(/\./g, '');
+                this.value = value;
+            });
+
+            input.addEventListener('focus', function(e) {
+                // Format kembali ke mata uang saat input mendapatkan fokus
+                let value = this.value.replace(/[^0-9]/g, '');
+                if (value) {
+                    this.value = new Intl.NumberFormat('id-ID').format(value);
+                }
+            });
+        }
+
+        // Terapkan formatCurrencyInput ke semua input harga_jasa_perbaikan
+        document.querySelectorAll('.harga-jasa-input').forEach(input => {
+            formatCurrencyInput(input);
+        });
+
         function tambahPartKeluarEdit() {
             const container = document.getElementById('part-keluar-container-edit');
             const newRow = document.createElement('div');
@@ -1315,13 +1374,20 @@
         document.querySelectorAll('.harga-jasa-input').forEach(input => {
             formatCurrencyInput(input);
         });
-
         // Fungsi untuk menghapus pemisah ribuan sebelum submit form
         document.getElementById('inputFormEdit').addEventListener('submit', function(e) {
             document.querySelectorAll('.harga-jasa-input').forEach(input => {
                 input.value = input.value.replace(/\./g, '');
             });
         });
+        document.querySelector('form').addEventListener('submit', function(event) {
+            const inputs = document.querySelectorAll('input[name="harga_jasa_perbaikan[]"]');
+
+            inputs.forEach(input => {
+                input.value = input.value.replace(/[^\d]/g, ''); // Strip non-digit characters
+            });
+        });
+
 
         // Fungsi untuk membuka modal edit dan memformat nilai yang sudah ada
         function openEditModal(
@@ -1374,10 +1440,10 @@
                 <select name="kode_barang[]" class="w-full p-2 border rounded kode-barang-select">
                     <option value="">Pilih Kode Barang</option>
                     ${spareparts.map(sparepart => `
-                                <option value="${sparepart.kode_barang}" ${part.kode_barang == sparepart.kode_barang ? 'selected' : ''}>
-                                    ${sparepart.kode_barang}
-                                </option>
-                            `).join('')}
+                                                                                                                    <option value="${sparepart.kode_barang}" ${part.kode_barang == sparepart.kode_barang ? 'selected' : ''}>
+                                                                                                                        ${sparepart.kode_barang}
+                                                                                                                    </option>
+                                                                                                                `).join('')}
                 </select>
             </div>
             <div>
