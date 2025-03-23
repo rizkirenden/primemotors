@@ -269,10 +269,12 @@
                         class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
                     <input type="text" id="harga_jual" name="harga_jual" placeholder="Harga Jual"
                         class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
-                    <input type="number" name="discount" placeholder="Discount"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required>
-                    <input type="number" name="total_harga_part" placeholder="Total Harga Part"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
+                    <input type="number" name="discount" id="discount" placeholder="Discount"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required
+                        oninput="calculateTotal()">
+                    <input type="number" name="total_harga_part" id="total_harga_part"
+                        placeholder="Total Harga Part" class="w-full px-4 py-2 border border-gray-300 rounded-full"
+                        required readonly>
                     <input type="text" name="status" placeholder="Status"
                         class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
                     <select name="metode_pembayaran" id="metode_pembayaran"
@@ -319,7 +321,6 @@
                 <button type="submit"
                     class="w-full px-4 py-2 bg-black text-white rounded-full hover:bg-gray-700">Update Data</button>
             </form>
-
             <button onclick="closeEditModal()"
                 class="mt-2 w-full px-4 py-2 bg-black text-white rounded-full hover:bg-red-700">Close</button>
         </div>
@@ -361,7 +362,6 @@
             });
         });
 
-
         document.querySelector('form').addEventListener('submit', function(event) {
             const hargaToko = document.getElementById('harga_toko').value;
             const marginPersen = document.getElementById('margin_persen').value;
@@ -372,6 +372,34 @@
             document.getElementById('margin_persen').value = removeFormatPersen(marginPersen);
             document.getElementById('harga_jual').value = removeFormatRupiah(hargaJual);
         });
+
+        function calculateTotal() {
+            // Ambil nilai harga jual dan hapus format Rupiah (jika ada)
+            const hargaJual = parseFloat(document.getElementById('harga_jual').value.replace(/[^0-9.-]+/g, ""));
+            const discountPersen = parseFloat(document.getElementById('discount').value);
+
+            if (!isNaN(hargaJual)) {
+                let totalHargaPart = hargaJual;
+
+                // Jika discount persen valid, hitung discount
+                if (!isNaN(discountPersen)) {
+                    const discountAmount = (hargaJual * discountPersen) / 100;
+                    totalHargaPart -= discountAmount;
+                }
+
+                // Pastikan total harga part tidak negatif
+                totalHargaPart = Math.max(totalHargaPart, 0);
+
+                // Update nilai total harga part
+                document.getElementById('total_harga_part').value = totalHargaPart.toFixed(2);
+            }
+        }
+
+        // Panggil fungsi calculateTotal saat halaman dimuat atau saat nilai discount berubah
+        document.getElementById('discount').addEventListener('input', calculateTotal);
+
+        // Panggil fungsi calculateTotal saat halaman dimuat atau saat nilai discount berubah
+        document.getElementById('discount').addEventListener('input', calculateTotal);
 
         function fetchSparepartData() {
             const kodeBarang = document.getElementById('kode_barang').value;
@@ -444,7 +472,8 @@
             });
         });
 
-        function openEditModal(id, kode_barang, nama_part, stn, tipe, merk, tanggal_keluar, jumlah, harga_toko, harga_jual,
+        function openEditModal(id, kode_barang, nama_part, stn, tipe, merk, tanggal_keluar, jumlah, harga_toko,
+            harga_jual,
             margin_persen, discount) {
             // Menetapkan nilai untuk input di modal edit
             document.getElementById("edit-id").value = id;
@@ -462,7 +491,7 @@
 
             // Update form action untuk mencocokkan dengan ID yang akan diupdate
             const formAction = document.querySelector("#edit-modal form");
-            formAction.action = "/datamekanik/" + id; // Update URL dengan ID mekanik
+            formAction.action = "/jualpart/" + id; // Update URL dengan ID mekanik
 
             // Tampilkan modal edit
             document.getElementById("edit-modal").classList.remove("hidden");
