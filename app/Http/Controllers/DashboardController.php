@@ -53,9 +53,6 @@ class DashboardController extends Controller
         ));
     }
 
-    /**
-     * Mengelompokkan data invoice berdasarkan bulan
-     */
     private function getInvoiceDataByMonth($invoices)
     {
         $data = array_fill(0, 12, 0); // Inisialisasi array dengan 12 bulan (0-11)
@@ -68,9 +65,6 @@ class DashboardController extends Controller
         return $data;
     }
 
-    /**
-     * Mengelompokkan data part keluar berdasarkan bulan
-     */
     private function getPartKeluarDataByMonth($partKeluar)
     {
         $data = array_fill(0, 12, 0); // Inisialisasi array dengan 12 bulan (0-11)
@@ -83,9 +77,6 @@ class DashboardController extends Controller
         return $data;
     }
 
-    /**
-     * Mengelompokkan data part masuk berdasarkan bulan
-     */
     private function getPartMasukDataByMonth($partMasuk)
     {
         $data = array_fill(0, 12, 0); // Inisialisasi array dengan 12 bulan (0-11)
@@ -97,10 +88,6 @@ class DashboardController extends Controller
 
         return $data;
     }
-
-    /**
-     * Ambil data invoice, part keluar, dan part masuk berdasarkan tahun untuk AJAX
-     */
     public function getDataByYear(Request $request)
     {
         $year = $request->query('year');
