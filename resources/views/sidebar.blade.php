@@ -102,6 +102,10 @@
                 <li class="mb-2">
                     <a href="{{ route('uraianpekerjaan') }}" class="text-sm">Uraian Pekerjaan</a>
                 </li>
+                <hr class="border-t border-gray-300 my-2"> <!-- Divider -->
+                <li class="mb-2">
+                    <a href="{{ route('jualpart') }}" class="text-sm">Jual Part</a>
+                </li>
             </ul>
         </li>
 

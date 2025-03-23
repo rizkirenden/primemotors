@@ -11,6 +11,7 @@ class Partkeluar extends Model
     protected $table = 'partkeluars';
     protected $fillable = [
         'dataservice_id',
+        'jualpart_id',
         'kode_barang',
         'nama_part',
         'stn',
@@ -29,5 +30,9 @@ class Partkeluar extends Model
     public function datasparepat()
     {
         return $this->belongsTo(Datasparepat::class, 'kode_barang', 'kode_barang');
+    }
+    public function jualpart()
+    {
+        return $this->belongsTo(Dataservice::class, 'jualpart_id');
     }
 }

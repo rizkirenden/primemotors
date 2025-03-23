@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('partkeluars', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('dataservice_id')->nullable();
+            $table->unsignedBigInteger('jualpart_id')->nullable();
             $table->string('kode_barang');
             $table->string('nama_part');
             $table->string('stn');
@@ -26,6 +27,7 @@ return new class extends Migration
             $table->string('status')->default('pending');
             $table->timestamps();
             $table->foreign('dataservice_id')->references('id')->on('dataservices')->onDelete('cascade');
+            $table->foreign('jualpart_id')->references('id')->on('jualparts')->onDelete('cascade');
         });
     }
 

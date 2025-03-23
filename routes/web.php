@@ -11,6 +11,7 @@ use App\Http\Controllers\DataserviceController;
 use App\Http\Controllers\InsentifController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\UraianpekerjaanController;
+use App\Http\Controllers\JualpartController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -99,3 +100,8 @@ Route::post('/uraianpekerjaan', [UraianpekerjaanController::class, 'store'])->na
 Route::put('/uraianpekerjaan/{id}', [UraianpekerjaanController::class, 'update'])->name('uraianpekerjaan.update');
 Route::delete('/uraianpekerjaan/{id}', [UraianpekerjaanController::class, 'destroy'])->name('uraianpekerjaan.destroy');
 
+Route::get('/jualpart', [JualpartController::class, 'index'])->name('jualpart');
+Route::post('/jualpart', [JualpartController::class, 'store'])->name('jualpart.store');
+Route::put('/jualpart/{id}', [JualpartController::class, 'update'])->name('jualpart.update');
+Route::delete('jualpart/{id}', [JualpartController::class, 'destroy'])->name('jualpart.destroy');
+Route::get('/spareparts/{kode_barang}', [JualpartController::class, 'getSparepart']);
