@@ -22,7 +22,6 @@ class Jualpart extends Model
         'harga_jual',
         'margin_persen',
         'discount',
-        'status',
         'total_harga_part',
         'metode_pembayaran',
         'nama_pelanggan',

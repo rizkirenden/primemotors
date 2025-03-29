@@ -26,7 +26,6 @@ return new class extends Migration
             $table->decimal('harga_jual', 15, 3);
             $table->decimal('discount', 5, 2);
             $table->decimal('total_harga_part', 15, 2);
-            $table->string('status')->default('pending');
             $table->enum('metode_pembayaran', ['Tunai', 'Kredit', 'Bank_Transfer'])->nullable();
             $table->string('nama_pelanggan')->nullable();
             $table->string('alamat_pelanggan')->nullable();
