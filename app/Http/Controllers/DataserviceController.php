@@ -91,7 +91,66 @@ class DataserviceController extends Controller
 
         return redirect()->route('dataservice')->with('success', 'Data service berhasil disimpan!');
     }
+// Mengupdate data service awal
+public function updateawal(Request $request, $id)
+{
+    // Validasi data
+    $request->validate([
+        'no_spk' => 'required|unique:dataservices,no_spk,'.$id,
+        'costumer' => 'required',
+        'contact_person' => 'required',
+        'masuk' => 'required|date_format:Y-m-d\TH:i',
+        'keluar' => 'nullable|date_format:Y-m-d\TH:i',
+        'no_polisi' => 'required',
+        'tahun' => 'required|integer',
+        'tipe_mobile' => 'required',
+        'warna' => 'required',
+        'no_rangka' => 'required',
+        'no_mesin' => 'required',
+        'kilometer' => 'required|regex:/^\d+(\.\d{1,2})?\s*KM$/i',
+        'keluhan_costumer' => 'required',
+        'status' => 'required',
+        'jenis_pekerjaan' => 'nullable|array',
+        'jenis_pekerjaan.*' => 'nullable|string',
+        'jenis_mobil' => 'nullable|array',
+        'jenis_mobil.*' => 'nullable|string',
+        'waktu_pengerjaan' => 'nullable|array',
+        'waktu_pengerjaan.*' => 'nullable|integer',
+        'ongkos_pengerjaan' => 'nullable|array',
+        'ongkos_pengerjaan.*' => 'nullable|numeric',
+    ]);
 
+    // Bersihkan input kilometer dengan menghapus "KM"
+    $kilometer = str_replace(' KM', '', $request->kilometer);
+    $kilometer = (float) $kilometer;
+
+    // Ambil data service yang akan diupdate
+    $dataService = Dataservice::findOrFail($id);
+
+    // Update data service
+    $dataService->update([
+        'no_spk' => $request->no_spk,
+        'costumer' => $request->costumer,
+        'contact_person' => $request->contact_person,
+        'masuk' => $request->masuk,
+        'keluar' => $request->keluar,
+        'no_polisi' => $request->no_polisi,
+        'tahun' => $request->tahun,
+        'tipe_mobile' => $request->tipe_mobile,
+        'warna' => $request->warna,
+        'no_rangka' => $request->no_rangka,
+        'no_mesin' => $request->no_mesin,
+        'kilometer' => $kilometer,
+        'keluhan_costumer' => $request->keluhan_costumer,
+        'status' => $request->status,
+        'jenis_pekerjaan' => json_encode($request->jenis_pekerjaan),
+        'jenis_mobil' => json_encode($request->jenis_mobil),
+        'waktu_pengerjaan' => json_encode($request->waktu_pengerjaan),
+        'ongkos_pengerjaan' => json_encode($request->ongkos_pengerjaan),
+    ]);
+
+    return redirect()->route('dataservice')->with('success', 'Data service awal berhasil diperbarui!');
+}
     // Mengupdate data service
     public function update(Request $request, $id)
     {

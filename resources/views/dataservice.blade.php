@@ -22,9 +22,7 @@
         .description-row td {
             padding: 20px 10px;
             white-space: normal;
-            /* Biarkan teks wrap */
             word-wrap: break-word;
-            /* Memastikan teks tidak melebihi lebar sel */
         }
 
         .description-container {
@@ -99,7 +97,6 @@
             flex-grow: 1;
         }
 
-        /* Make the text smaller */
         td {
             font-size: 0.75rem;
             white-space: nowrap;
@@ -111,22 +108,16 @@
             padding: 4px 8px;
         }
 
-        /* Modal Input Form Adjustments */
-        /* Modal Container */
         .modal-container {
             max-width: 90vw;
-            /* Lebar maksimum 90% dari viewport */
             max-height: 90vh;
-            /* Tinggi maksimum 90% dari viewport */
             overflow-y: auto;
-            /* Scroll jika konten terlalu panjang */
             padding: 1.5rem;
             background-color: white;
             border-radius: 0.5rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        /* Input dan Textarea */
         .modal-input-row input,
         .modal-input-row select,
         .modal-input-row textarea {
@@ -137,20 +128,17 @@
             font-size: 0.875rem;
         }
 
-        /* Textarea */
         .modal-input-row textarea {
             resize: vertical;
             min-height: 100px;
         }
 
-        /* CSS untuk Baris Part Keluar */
         .part-keluar-row {
             border-bottom: 1px solid #ccc;
             padding-bottom: 10px;
             margin-bottom: 10px;
         }
 
-        /* CSS untuk Container Part Keluar */
         #part-keluar-container-edit {
             margin-top: 20px;
             padding: 10px;
@@ -174,28 +162,22 @@
 
         .description-row {
             display: none;
-            /* Sembunyikan secara default */
         }
 
         .description-row.visible {
             display: table-row;
-            /* Tampilkan ketika diperlukan */
         }
 
         table {
             width: 100%;
             table-layout: fixed;
-            /* Memastikan lebar kolom tetap */
         }
 
         td,
         th {
             word-wrap: break-word;
-            /* Memastikan teks tidak melebihi lebar sel */
             overflow: hidden;
-            /* Sembunyikan teks yang melebihi lebar sel */
             text-overflow: ellipsis;
-            /* Tambahkan ellipsis jika teks terlalu panjang */
         }
     </style>
 </head>
@@ -304,11 +286,35 @@
                                             '{{ $dataservice->tipe }}',
                                             '{{ $dataservice->merk }}',
                                             '{{ $dataservice->jumlah }}',
-                                                                    '{{ $dataservice->uraian_jasa_perbaikan }}',
+                                            '{{ $dataservice->uraian_jasa_perbaikan }}',
                                             '{{ $dataservice->status }}',
                                             '{{ $dataservice->tanggal_keluar ?? '' }}'
                                         )">
                                         <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="#" class="text-green-500 hover:text-green-700 mr-3"
+                                        onclick="openEditModalAwal(
+                                            '{{ $dataservice->id }}',
+                                            '{{ $dataservice->no_spk }}',
+                                            '{{ $dataservice->costumer }}',
+                                            '{{ $dataservice->contact_person }}',
+                                            '{{ $dataservice->masuk }}',
+                                            '{{ $dataservice->keluar }}',
+                                            '{{ $dataservice->no_polisi }}',
+                                            '{{ $dataservice->tahun }}',
+                                            '{{ $dataservice->tipe_mobile }}',
+                                            '{{ $dataservice->warna }}',
+                                            '{{ $dataservice->no_rangka }}',
+                                            '{{ $dataservice->no_mesin }}',
+                                            '{{ $dataservice->kilometer }}',
+                                            '{{ $dataservice->keluhan_costumer }}',
+                                            '{{ $dataservice->status }}',
+                                            '{{ $dataservice->jenis_pekerjaan }}',
+                                            '{{ $dataservice->jenis_mobil }}',
+                                            '{{ $dataservice->waktu_pengerjaan }}',
+                                            '{{ $dataservice->ongkos_pengerjaan }}'
+                                        )">
+                                        <i class="fa-solid fa-user-pen"></i>
                                     </a>
                                     <form action="{{ route('dataservice.destroy', $dataservice->id) }}" method="POST"
                                         class="inline-block">
@@ -398,17 +404,13 @@
                                                         @foreach ($jenisPekerjaan as $index => $jenis)
                                                             <tr>
                                                                 <td style="border: 1px solid #000; padding: 5px;">
-                                                                    {{ $jenis }}
-                                                                </td>
+                                                                    {{ $jenis }}</td>
                                                                 <td style="border: 1px solid #000; padding: 5px;">
-                                                                    {{ $jenisMobil[$index] ?? '-' }}
-                                                                </td>
+                                                                    {{ $jenisMobil[$index] ?? '-' }}</td>
                                                                 <td style="border: 1px solid #000; padding: 5px;">
-                                                                    {{ $waktuPengerjaan[$index] ?? '-' }}
-                                                                </td>
+                                                                    {{ $waktuPengerjaan[$index] ?? '-' }}</td>
                                                                 <td style="border: 1px solid #000; padding: 5px;">
                                                                     @php
-                                                                        // Decode data JSON ongkos_pengerjaan
                                                                         $ongkosPekerjaan = json_decode(
                                                                             $dataservice->ongkos_pengerjaan,
                                                                             true,
@@ -628,9 +630,7 @@
                     </div>
                     <div class="col-span-5">
                         <label for="uraian_pekerjaan"></label>
-                        <div id="uraian-container">
-
-                        </div>
+                        <div id="uraian-container"></div>
                         <button type="button" onclick="tambahUraian()"
                             class="bg-black text-white px-4 py-2 rounded-full mt-4">
                             <i class="fas fa-plus"></i> Tambah Uraian
@@ -639,6 +639,119 @@
                 </div>
                 <div class="mt-4 flex space-x-4 justify-center">
                     <button type="button" onclick="closeAddModal()"
+                        class="bg-black text-white hover:bg-red-700 px-4 py-2 rounded-full w-full sm:w-auto">Cancel</button>
+                    <button type="submit"
+                        class="bg-black text-white hover:bg-gray-700 px-4 py-2 rounded-full w-full sm:w-auto">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Edit Awal -->
+    <div id="modal-edit-awal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center hidden">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-[90vw] overflow-y-auto" style="max-height: 90vh;">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Edit Data Service Awal</h2>
+                <button onclick="closeEditAwalModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form id="inputFormEditAwal" method="POST"
+                action="{{ route('dataservice.updateawal', $dataservice->id ?? '') }}">
+                @csrf
+                @method('PUT')
+                <input type="hidden" id="edit_awal_id" name="id">
+
+                <div class="grid grid-cols-5 gap-4">
+                    <!-- Baris 1 -->
+                    <div>
+                        <label for="no_spk_edit_awal">No SPK</label>
+                        <input type="text" id="no_spk_edit_awal" name="no_spk" class="w-full p-2 border rounded"
+                            required>
+                    </div>
+                    <div>
+                        <label for="costumer_edit_awal">Costumer</label>
+                        <input type="text" id="costumer_edit_awal" name="costumer"
+                            class="w-full p-2 border rounded" required>
+                    </div>
+                    <div>
+                        <label for="contact_person_edit_awal">Contact Person</label>
+                        <input type="text" id="contact_person_edit_awal" name="contact_person"
+                            class="w-full p-2 border rounded" required>
+                    </div>
+                    <div>
+                        <label for="masuk_edit_awal">Tanggal Masuk</label>
+                        <input type="datetime-local" id="masuk_edit_awal" name="masuk"
+                            class="w-full p-2 border rounded" required>
+                    </div>
+                    <!-- Baris 2 -->
+                    <div>
+                        <label for="keluar_edit_awal">Tanggal Keluar</label>
+                        <input type="datetime-local" id="keluar_edit_awal" name="keluar"
+                            class="w-full p-2 border rounded">
+                    </div>
+                    <div>
+                        <label for="no_polisi_edit_awal">No Polisi</label>
+                        <input type="text" id="no_polisi_edit_awal" name="no_polisi"
+                            class="w-full p-2 border rounded" required>
+                    </div>
+                    <div>
+                        <label for="tahun_edit_awal">Tahun</label>
+                        <input type="text" id="tahun_edit_awal" name="tahun" class="w-full p-2 border rounded"
+                            required>
+                    </div>
+                    <div>
+                        <label for="tipe_mobile_edit_awal">Tipe Mobil</label>
+                        <input type="text" id="tipe_mobile_edit_awal" name="tipe_mobile"
+                            class="w-full p-2 border rounded" required>
+                    </div>
+                    <!-- Baris 3 -->
+                    <div>
+                        <label for="warna_edit_awal">Warna</label>
+                        <input type="text" id="warna_edit_awal" name="warna" class="w-full p-2 border rounded"
+                            required>
+                    </div>
+                    <div>
+                        <label for="no_rangka_edit_awal">No Rangka</label>
+                        <input type="text" id="no_rangka_edit_awal" name="no_rangka"
+                            class="w-full p-2 border rounded" required>
+                    </div>
+                    <div>
+                        <label for="no_mesin_edit_awal">No Mesin</label>
+                        <input type="text" id="no_mesin_edit_awal" name="no_mesin"
+                            class="w-full p-2 border rounded" required>
+                    </div>
+                    <div>
+                        <label for="kilometer_edit_awal">Jarak (Kilometer)</label>
+                        <input type="text" id="kilometer_edit_awal" name="kilometer"
+                            class="w-full p-2 border rounded" oninput="formatKilometer(this)" required>
+                    </div>
+                    <div>
+                        <label for="keluhan_costumer_edit_awal">Keluhan Costumer</label>
+                        <textarea id="keluhan_costumer_edit_awal" name="keluhan_costumer" class="w-full p-2 border rounded" required></textarea>
+                    </div>
+                    <div class="col-span-5">
+                        <label for="status_edit_awal">Status Costumer</label>
+                        <select id="status_edit_awal" name="status" class="w-full p-2 border rounded" required>
+                            <option value="menunggu">Menunggu</option>
+                            <option value="pulang">Pulang</option>
+                        </select>
+                    </div>
+                    <div class="col-span-5">
+                        <label for="uraian_pekerjaan">Uraian Pekerjaan</label>
+                        <div id="uraian-container-edit-awal"></div>
+                        <button type="button" onclick="addPekerjaanFieldEditAwal()"
+                            class="bg-black text-white px-4 py-2 rounded-full mt-4">
+                            <i class="fas fa-plus"></i> Tambah Uraian
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-4 flex space-x-4 justify-center">
+                    <button type="button" onclick="closeEditAwalModal()"
                         class="bg-black text-white hover:bg-red-700 px-4 py-2 rounded-full w-full sm:w-auto">Cancel</button>
                     <button type="submit"
                         class="bg-black text-white hover:bg-gray-700 px-4 py-2 rounded-full w-full sm:w-auto">Submit</button>
@@ -712,7 +825,8 @@
                     <div>
                         <label for="tipe_mobile_edit">Tipe Mobile</label>
                         <input type="text" id="tipe_mobile_edit" name="tipe_mobile"
-                            class="w-full p-2 border rounded" value="{{ $dataservice->tipe_mobile ?? '' }}" required>
+                            class="w-full p-2 border rounded" value="{{ $dataservice->tipe_mobile ?? '' }}"
+                            required>
                     </div>
 
                     <!-- Baris 3 -->
@@ -745,11 +859,9 @@
                         <label for="status_edit">Status</label>
                         <select id="status_edit" name="status" class="w-full p-2 border rounded" required>
                             <option value="menunggu"
-                                {{ ($dataservice->status ?? '') == 'menunggu' ? 'selected' : '' }}>
-                                Menunggu</option>
+                                {{ ($dataservice->status ?? '') == 'menunggu' ? 'selected' : '' }}>Menunggu</option>
                             <option value="pulang" {{ ($dataservice->status ?? '') == 'pulang' ? 'selected' : '' }}>
-                                pulang
-                            </option>
+                                pulang</option>
                         </select>
                     </div>
                 </div>
@@ -813,7 +925,6 @@
                                             name="harga_jasa_perbaikan[]"
                                             class="w-full p-2 border rounded harga-jasa-input"
                                             value="{{ $part->harga_jasa_perbaikan ? number_format($part->harga_jasa_perbaikan, 0, ',', '.') : '' }}">
-
                                     </div>
                                 </div>
                             @endforeach
@@ -840,193 +951,222 @@
     </div>
 
     <script>
+        // Function to open edit awal modal
+        // Function to open edit awal modal
+        function openEditModalAwal(
+            id, no_spk, costumer, contact_person, masuk, keluar, no_polisi, tahun,
+            tipe_mobile, warna, no_rangka, no_mesin, kilometer, keluhan_costumer, status,
+            jenis_pekerjaan, jenis_mobil, waktu_pengerjaan, ongkos_pengerjaan
+        ) {
+            // Populate form fields
+            document.getElementById('edit_awal_id').value = id;
+            document.getElementById('no_spk_edit_awal').value = no_spk;
+            document.getElementById('costumer_edit_awal').value = costumer;
+            document.getElementById('contact_person_edit_awal').value = contact_person;
+            document.getElementById('masuk_edit_awal').value = masuk.replace(' ', 'T');
+            document.getElementById('keluar_edit_awal').value = keluar ? keluar.replace(' ', 'T') : '';
+            document.getElementById('no_polisi_edit_awal').value = no_polisi;
+            document.getElementById('tahun_edit_awal').value = tahun;
+            document.getElementById('tipe_mobile_edit_awal').value = tipe_mobile;
+            document.getElementById('warna_edit_awal').value = warna;
+            document.getElementById('no_rangka_edit_awal').value = no_rangka;
+            document.getElementById('no_mesin_edit_awal').value = no_mesin;
+            document.getElementById('kilometer_edit_awal').value = kilometer + ' KM';
+            document.getElementById('keluhan_costumer_edit_awal').value = keluhan_costumer;
+            document.getElementById('status_edit_awal').value = status;
+
+            // Clear existing pekerjaan fields
+            const pekerjaanContainer = document.getElementById('uraian-container-edit-awal');
+            pekerjaanContainer.innerHTML = '';
+
+            // Parse JSON data for pekerjaan
+            try {
+                const pekerjaanList = JSON.parse(jenis_pekerjaan || '[]');
+                const jenisMobilList = JSON.parse(jenis_mobil || '[]');
+                const waktuList = JSON.parse(waktu_pengerjaan || '[]');
+                const ongkosList = JSON.parse(ongkos_pengerjaan || '[]');
+
+                // Add pekerjaan fields
+                pekerjaanList.forEach((pekerjaan, index) => {
+                    addPekerjaanFieldEditAwal(
+                        pekerjaan,
+                        jenisMobilList[index] || '',
+                        waktuList[index] || '',
+                        ongkosList[index] || ''
+                    );
+                });
+            } catch (e) {
+                console.error('Error parsing pekerjaan data:', e);
+            }
+
+            // Set form action
+            document.getElementById('inputFormEditAwal').action = `/dataservice/${id}/updateawal`;
+
+            // Show modal
+            document.getElementById('modal-edit-awal').classList.remove('hidden');
+        }
+
+        function closeEditAwalModal() {
+            document.getElementById('modal-edit-awal').classList.add('hidden');
+        }
+
+        function addPekerjaanFieldEditAwal(pekerjaan = '', jenisMobil = '', waktu = '', ongkos = '') {
+            const container = document.getElementById('uraian-container-edit-awal');
+            const index = container.children.length;
+
+            const fieldHtml = `
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-2 mb-2 pekerjaan-field-edit-awal">
+                <div>
+                    <label class="block text-sm">Jenis Pekerjaan</label>
+                    <select name="jenis_pekerjaan[]" class="w-full p-2 border rounded jenis-pekerjaan-select" onchange="fillUraianDataEditAwal(event)">
+                        <option value="">Pilih Jenis Pekerjaan</option>
+                        @foreach ($uraianPekerjaans as $uraian)
+                            <option value="{{ $uraian->jenis_pekerjaan }}"
+                                data-mobil="{{ $uraian->jenis_mobil }}"
+                                data-waktu="{{ $uraian->waktu_pengerjaan }}"
+                                data-ongkos="{{ $uraian->ongkos_pengerjaan }}"
+                                ${pekerjaan === "{{ $uraian->jenis_pekerjaan }}" ? 'selected' : ''}>
+                                {{ $uraian->jenis_pekerjaan }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm">Jenis Mobil</label>
+                    <input type="text" name="jenis_mobil[]" value="${jenisMobil}"
+                        class="w-full p-2 border rounded jenis-mobil-input" readonly>
+                </div>
+                <div>
+                    <label class="block text-sm">Waktu (jam)</label>
+                    <input type="number" name="waktu_pengerjaan[]" value="${waktu}"
+                        class="w-full p-2 border rounded waktu-pengerjaan-input" readonly>
+                </div>
+                <div class="flex items-end">
+                    <div class="flex-1">
+                        <label class="block text-sm">Ongkos</label>
+                        <input type="text" name="ongkos_pengerjaan[]" value="${ongkos}"
+                            class="w-full p-2 border rounded ongkos-pengerjaan-input" readonly>
+                    </div>
+                    <button type="button" onclick="removePekerjaanFieldEditAwal(this)"
+                        class="ml-2 bg-red-500 text-white px-2 py-2 rounded">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        `;
+
+            container.insertAdjacentHTML('beforeend', fieldHtml);
+        }
+
+        function fillUraianDataEditAwal(event) {
+            const selectedOption = event.target.selectedOptions[0];
+            const row = event.target.closest('.pekerjaan-field-edit-awal');
+
+            if (selectedOption.value) {
+                const jenisMobil = selectedOption.getAttribute('data-mobil');
+                const waktuPengerjaan = selectedOption.getAttribute('data-waktu');
+                const ongkosPengerjaan = selectedOption.getAttribute('data-ongkos');
+
+                row.querySelector('.jenis-mobil-input').value = jenisMobil || '';
+                row.querySelector('.waktu-pengerjaan-input').value = waktuPengerjaan || '';
+                row.querySelector('.ongkos-pengerjaan-input').value = ongkosPengerjaan || '';
+            } else {
+                row.querySelector('.jenis-mobil-input').value = '';
+                row.querySelector('.waktu-pengerjaan-input').value = '';
+                row.querySelector('.ongkos-pengerjaan-input').value = '';
+            }
+        }
+
+        function removePekerjaanFieldEditAwal(button) {
+            button.closest('.pekerjaan-field-edit-awal').remove();
+        }
+        // Common functions
         function tambahUraian() {
             const container = document.getElementById('uraian-container');
             const newUraian = document.createElement('div');
             newUraian.classList.add('uraian-row', 'grid', 'grid-cols-4', 'gap-4', 'mt-4');
             newUraian.innerHTML = `
-       <div>
-    <label for="jenis_pekerjaan">Pilih Jenis Pekerjaan:</label>
-    <select name="jenis_pekerjaan[]" class="w-full p-2 border rounded jenis-pekerjaan-select" onchange="fillUraianData(event)">
-        <option value="">Pilih Jenis Pekerjaan</option>
-        @foreach ($uraianPekerjaans as $uraian)
-            <option value="{{ $uraian->jenis_pekerjaan }}" data-mobil="{{ $uraian->jenis_mobil }}" data-waktu="{{ $uraian->waktu_pengerjaan }}" data-ongkos="{{ $uraian->ongkos_pengerjaan }}">
-                {{ $uraian->jenis_pekerjaan }}
-            </option>
-        @endforeach
-    </select>
-</div>
-<div>
-    <label for="jenis_mobil">Jenis Mobil</label>
-    <input type="text" name="jenis_mobil[]" class="w-full p-2 border rounded jenis-mobil-input" readonly>
-</div>
-<div>
-    <label for="waktu_pengerjaan">Waktu Pengerjaan (jam)</label>
-    <input type="number" name="waktu_pengerjaan[]" class="w-full p-2 border rounded waktu-pengerjaan-input" readonly>
-</div>
-<div>
-    <label for="ongkos_pengerjaan">Ongkos Pengerjaan</label>
-    <input type="text" name="ongkos_pengerjaan[]" class="w-full p-2 border rounded ongkos-pengerjaan-input" readonly>
-</div>
-<div class="flex items-end">
-    <button type="button" onclick="hapusUraian(this)" class="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-700">
-        <i class="fas fa-trash"></i> Hapus
-    </button>
-</div>
-
-    `;
+                <div>
+                    <label for="jenis_pekerjaan">Pilih Jenis Pekerjaan:</label>
+                    <select name="jenis_pekerjaan[]" class="w-full p-2 border rounded jenis-pekerjaan-select" onchange="fillUraianData(event)">
+                        <option value="">Pilih Jenis Pekerjaan</option>
+                        @foreach ($uraianPekerjaans as $uraian)
+                            <option value="{{ $uraian->jenis_pekerjaan }}" data-mobil="{{ $uraian->jenis_mobil }}" data-waktu="{{ $uraian->waktu_pengerjaan }}" data-ongkos="{{ $uraian->ongkos_pengerjaan }}">
+                                {{ $uraian->jenis_pekerjaan }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label for="jenis_mobil">Jenis Mobil</label>
+                    <input type="text" name="jenis_mobil[]" class="w-full p-2 border rounded jenis-mobil-input" readonly>
+                </div>
+                <div>
+                    <label for="waktu_pengerjaan">Waktu Pengerjaan (jam)</label>
+                    <input type="number" name="waktu_pengerjaan[]" class="w-full p-2 border rounded waktu-pengerjaan-input" readonly>
+                </div>
+                <div>
+                    <label for="ongkos_pengerjaan">Ongkos Pengerjaan</label>
+                    <input type="text" name="ongkos_pengerjaan[]" class="w-full p-2 border rounded ongkos-pengerjaan-input" readonly>
+                </div>
+                <div class="flex items-end">
+                    <button type="button" onclick="hapusUraian(this)" class="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-700">
+                        <i class="fas fa-trash"></i> Hapus
+                    </button>
+                </div>
+            `;
 
             container.appendChild(newUraian);
-
-            // Tambahkan event listener untuk select jenis pekerjaan
-            const jenisPekerjaanSelect = newUraian.querySelector('.jenis-pekerjaan-select');
-            jenisPekerjaanSelect.addEventListener('change', fillUraianData);
         }
 
         function fillUraianData(event) {
-            // Get the selected option
             const selectedOption = event.target.selectedOptions[0];
+            const row = event.target.closest('.uraian-row');
 
             if (selectedOption.value) {
-                // Retrieve the associated data from the selected option
                 const jenisMobil = selectedOption.getAttribute('data-mobil');
                 const waktuPengerjaan = selectedOption.getAttribute('data-waktu');
                 const ongkosPengerjaan = selectedOption.getAttribute('data-ongkos');
 
-                // Populate the other fields
-                const mobilInput = event.target.closest('div').nextElementSibling.querySelector('input');
-                const waktuInput = mobilInput.closest('div').nextElementSibling.querySelector('input');
-                const ongkosInput = waktuInput.closest('div').nextElementSibling.querySelector('input');
-
-                mobilInput.value = jenisMobil;
-                waktuInput.value = waktuPengerjaan;
-                ongkosInput.value = ongkosPengerjaan;
+                row.querySelector('.jenis-mobil-input').value = jenisMobil || '';
+                row.querySelector('.waktu-pengerjaan-input').value = waktuPengerjaan || '';
+                row.querySelector('.ongkos-pengerjaan-input').value = ongkosPengerjaan || '';
             } else {
-                // Clear the fields if no job is selected
-                const mobilInput = event.target.closest('div').nextElementSibling.querySelector('input');
-                const waktuInput = mobilInput.closest('div').nextElementSibling.querySelector('input');
-                const ongkosInput = waktuInput.closest('div').nextElementSibling.querySelector('input');
-
-                mobilInput.value = '';
-                waktuInput.value = '';
-                ongkosInput.value = '';
+                row.querySelector('.jenis-mobil-input').value = '';
+                row.querySelector('.waktu-pengerjaan-input').value = '';
+                row.querySelector('.ongkos-pengerjaan-input').value = '';
             }
         }
 
         function hapusUraian(button) {
-            // Find the parent div and remove it from the DOM
-            const parentDiv = button.closest('div').parentElement;
-            parentDiv.remove();
+            button.closest('.uraian-row').remove();
         }
 
         function formatKilometer(input) {
-            // Remove non-numeric characters, except decimal point
             let value = input.value.replace(/[^0-9.]/g, '');
+            input.value = value + ' KM';
+        }
 
-            // Ensure only one decimal point
-            if ((value.match(/\./g) || []).length > 1) {
-                value = value.replace(/\.+$/, ''); // Remove extra dots
+        function openAddModal() {
+            document.getElementById("modal-add").classList.remove("hidden");
+        }
+
+        function closeAddModal() {
+            document.getElementById("modal-add").classList.add("hidden");
+        }
+
+        function toggleDescription(rowId) {
+            const descriptionRow = document.getElementById('desc-' + rowId);
+            if (descriptionRow.classList.contains('hidden')) {
+                descriptionRow.classList.remove('hidden');
+                descriptionRow.style.display = 'table-row';
+            } else {
+                descriptionRow.classList.add('hidden');
+                descriptionRow.style.display = 'none';
             }
-
-            // Convert to a float and ensure two decimal places
-            let number = parseFloat(value);
-
-            // If number is NaN, set it to 0
-            if (isNaN(number)) {
-                number = 0;
-            }
-
-            // Format number to 2 decimal places and append 'KM'
-            let formattedValue = number.toFixed(2);
-
-            // Set the formatted value back to the input, ensuring it ends with 'KM'
-            input.value = formattedValue + ' KM';
         }
-
-
-        function formatKilometer(input) {
-            let value = input.value.replace(/[^0-9.]/g, ''); // Hapus semua karakter selain angka dan titik
-            input.value = value + ' KM'; // Tambahkan 'KM' di akhir
-        }
-
-        function cleanHargaJasaBeforeSubmit() {
-            // Terapkan formatCurrencyInput ke semua input harga_jasa_perbaikan
-            document.querySelectorAll('.harga-jasa-input').forEach(input => {
-                formatCurrencyInput(input);
-            });
-        }
-
-        document.getElementById('inputFormEdit').addEventListener('submit', function(e) {
-            // Bersihkan nilai harga_jasa_perbaikan sebelum submit
-            document.querySelectorAll('.harga-jasa-input').forEach(input => {
-                input.value = input.value.replace(/[^0-9]/g, '');
-            });
-        });
-
-        document.getElementById('inputFormAdd').addEventListener('submit', function(e) {
-            // Bersihkan nilai harga_jasa_perbaikan sebelum submit
-            document.querySelectorAll('.harga-jasa-input').forEach(input => {
-                input.value = input.value.replace(/[^0-9]/g, '');
-            });
-        });
-
-        // Fungsi untuk memformat input harga jasa perbaikan (tanpa "Rp")
-        function formatCurrencyInput(input) {
-            input.addEventListener('input', function(e) {
-                // Hapus semua karakter non-digit
-                let value = this.value.replace(/[^0-9]/g, '');
-
-                // Update nilai input dengan angka saja
-                this.value = value;
-            });
-
-            input.addEventListener('blur', function(e) {
-                // Pastikan nilai tetap berupa angka tanpa format
-                let value = this.value.replace(/[^0-9]/g, '');
-                this.value = value;
-            });
-
-            input.addEventListener('focus', function(e) {
-                // Tidak perlu menambahkan format "Rp" saat input aktif
-                let value = this.value.replace(/[^0-9]/g, '');
-                this.value = value;
-            });
-        }
-
-        // Terapkan formatCurrencyInput ke semua input harga_jasa_perbaikan
-        document.querySelectorAll('.harga-jasa-input').forEach(input => {
-            formatCurrencyInput(input);
-        });
-
-        function formatCurrencyInput(input) {
-            input.addEventListener('input', function(e) {
-                // Hapus karakter non-digit
-                let value = this.value.replace(/[^0-9]/g, '');
-
-                // Format angka ke dalam format mata uang
-                if (value) {
-                    value = 'Rp. ' + new Intl.NumberFormat('id-ID').format(value);
-                }
-
-                // Update nilai input
-                this.value = value;
-            });
-
-            input.addEventListener('blur', function(e) {
-                // Hapus format "Rp." saat input kehilangan fokus
-                let value = this.value.replace(/[^0-9]/g, '');
-                this.value = value;
-            });
-
-            input.addEventListener('focus', function(e) {
-                // Format kembali ke mata uang saat input mendapatkan fokus
-                let value = this.value.replace(/[^0-9]/g, '');
-                if (value) {
-                    this.value = 'Rp. ' + new Intl.NumberFormat('id-ID').format(value);
-                }
-            });
-        }
-
 
         function searchTable() {
             let input = document.getElementById("search-input");
@@ -1035,25 +1175,18 @@
             let rows = table.getElementsByTagName("tr");
 
             Array.from(rows).forEach(row => {
-                // Skip rows that are description rows
-                if (row.classList.contains('description-row')) {
-                    return; // Jangan proses baris detail
-                }
+                if (row.classList.contains('description-row')) return;
 
                 let cells = row.getElementsByTagName("td");
                 let found = false;
 
-                // Loop through all the columns of the row
                 Array.from(cells).forEach(cell => {
                     if (cell && cell.textContent.toLowerCase().includes(filter)) {
                         found = true;
                     }
                 });
 
-                // Show or hide the row based on the search result
                 row.style.display = found ? "" : "none";
-
-                // Tampilkan atau sembunyikan baris detail terkait
                 let descriptionRow = table.querySelector(`#desc-${row.dataset.id}`);
                 if (descriptionRow) {
                     descriptionRow.style.display = found ? "" : "none";
@@ -1067,36 +1200,23 @@
             let table = document.querySelector("table tbody");
             let rows = table.getElementsByTagName("tr");
 
-            // Konversi tanggal ke objek Date
             let start = startDate ? new Date(startDate) : null;
             let end = endDate ? new Date(endDate) : null;
 
             Array.from(rows).forEach(row => {
-                // Skip rows that are description rows
-                if (row.classList.contains('description-row')) {
-                    return; // Jangan proses baris detail
-                }
+                if (row.classList.contains('description-row')) return;
 
                 let cells = row.getElementsByTagName("td");
-                let dateCell = cells[1]; // Kolom tanggal (index 1)
+                let dateCell = cells[1];
 
                 if (dateCell) {
                     let rowDate = new Date(dateCell.textContent.trim());
-
-                    // Filter berdasarkan rentang tanggal
                     let isWithinRange = true;
 
-                    if (start && rowDate < start) {
-                        isWithinRange = false;
-                    }
-                    if (end && rowDate > end) {
-                        isWithinRange = false;
-                    }
+                    if (start && rowDate < start) isWithinRange = false;
+                    if (end && rowDate > end) isWithinRange = false;
 
-                    // Tampilkan atau sembunyikan baris berdasarkan hasil filter
                     row.style.display = isWithinRange ? "" : "none";
-
-                    // Jangan sembunyikan baris detail terkait
                     let descriptionRow = table.querySelector(`#desc-${row.dataset.id}`);
                     if (descriptionRow) {
                         descriptionRow.style.display = isWithinRange ? "" : "none";
@@ -1105,7 +1225,6 @@
             });
         }
 
-        // Tambahkan event listener ke input tanggal
         document.getElementById("date-start").addEventListener("change", filterByDateRange);
         document.getElementById("date-end").addEventListener("change", filterByDateRange);
 
@@ -1116,43 +1235,29 @@
             let table = document.querySelector("table tbody");
             let rows = table.getElementsByTagName("tr");
 
-            // Konversi tanggal ke objek Date
             let start = startDate ? new Date(startDate) : null;
             let end = endDate ? new Date(endDate) : null;
 
             Array.from(rows).forEach(row => {
-                // Skip rows that are description rows
-                if (row.classList.contains('description-row')) {
-                    return; // Jangan proses baris detail
-                }
+                if (row.classList.contains('description-row')) return;
 
                 let cells = row.getElementsByTagName("td");
                 let found = false;
 
-                // Cek apakah baris cocok dengan pencarian
                 Array.from(cells).forEach(cell => {
                     if (cell && cell.textContent.toLowerCase().includes(search)) {
                         found = true;
                     }
                 });
 
-                // Cek apakah tanggal dalam rentang yang dipilih
-                let dateCell = cells[1]; // Kolom tanggal (index 1)
+                let dateCell = cells[1];
                 if (dateCell) {
                     let rowDate = new Date(dateCell.textContent.trim());
-
-                    if (start && rowDate < start) {
-                        found = false;
-                    }
-                    if (end && rowDate > end) {
-                        found = false;
-                    }
+                    if (start && rowDate < start) found = false;
+                    if (end && rowDate > end) found = false;
                 }
 
-                // Tampilkan atau sembunyikan baris berdasarkan hasil filter
                 row.style.display = found ? "" : "none";
-
-                // Tampilkan atau sembunyikan baris detail terkait
                 let descriptionRow = table.querySelector(`#desc-${row.dataset.id}`);
                 if (descriptionRow) {
                     descriptionRow.style.display = found ? "" : "none";
@@ -1160,12 +1265,9 @@
             });
         }
 
-        // Tambahkan event listener ke input pencarian dan tanggal
         document.getElementById("search-input").addEventListener("keyup", filterTable);
         document.getElementById("date-start").addEventListener("change", filterTable);
         document.getElementById("date-end").addEventListener("change", filterTable);
-
-        document.getElementById('kode_barang_edit').addEventListener('change', fetchSparepartDataEdit);
 
         function fetchSparepartDataEdit(event) {
             const kodeBarang = event.target.value;
@@ -1198,202 +1300,10 @@
             }
         }
 
-        function openAddModal() {
-            document.getElementById("modal-add").classList.remove("hidden");
-            fetchSparepartData();
-        }
-
-        function closeAddModal() {
-            document.getElementById("modal-add").classList.add("hidden");
-        }
-
-        function toggleDescription(rowId) {
-            const descriptionRow = document.getElementById('desc-' + rowId);
-
-            // Toggle visibility of the description row
-            if (descriptionRow.classList.contains('hidden')) {
-                descriptionRow.classList.remove('hidden');
-                descriptionRow.style.display = 'table-row'; // Tampilkan baris detail
-            } else {
-                descriptionRow.classList.add('hidden');
-                descriptionRow.style.display = 'none'; // Sembunyikan baris detail
-            }
-        }
-
-        function formatCurrencyInput(input) {
-            input.addEventListener('input', function(e) {
-                // Hapus karakter non-digit
-                let value = this.value.replace(/[^0-9]/g, '');
-
-                // Format angka ke dalam format mata uang (tanpa "Rp")
-                if (value) {
-                    value = new Intl.NumberFormat('id-ID').format(value);
-                }
-
-                // Update nilai input
-                this.value = value;
-            });
-
-            input.addEventListener('blur', function(e) {
-                // Hapus pemisah ribuan saat input kehilangan fokus
-                let value = this.value.replace(/\./g, '');
-                this.value = value;
-            });
-
-            input.addEventListener('focus', function(e) {
-                // Format kembali ke mata uang saat input mendapatkan fokus
-                let value = this.value.replace(/[^0-9]/g, '');
-                if (value) {
-                    this.value = new Intl.NumberFormat('id-ID').format(value);
-                }
-            });
-        }
-
-        // Terapkan formatCurrencyInput ke semua input harga_jasa_perbaikan
-        document.querySelectorAll('.harga-jasa-input').forEach(input => {
-            formatCurrencyInput(input);
-        });
-
-        function tambahPartKeluarEdit() {
-            const container = document.getElementById('part-keluar-container-edit');
-            const newRow = document.createElement('div');
-            newRow.classList.add('part-keluar-row', 'grid', 'grid-cols-6', 'gap-4', 'mt-4');
-
-            newRow.innerHTML = `
-        <div>
-            <label for="kode_barang_edit">Kode Barang</label>
-            <select name="kode_barang[]" class="w-full p-2 border rounded kode-barang-select" onchange="fetchSparepartDataEdit(event)">
-                <option value="">Pilih Kode Barang</option>
-                @foreach ($spareparts as $sparepart)
-                    <option value="{{ $sparepart->kode_barang }}">{{ $sparepart->kode_barang }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div>
-            <label for="nama_part_edit">Nama Part</label>
-            <input type="text" name="nama_part[]" class="w-full p-2 border rounded nama-part-input" readonly>
-        </div>
-        <div>
-            <label for="stn_edit">STN</label>
-            <input type="text" name="stn[]" class="w-full p-2 border rounded stn-input" readonly>
-        </div>
-        <div>
-            <label for="merk_edit">Merk</label>
-            <input type="text" name="merk[]" class="w-full p-2 border rounded merk-input" readonly>
-        </div>
-        <div>
-            <label for="jumlah_edit">Jumlah</label>
-            <input type="number" name="jumlah[]" class="w-full p-2 border rounded jumlah-input" value="0">
-        </div>
-        <div>
-            <label for="tanggal_keluar_edit">Tanggal Keluar</label>
-            <input type="date" name="tanggal_keluar[]" class="w-full p-2 border rounded">
-        </div>
-        <div>
-            <label for="uraian_jasa_perbaikan_edit">Uraian Pekerjaan</label>
-            <textarea name="uraian_jasa_perbaikan[]" class="w-full p-2 border rounded"></textarea>
-        </div>
-        <div>
-            <label for="harga_jasa_perbaikan_edit">Harga Jasa Perbaikan</label>
-            <input type="text" name="harga_jasa_perbaikan[]" class="w-full p-2 border rounded harga-jasa-input">
-        </div>
-        <div class="flex items-end">
-            <button type="button" onclick="hapusPartKeluar(this)" class="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-700">
-                <i class="fas fa-trash"></i> Hapus
-            </button>
-        </div>
-    `;
-
-            container.appendChild(newRow);
-
-            // Tambahkan event listener untuk select kode barang
-            const kodeBarangSelect = newRow.querySelector('.kode-barang-select');
-            kodeBarangSelect.addEventListener('change', fetchSparepartDataEdit);
-            const hargaJasaInput = newRow.querySelector('.harga-jasa-input');
-            hargaJasaInput.addEventListener('input', function(e) {
-                // Hapus karakter non-digit
-                let value = this.value.replace(/[^0-9]/g, '');
-
-                // Format angka ke dalam format mata uang
-                if (value) {
-                    value = 'Rp. ' + new Intl.NumberFormat('id-ID').format(value);
-                }
-
-                // Update nilai input
-                this.value = value;
-            });
-
-            hargaJasaInput.addEventListener('blur', function(e) {
-                // Hapus format "Rp." saat input kehilangan fokus
-                let value = this.value.replace(/[^0-9]/g, '');
-                this.value = value;
-            });
-        }
-
-        function hapusPartKeluar(button) {
-            console.log("Tombol hapus diklik"); // Debugging
-            const row = button.closest('.part-keluar-row');
-            if (row) {
-                console.log("Baris ditemukan:", row); // Debugging
-                row.remove();
-            } else {
-                console.log("Baris tidak ditemukan"); // Debugging
-            }
-        }
-
-        function formatCurrencyInput(input) {
-            input.addEventListener('input', function(e) {
-                // Hapus karakter non-digit
-                let value = this.value.replace(/[^0-9]/g, '');
-
-                // Format angka ke dalam format mata uang (tanpa "Rp")
-                if (value) {
-                    value = new Intl.NumberFormat('id-ID').format(value);
-                }
-
-                // Update nilai input
-                this.value = value;
-            });
-
-            input.addEventListener('blur', function(e) {
-                // Hapus pemisah ribuan saat input kehilangan fokus
-                let value = this.value.replace(/\./g, '');
-                this.value = value;
-            });
-
-            input.addEventListener('focus', function(e) {
-                // Format kembali ke mata uang saat input mendapatkan fokus
-                let value = this.value.replace(/[^0-9]/g, '');
-                if (value) {
-                    this.value = new Intl.NumberFormat('id-ID').format(value);
-                }
-            });
-        }
-
-        // Terapkan formatCurrencyInput ke semua input harga_jasa_perbaikan
-        document.querySelectorAll('.harga-jasa-input').forEach(input => {
-            formatCurrencyInput(input);
-        });
-        // Fungsi untuk menghapus pemisah ribuan sebelum submit form
-        document.getElementById('inputFormEdit').addEventListener('submit', function(e) {
-            document.querySelectorAll('.harga-jasa-input').forEach(input => {
-                input.value = input.value.replace(/\./g, '');
-            });
-        });
-        document.querySelector('form').addEventListener('submit', function(event) {
-            const inputs = document.querySelectorAll('input[name="harga_jasa_perbaikan[]"]');
-
-            inputs.forEach(input => {
-                input.value = input.value.replace(/[^\d]/g, ''); // Strip non-digit characters
-            });
-        });
-
-
-        // Fungsi untuk membuka modal edit dan memformat nilai yang sudah ada
         function openEditModal(
             id, no_spk, costumer, contact_person, masuk, keluar, no_polisi, nama_mekanik, tahun,
-            tipe_mobile, warna, no_rangka, no_mesin, kilometer, keluhan_costumer, kode_barang, nama_part, jumlah,
-            uraian_jasa_perbaikan, status, tanggal_keluar, partData, spareparts, harga_jasa_perbaikan
+            tipe_mobile, warna, no_rangka, no_mesin, kilometer, keluhan_costumer, kode_barang, nama_part, stn,
+            tipe, merk, jumlah, uraian_jasa_perbaikan, status, tanggal_keluar
         ) {
             document.getElementById("modal-edit").classList.remove("hidden");
 
@@ -1412,80 +1322,69 @@
             document.getElementById('no_mesin_edit').value = no_mesin;
             document.getElementById('kilometer_edit').value = kilometer;
             document.getElementById('keluhan_costumer_edit').value = keluhan_costumer;
-            document.getElementById('kode_barang_edit').value = kode_barang;
-            document.getElementById('nama_part_edit').value = nama_part;
-            document.getElementById('stn_edit').value = stn;
-            document.getElementById('merk_edit').value = merk;
-            document.getElementById('tipe_edit').value = tipe;
-            document.getElementById('jumlah_edit').value = jumlah;
-            document.getElementById('uraian_jasa_perbaikan_edit').value = uraian_jasa_perbaikan;
-            document.getElementById('harga_jasa_perbaikan_edit').value = harga_jasa_perbaikan ? 'Rp. ' + new Intl
-                .NumberFormat('id-ID').format(harga_jasa_perbaikan) : '';
             document.getElementById('status_edit').value = status;
-            document.getElementById('tanggal_keluar_edit').value = tanggal_keluar;
             document.getElementById("inputFormEdit").action = "/dataservice/" + id;
-
-            // Isi part keluar yang sudah ada
-            const partKeluarContainer = document.getElementById('part-keluar-container-edit');
-            partKeluarContainer.innerHTML = ''; // Kosongkan container
-
-            // Loop melalui partData untuk menambahkan baris
-            partData.forEach(part => {
-                const newRow = document.createElement('div');
-                newRow.classList.add('part-keluar-row', 'grid', 'grid-cols-5', 'gap-4', 'mt-4');
-
-                newRow.innerHTML = `
-            <div>
-                <label for="kode_barang_edit">Kode Barang</label>
-                <select name="kode_barang[]" class="w-full p-2 border rounded kode-barang-select">
-                    <option value="">Pilih Kode Barang</option>
-                    ${spareparts.map(sparepart => `
-                                                                                                                    <option value="${sparepart.kode_barang}" ${part.kode_barang == sparepart.kode_barang ? 'selected' : ''}>
-                                                                                                                        ${sparepart.kode_barang}
-                                                                                                                    </option>
-                                                                                                                `).join('')}
-                </select>
-            </div>
-            <div>
-                <label for="nama_part_edit">Nama Part</label>
-                <input type="text" name="nama_part[]" class="w-full p-2 border rounded nama-part-input" value="${part.nama_part}" readonly>
-            </div>
-            <div>
-                <label for="stn_edit">STN</label>
-                <input type="text" name="stn[]" class="w-full p-2 border rounded stn-input" value="${part.stn}" readonly>
-            </div>
-            <div>
-                <label for="merk_edit">Merk</label>
-                <input type="text" name="merk[]" class="w-full p-2 border rounded merk-input" value="${part.merk}" readonly>
-            </div>
-            <div>
-                <label for="jumlah_edit">Jumlah</label>
-                <input type="number" name="jumlah[]" class="w-full p-2 border rounded jumlah-input" value="${part.jumlah}">
-            </div>
-            <div>
-                <label for="tanggal_keluar_edit">Tanggal Keluar</label>
-                <input type="date" name="tanggal_keluar[]" class="w-full p-2 border rounded" value="${part.tanggal_keluar || ''}">
-            </div>
-            <div>
-                <label for="uraian_jasa_perbaikan_edit">Uraian Jasa Perbaikan</label>
-                <textarea name="uraian_jasa_perbaikan[]" class="w-full p-2 border rounded">${part.uraian_jasa_perbaikan}</textarea>
-            </div>
-            <div>
-                <label for="harga_jasa_perbaikan_edit">Harga Jasa Perbaikan</label>
-                <input type="text" name="harga_jasa_perbaikan[]" class="w-full p-2 border rounded harga-jasa-input" value="${part.harga_jasa_perbaikan ? new Intl.NumberFormat('id-ID').format(part.harga_jasa_perbaikan) : ''}">
-            </div>
-        `;
-
-                partKeluarContainer.appendChild(newRow);
-
-                // Terapkan formatCurrencyInput ke input baru
-                const hargaJasaInput = newRow.querySelector('.harga-jasa-input');
-                formatCurrencyInput(hargaJasaInput);
-            });
         }
 
         function closeEditModal() {
             document.getElementById("modal-edit").classList.add("hidden");
+        }
+
+        function tambahPartKeluarEdit() {
+            const container = document.getElementById('part-keluar-container-edit');
+            const newRow = document.createElement('div');
+            newRow.classList.add('part-keluar-row', 'grid', 'grid-cols-6', 'gap-4', 'mt-4');
+
+            newRow.innerHTML = `
+                <div>
+                    <label for="kode_barang_edit">Kode Barang</label>
+                    <select name="kode_barang[]" class="w-full p-2 border rounded kode-barang-select" onchange="fetchSparepartDataEdit(event)">
+                        <option value="">Pilih Kode Barang</option>
+                        @foreach ($spareparts as $sparepart)
+                            <option value="{{ $sparepart->kode_barang }}">{{ $sparepart->kode_barang }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label for="nama_part_edit">Nama Part</label>
+                    <input type="text" name="nama_part[]" class="w-full p-2 border rounded nama-part-input" readonly>
+                </div>
+                <div>
+                    <label for="stn_edit">STN</label>
+                    <input type="text" name="stn[]" class="w-full p-2 border rounded stn-input" readonly>
+                </div>
+                <div>
+                    <label for="merk_edit">Merk</label>
+                    <input type="text" name="merk[]" class="w-full p-2 border rounded merk-input" readonly>
+                </div>
+                <div>
+                    <label for="jumlah_edit">Jumlah</label>
+                    <input type="number" name="jumlah[]" class="w-full p-2 border rounded jumlah-input" value="0">
+                </div>
+                <div>
+                    <label for="tanggal_keluar_edit">Tanggal Keluar</label>
+                    <input type="date" name="tanggal_keluar[]" class="w-full p-2 border rounded">
+                </div>
+                <div>
+                    <label for="uraian_jasa_perbaikan_edit">Uraian Pekerjaan</label>
+                    <textarea name="uraian_jasa_perbaikan[]" class="w-full p-2 border rounded"></textarea>
+                </div>
+                <div>
+                    <label for="harga_jasa_perbaikan_edit">Harga Jasa Perbaikan</label>
+                    <input type="text" name="harga_jasa_perbaikan[]" class="w-full p-2 border rounded harga-jasa-input">
+                </div>
+                <div class="flex items-end">
+                    <button type="button" onclick="hapusPartKeluar(this)" class="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-700">
+                        <i class="fas fa-trash"></i> Hapus
+                    </button>
+                </div>
+            `;
+
+            container.appendChild(newRow);
+        }
+
+        function hapusPartKeluar(button) {
+            button.closest('.part-keluar-row').remove();
         }
 
         function showErrorPopup(message) {
@@ -1497,7 +1396,6 @@
         }
 
         @if (session('error'))
-            console.log("Session Error: ", "{{ session('error') }}");
             showErrorPopup("{{ session('error') }}");
         @endif
     </script>

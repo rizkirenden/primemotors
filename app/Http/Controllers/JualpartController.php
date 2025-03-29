@@ -44,7 +44,6 @@ public function getSparepart($kode_barang)
             'harga_jual' => 'sometimes|numeric',
             'discount' => 'required',
             'total_harga_part' => 'required',
-            'status' => 'required',
             'metode_pembayaran' => 'required',
             'nama_pelanggan' => 'required',
             'alamat_pelanggan' => 'required',

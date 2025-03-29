@@ -133,16 +133,13 @@
             <table class="min-w-full table-auto text-black">
                 <thead class="bg-white">
                     <tr>
+                        <th class="px-4 py-2 text-left text-xs">Nama Pelanggan</th>
                         <th class="px-4 py-2 text-left text-xs">Kode Barang</th>
                         <th class="px-4 py-2 text-left text-xs">Nama Part</th>
-                        <th class="px-4 py-2 text-left text-xs">STN</th>
-                        <th class="px-4 py-2 text-left text-xs">Tipe</th>
-                        <th class="px-4 py-2 text-left text-xs">Merk</th>
                         <th class="px-4 py-2 text-left text-xs">Tanggal Keluar</th>
                         <th class="px-4 py-2 text-left text-xs">Jumlah</th>
                         <th class="px-4 py-2 text-left text-xs">Harga Toko</th>
                         <th class="px-4 py-2 text-left text-xs">Harga Jual</th>
-                        <th class="px-4 py-2 text-left text-xs">Margin Persen</th>
                         <th class="px-4 py-2 text-left text-xs">Discount</th>
                         <th class="px-4 py-2 text-left text-xs">Total</th>
                         <th class="px-4 py-2 text-left text-xs">Detail</th>
@@ -152,12 +149,6 @@
                 <tbody class="bg-white">
                     @foreach ($jualparts as $jualpart)
                         <tr>
-                            <td class="px-4 py-2"></td>
-                            <td class="px-4 py-2"></td>
-                            <td class="px-4 py-2"></td>
-                            <td class="px-4 py-2"></td>
-                            <td class="px-4 py-2"></td>
-                            <td class="px-4 py-2"></td>
                             <td class="px-4 py-2"></td>
                             <td class="px-4 py-2"></td>
                             <td class="px-4 py-2"></td>
@@ -190,9 +181,11 @@
                                 <div class="description-container">
                                     <div style="display: flex; gap: 20px;">
                                         <!-- Tambahkan display: flex dan gap untuk jarak -->
+                                        <div><strong>Alamat Pelanggan:</strong> {{ $sparepat->stn }}</div>
+                                        <div><strong>No Telp:</strong> {{ $sparepat->tipe }}</div>
                                         <div><strong>STN:</strong> {{ $sparepat->stn }}</div>
+                                        <div><strong>MERK:</strong>{{ $sparepat->merk }}</div>
                                         <div><strong>Tipe:</strong> {{ $sparepat->tipe }}</div>
-                                        <div><strong>Merk:</strong> {{ $sparepat->merk }}</div>
                                     </div>
                                 </div>
                             </td>
@@ -275,8 +268,6 @@
                     <input type="number" name="total_harga_part" id="total_harga_part"
                         placeholder="Total Harga Part" class="w-full px-4 py-2 border border-gray-300 rounded-full"
                         required readonly>
-                    <input type="text" name="status" placeholder="Status"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
                     <select name="metode_pembayaran" id="metode_pembayaran"
                         class="w-full px-4 py-2 border border-gray-300 rounded-full" required>
                         <option value="">Metode Pembayaran</option>
@@ -302,32 +293,71 @@
     <!-- Edit Modal for Editing Data -->
     <div id="edit-modal"
         class="modal hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-        <div class="modal-content bg-white p-6 rounded-lg max-w-sm w-full">
-            <h2 class="text-center text-xl font-semibold mb-4">Edit Data Mekanik</h2>
-            <form method="POST">
+        <div class="modal-content bg-white p-6 rounded-lg max-w-4xl w-full">
+            <h2 class="text-center text-xl font-semibold mb-4">Edit Data Jual Part</h2>
+            <form method="POST" class="w-full space-y-4">
                 @csrf
                 @method('PUT')
                 <input type="hidden" id="edit-id" name="id">
-                <input type="text" id="edit-nama_mekanik" name="nama_mekanik"
-                    class="mb-2 w-full px-4 py-2 border border-gray-300 rounded-full" required>
-                <input type="text" id="edit-nomor_hp" name="nomor_hp"
-                    class="mb-2 w-full px-4 py-2 border border-gray-300 rounded-full" required>
-                <input type="text" id="edit-alamat" name="alamat"
-                    class="mb-2 w-full px-4 py-2 border border-gray-300 rounded-full" required>
-                <input type="date" id="edit-tanggal_lahir" name="tanggal_lahir"
-                    class="mb-4 w-full px-4 py-2 border border-gray-300 rounded-full" required>
-                <input type="date" id="edit-tanggal_masuk_karyawan" name="tanggal_masuk_karyawan"
-                    class="mb-4 w-full px-4 py-2 border border-gray-300 rounded-full" required>
-                <button type="submit"
-                    class="w-full px-4 py-2 bg-black text-white rounded-full hover:bg-gray-700">Update Data</button>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    <select name="kode_barang" id="edit-kode_barang"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required
+                        onchange="fetchSparepartDataEdit()">
+                        <option value="">Pilih Kode Barang</option>
+                        @foreach ($spareparts as $sparepart)
+                            <option value="{{ $sparepart->kode_barang }}">{{ $sparepart->kode_barang }}</option>
+                        @endforeach
+                    </select>
+                    <input type="text" id="edit-nama_part" name="nama_part" placeholder="Nama Part"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
+                    <input type="text" id="edit-stn" name="stn" placeholder="STN"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
+                    <input type="text" id="edit-tipe" name="tipe" placeholder="Tipe"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
+                    <input type="text" id="edit-merk" name="merk" placeholder="Merk"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
+                    <input type="date" id="edit-tanggal_keluar" name="tanggal_keluar"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required>
+                    <input type="number" id="edit-jumlah" name="jumlah" placeholder="Jumlah"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required min="1"
+                        oninput="calculateTotalEdit()">
+                    <input type="text" id="edit-harga_toko" name="harga_toko" placeholder="Harga Toko"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
+                    <input type="text" id="edit-margin_persen" name="margin_persen" placeholder="Margin Persen"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
+                    <input type="text" id="edit-harga_jual" name="harga_jual" placeholder="Harga Jual"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
+                    <input type="number" id="edit-discount" name="discount" placeholder="Discount"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required
+                        oninput="calculateTotalEdit()">
+                    <input type="number" id="edit-total_harga_part" name="total_harga_part"
+                        placeholder="Total Harga Part" class="w-full px-4 py-2 border border-gray-300 rounded-full"
+                        required readonly>
+                    <input type="text" id="edit-status" name="status" placeholder="Status"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
+                    <select name="metode_pembayaran" id="edit-metode_pembayaran"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required>
+                        <option value="">Metode Pembayaran</option>
+                        <option value="Tunai">Tunai</option>
+                        <option value="Kredit">Kredit</option>
+                        <option value="Bank_Transfer">Bank Transfer</option>
+                    </select>
+                    <input type="text" id="edit-nama_pelanggan" name="nama_pelanggan"
+                        placeholder="Nama Pelanggan" class="w-full px-4 py-2 border border-gray-300 rounded-full"
+                        required>
+                    <input type="date" id="edit-tanggal_pembayaran" name="tanggal_pembayaran"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required>
+                </div>
+                <div class="mt-4 flex justify-between">
+                    <button type="submit"
+                        class="w-1/2 px-4 py-2 bg-black text-white rounded-full hover:bg-gray-700 mr-2">Update
+                        Data</button>
+                    <button type="button" onclick="closeEditModal()"
+                        class="w-1/2 px-4 py-2 bg-black text-white rounded-full hover:bg-red-700 ml-2">Close</button>
+                </div>
             </form>
-            <button onclick="closeEditModal()"
-                class="mt-2 w-full px-4 py-2 bg-black text-white rounded-full hover:bg-red-700">Close</button>
         </div>
     </div>
-
-
-
     <script>
         // Modal functions
         function openModal() {
@@ -472,31 +502,50 @@
             });
         });
 
-        function openEditModal(id, kode_barang, nama_part, stn, tipe, merk, tanggal_keluar, jumlah, harga_toko,
+        function openEditModal(
+            id,
+            kode_barang,
+            nama_part,
+            stn,
+            tipe,
+            merk,
+            tanggal_keluar,
+            jumlah,
+            harga_toko,
             harga_jual,
-            margin_persen, discount) {
-            // Menetapkan nilai untuk input di modal edit
+            margin_persen,
+            discount,
+            total_harga_part,
+            status,
+            metode_pembayaran,
+            nama_pelanggan,
+            tanggal_pembayaran
+        ) {
             document.getElementById("edit-id").value = id;
-            document.getElementById("edit-nama_mekanik").value = kode_barang;
-            document.getElementById("edit-nomor_hp").value = nama_part;
-            document.getElementById("edit-alamat").value = stn;
-            document.getElementById("edit-tanggal_lahir").value = tipe;
-            document.getElementById("edit-tanggal_masuk_mekanik").value = merk;
-            document.getElementById("edit-tanggal_masuk_karyawan").value = tanggal_keluar;
-            document.getElementById("edit-tanggal_keluar").value = jumlah;
-            document.getElementById("edit-tanggal_masuk_karyawan").value = harga_toko;
-            document.getElementById("edit-tanggal_masuk_karyawan").value = harga_jual;
-            document.getElementById("edit-tanggal_masuk_karyawan").value = margin_persen;
-            document.getElementById("edit-tanggal_masuk_karyawan").value = discount;
+            document.getElementById("edit-kode_barang").value = kode_barang;
+            document.getElementById("edit-nama_part").value = nama_part;
+            document.getElementById("edit-stn").value = stn;
+            document.getElementById("edit-tipe").value = tipe;
+            document.getElementById("edit-merk").value = merk;
+            document.getElementById("edit-tanggal_keluar").value = tanggal_keluar;
+            document.getElementById("edit-jumlah").value = jumlah;
+            document.getElementById("edit-harga_toko").value = harga_toko;
+            document.getElementById("edit-harga_jual").value = harga_jual;
+            document.getElementById("edit-margin_persen").value = margin_persen;
+            document.getElementById("edit-discount").value = discount;
+            document.getElementById("edit-total_harga_part").value = total_harga_part;
+            document.getElementById("edit-status").value = status;
+            document.getElementById("edit-metode_pembayaran").value = metode_pembayaran;
+            document.getElementById("edit-nama_pelanggan").value = nama_pelanggan;
+            document.getElementById("edit-tanggal_pembayaran").value = tanggal_pembayaran;
 
-            // Update form action untuk mencocokkan dengan ID yang akan diupdate
+            // Update form action to match the ID being edited
             const formAction = document.querySelector("#edit-modal form");
-            formAction.action = "/jualpart/" + id; // Update URL dengan ID mekanik
+            formAction.action = "/jualpart/" + id;
 
-            // Tampilkan modal edit
+            // Show edit modal
             document.getElementById("edit-modal").classList.remove("hidden");
         }
-
 
         function closeEditModal() {
             document.getElementById("edit-modal").classList.add("hidden");
