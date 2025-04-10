@@ -160,12 +160,32 @@
             align-items: flex-end;
         }
 
+        /* Description row styling */
         .description-row {
             display: none;
         }
 
         .description-row.visible {
             display: table-row;
+        }
+
+        /* Table styling inside description */
+        .description-row table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+
+        .description-row th,
+        .description-row td {
+            border: 1px solid #000;
+            padding: 5px;
+        }
+
+        .description-row th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
         }
 
         table {
@@ -958,41 +978,53 @@
             document.getElementById("modal-add").classList.add("hidden");
         }
 
-        function toggleDescription(rowId) {
-            const descriptionRow = document.getElementById('desc-' + rowId);
-            if (descriptionRow.classList.contains('hidden')) {
-                descriptionRow.classList.remove('hidden');
-                descriptionRow.style.display = 'table-row';
-            } else {
-                descriptionRow.classList.add('hidden');
-                descriptionRow.style.display = 'none';
-            }
-        }
-
         function searchTable() {
-            let input = document.getElementById("search-input");
-            let filter = input.value.toLowerCase();
-            let table = document.querySelector("table tbody");
-            let rows = table.getElementsByTagName("tr");
+            const searchTerm = document.getElementById("search-input").value.toLowerCase();
+            const mainRows = document.querySelectorAll("tbody tr[data-id]");
 
-            Array.from(rows).forEach(row => {
-                if (row.classList.contains('description-row')) return;
+            mainRows.forEach(row => {
+                const cells = row.cells;
+                // Ambil teks dari kolom yang ingin dicari (No SPK, Costumer, No Polisi)
+                const noSpk = cells[0].textContent.toLowerCase(); // Kolom No SPK (indeks 0)
+                const costumer = cells[1].textContent.toLowerCase(); // Kolom Costumer (indeks 1)
+                const noPolisi = cells[4].textContent.toLowerCase(); // Kolom No Polisi (indeks 4)
 
-                let cells = row.getElementsByTagName("td");
-                let found = false;
+                // Gabungkan teks dari kolom yang ingin dicari
+                const searchData = `${noSpk} ${costumer} ${noPolisi}`;
 
-                Array.from(cells).forEach(cell => {
-                    if (cell && cell.textContent.toLowerCase().includes(filter)) {
-                        found = true;
-                    }
-                });
+                const isVisible = searchData.includes(searchTerm);
 
-                row.style.display = found ? "" : "none";
-                let descriptionRow = table.querySelector(`#desc-${row.dataset.id}`);
-                if (descriptionRow) {
-                    descriptionRow.style.display = found ? "" : "none";
+                // Toggle main row visibility
+                row.style.display = isVisible ? '' : 'none';
+
+                // Hide all description rows initially
+                const descRow = document.getElementById(`desc-${row.dataset.id}`);
+                if (descRow) {
+                    descRow.style.display = 'none';
+                    descRow.classList.remove('visible');
                 }
             });
+        }
+
+        function toggleDescription(rowId) {
+            const descRow = document.getElementById(`desc-${rowId}`);
+            const mainRow = document.querySelector(`tr[data-id="${rowId}"]`);
+
+            if (mainRow.style.display !== 'none') {
+                // Toggle visibility
+                const isVisible = descRow.classList.toggle('visible');
+                descRow.style.display = isVisible ? 'table-row' : 'none';
+
+                // Force re-render tables when showing
+                if (isVisible) {
+                    setTimeout(() => {
+                        descRow.querySelectorAll('table').forEach(table => {
+                            table.style.display = 'table';
+                            table.style.visibility = 'visible';
+                        });
+                    }, 10);
+                }
+            }
         }
 
         function filterByDateRange() {
@@ -1058,25 +1090,21 @@
                 let cells = row.getElementsByTagName("td");
                 let found = false;
 
-                // Cari berdasarkan teks
-                Array.from(cells).forEach(cell => {
-                    if (cell && cell.textContent.toLowerCase().includes(search)) {
-                        found = true;
-                    }
-                });
+                // Cari hanya di kolom No SPK (0), Costumer (1), dan No Polisi (4)
+                if (search) {
+                    const noSpk = cells[0].textContent.toLowerCase();
+                    const costumer = cells[1].textContent.toLowerCase();
+                    const noPolisi = cells[4].textContent.toLowerCase();
 
-                // Jika ada pencarian teks dan tidak ketemu, skip
-                if (search && !found) {
-                    row.style.display = "none";
-                    let descriptionRow = table.querySelector(`#desc-${row.dataset.id}`);
-                    if (descriptionRow) {
-                        descriptionRow.style.display = "none";
-                    }
-                    return;
+                    found = noSpk.includes(search) ||
+                        costumer.includes(search) ||
+                        noPolisi.includes(search);
+                } else {
+                    found = true; // Jika tidak ada pencarian, tampilkan semua
                 }
 
-                // Filter berdasarkan tanggal masuk saja
-                if (start || end) {
+                // Filter berdasarkan tanggal masuk saja (kolom 2)
+                if (found && (start || end)) {
                     let dateMasukCell = cells[2]; // Kolom tanggal masuk (indeks 2)
                     let dateMasuk = dateMasukCell.textContent.trim() ? new Date(dateMasukCell.textContent.trim()) :
                         null;
@@ -1098,6 +1126,7 @@
         }
 
         // Event listeners
+        document.getElementById("search-input").addEventListener("keyup", searchTable);
         document.getElementById("search-input").addEventListener("keyup", filterTable);
         document.getElementById("date-start").addEventListener("change", filterTable);
         document.getElementById("date-end").addEventListener("change", filterTable);
