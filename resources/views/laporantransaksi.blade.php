@@ -178,35 +178,50 @@
             <table class="min-w-full table-auto text-black">
                 <thead class="bg-white">
                     <tr>
-                        <th class="px-4 py-2 text-left">No SPK</th>
+                        <th class="px-4 py-2 text-left">No Invoice</th>
                         <th class="px-4 py-2 text-left">Tanggal Invoice</th>
-                        <th class="px-4 py-2 text-left">Costumer</th>
-                        <th class="px-4 py-2 text-left">No Polisi</th>
+                        <th class="px-4 py-2 text-left">No SPK</th>
                         <th class="px-4 py-2 text-left">Nama Mekanik</th>
-                        <th class="px-4 py-2 text-left">Sparepat</th>
-                        <th class="px-4 py-2 text-left">Total Biaya Jasa</th>
-                        <th class="px-4 py-2 text-left">Discount</th>
+                        <th class="px-4 py-2 text-left">Nama Part</th>
+                        <th class="px-4 py-2 text-left">Jumlah</th>
+                        <th class="px-4 py-2 text-left">Harga Part</th>
+                        <th class="px-4 py-2 text-left">Discount Part</th>
+                        <th class="px-4 py-2 text-left">Total Harga Part</th>
+                        <th class="px-4 py-2 text-left">Jenis Pekerjaan</th>
+                        <th class="px-4 py-2 text-left">Ongkos Pengerjaan</th>
+                        <th class="px-4 py-2 text-left">Discount Ongkos</th>
+                        <th class="px-4 py-2 text-left">Total Ongkos</th>
                         <th class="px-4 py-2 text-left">PPN</th>
-                        <th class="px-4 py-2 text-left">Total</th>
+                        <th class="px-4 py-2 text-left">Total Harga</th>
                         <th class="px-4 py-2 text-left">Action</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white">
                     @foreach ($invoices as $invoice)
                         <tr>
-                            <td class="px-4 py-2">{{ $invoice->dataservice->no_spk }}</td>
+                            <td class="px-4 py-2">{{ $invoice->no_invoice }}</td>
                             <td class="px-4 py-2">{{ $invoice->tanggal_invoice }}</td>
-                            <td class="px-4 py-2">{{ $invoice->dataservice->costumer }}</td>
-                            <td class="px-4 py-2">{{ $invoice->dataservice->no_polisi }}</td>
-                            <td class="px-4 py-2">{{ $invoice->dataservice->nama_mekanik }}</td>
+                            <td class="px-4 py-2">{{ $invoice->dataservice->no_spk }}</td>
+                            <td class="px-4 py-2">{{ $invoice->nama_mekanik }}</td>
+                            <td class="px-4 py-2">{{ $invoice->nama_part }}</td>
+                            <td class="px-4 py-2">{{ $invoice->jumlah }}</td>
+                            <td class="px-4 py-2">Rp {{ number_format($invoice->harga_jual, 0, ',', '.') }}</td>
+                            <td class="px-4 py-2">{{ $invoice->discount_part }}%</td>
                             <td class="px-4 py-2">Rp {{ number_format($invoice->total_harga_part, 0, ',', '.') }}</td>
-                            <td class="px-4 py-2">Rp {{ number_format($invoice->biaya_jasa, 0, ',', '.') }}</td>
-                            <td class="px-4 py-2"> {{ number_format($invoice->discount, 0, ',', '.') }} %</td>
-                            <td class="px-4 py-2"> {{ number_format($invoice->ppn, 0, ',', '.') }} %</td>
+                            @php
+                                $jenisPekerjaan = json_decode($invoice->jenis_pekerjaan, true);
+                                $firstItem = $jenisPekerjaan[0] ?? ''; // Ambil elemen pertama jika ada
+                            @endphp
+                            <td class="px-4 py-2">{{ $firstItem }}</td>
+                            <td class="px-4 py-2">Rp {{ number_format($invoice->ongkos_pengerjaan, 0, ',', '.') }}</td>
+                            <td class="px-4 py-2">{{ $invoice->discount_ongkos_pengerjaan }}%</td>
+                            <td class="px-4 py-2">Rp
+                                {{ number_format($invoice->total_harga_uraian_pekerjaan, 0, ',', '.') }}</td>
+                            <td class="px-4 py-2">{{ $invoice->ppn }}%</td>
                             <td class="px-4 py-2">Rp {{ number_format($invoice->total_harga, 0, ',', '.') }}</td>
                             <td class="px-4 py-2">
                                 <button
-                                    onclick="openUpdateModal({{ $invoice->id }}, {{ $invoice->discount }}, {{ $invoice->ppn }})"
+                                    onclick="openUpdateModal({{ $invoice->id }}, {{ $invoice->discount_part }}, {{ $invoice->discount_ongkos_pengerjaan }}, {{ $invoice->ppn }})"
                                     class="text-blue-500 hover:text-blue-700">
                                     <i class="fas fa-save"></i>
                                 </button>
@@ -263,10 +278,18 @@
             <h2 class="text-lg font-bold mb-4">Update Invoice</h2>
             <form id="updateForm">
                 <div class="space-y-4">
-                    <!-- Discount -->
+                    <!-- Discount Part -->
                     <div>
-                        <label for="modal_discount" class="block text-sm font-medium text-gray-700">Discount (%)</label>
-                        <input type="number" id="modal_discount" name="discount"
+                        <label for="modal_discount_part" class="block text-sm font-medium text-gray-700">Discount Part
+                            (%)</label>
+                        <input type="number" id="modal_discount_part" name="discount_part"
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <!-- Discount Ongkos -->
+                    <div>
+                        <label for="modal_discount_ongkos" class="block text-sm font-medium text-gray-700">Discount
+                            Ongkos (%)</label>
+                        <input type="number" id="modal_discount_ongkos" name="discount_ongkos"
                             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
                     </div>
                     <!-- PPN -->
@@ -295,29 +318,16 @@
             let rows = table.getElementsByTagName("tr");
 
             Array.from(rows).forEach(row => {
-                // Skip rows that are description rows
-                if (row.classList.contains('description-row')) {
-                    return; // Jangan proses baris detail
-                }
-
                 let cells = row.getElementsByTagName("td");
                 let found = false;
 
-                // Loop through all the columns of the row
                 Array.from(cells).forEach(cell => {
                     if (cell && cell.textContent.toLowerCase().includes(filter)) {
                         found = true;
                     }
                 });
 
-                // Show or hide the row based on the search result
                 row.style.display = found ? "" : "none";
-
-                // Tampilkan atau sembunyikan baris detail terkait
-                let descriptionRow = table.querySelector(`#desc-${row.dataset.id}`);
-                if (descriptionRow) {
-                    descriptionRow.style.display = found ? "" : "none";
-                }
             });
         }
 
@@ -327,23 +337,16 @@
             let table = document.querySelector("table tbody");
             let rows = table.getElementsByTagName("tr");
 
-            // Konversi tanggal ke objek Date
             let start = startDate ? new Date(startDate) : null;
             let end = endDate ? new Date(endDate) : null;
 
             Array.from(rows).forEach(row => {
-                // Skip rows that are description rows
-                if (row.classList.contains('description-row')) {
-                    return; // Jangan proses baris detail
-                }
-
                 let cells = row.getElementsByTagName("td");
                 let dateCell = cells[1]; // Kolom tanggal (index 1)
 
                 if (dateCell) {
                     let rowDate = new Date(dateCell.textContent.trim());
 
-                    // Filter berdasarkan rentang tanggal
                     let isWithinRange = true;
 
                     if (start && rowDate < start) {
@@ -353,19 +356,11 @@
                         isWithinRange = false;
                     }
 
-                    // Tampilkan atau sembunyikan baris berdasarkan hasil filter
                     row.style.display = isWithinRange ? "" : "none";
-
-                    // Jangan sembunyikan baris detail terkait
-                    let descriptionRow = table.querySelector(`#desc-${row.dataset.id}`);
-                    if (descriptionRow) {
-                        descriptionRow.style.display = isWithinRange ? "" : "none";
-                    }
                 }
             });
         }
 
-        // Tambahkan event listener ke input tanggal
         document.getElementById("date-start").addEventListener("change", filterByDateRange);
         document.getElementById("date-end").addEventListener("change", filterByDateRange);
 
@@ -376,28 +371,20 @@
             let table = document.querySelector("table tbody");
             let rows = table.getElementsByTagName("tr");
 
-            // Konversi tanggal ke objek Date
             let start = startDate ? new Date(startDate) : null;
             let end = endDate ? new Date(endDate) : null;
 
             Array.from(rows).forEach(row => {
-                // Skip rows that are description rows
-                if (row.classList.contains('description-row')) {
-                    return; // Jangan proses baris detail
-                }
-
                 let cells = row.getElementsByTagName("td");
                 let found = false;
 
-                // Cek apakah baris cocok dengan pencarian
                 Array.from(cells).forEach(cell => {
                     if (cell && cell.textContent.toLowerCase().includes(search)) {
                         found = true;
                     }
                 });
 
-                // Cek apakah tanggal dalam rentang yang dipilih
-                let dateCell = cells[1]; // Kolom tanggal (index 1)
+                let dateCell = cells[1];
                 if (dateCell) {
                     let rowDate = new Date(dateCell.textContent.trim());
 
@@ -409,63 +396,32 @@
                     }
                 }
 
-                // Tampilkan atau sembunyikan baris berdasarkan hasil filter
                 row.style.display = found ? "" : "none";
-
-                // Tampilkan atau sembunyikan baris detail terkait
-                let descriptionRow = table.querySelector(`#desc-${row.dataset.id}`);
-                if (descriptionRow) {
-                    descriptionRow.style.display = found ? "" : "none";
-                }
             });
         }
 
-        // Tambahkan event listener ke input pencarian dan tanggal
         document.getElementById("search-input").addEventListener("keyup", filterTable);
         document.getElementById("date-start").addEventListener("change", filterTable);
         document.getElementById("date-end").addEventListener("change", filterTable);
 
-        // Fungsi untuk memformat input dengan "Rp"
-        function formatCurrency(input) {
-            let value = input.value.replace(/\D/g, '');
-            if (value.length > 0) {
-                input.value = 'Rp ' + parseInt(value).toLocaleString('id-ID');
-            } else {
-                input.value = '';
-            }
-        }
-
-        // Fungsi untuk menghapus "Rp" dan mengembalikan nilai numerik
-        function getNumericValue(currencyString) {
-            return parseInt(currencyString.replace(/\D/g, ''));
-        }
-
-        // Fungsi untuk membuka modal dan mengisi data
-
-        // Fungsi untuk membuka modal dan mengisi data
-        function openUpdateModal(id, discount, ppn) {
-            console.log("Opening modal for invoice ID:", id);
-            console.log("Discount:", discount);
-            console.log("PPN:", ppn);
-
+        function openUpdateModal(id, discount_part, discount_ongkos, ppn) {
             currentInvoiceId = id;
 
-            // Isi nilai discount dan ppn
-            document.getElementById('modal_discount').value = discount;
+            document.getElementById('modal_discount_part').value = discount_part;
+            document.getElementById('modal_discount_ongkos').value = discount_ongkos;
             document.getElementById('modal_ppn').value = ppn;
             document.getElementById('updateModal').classList.remove('hidden');
         }
 
-        // Fungsi untuk menutup modal
         function closeModal() {
             document.getElementById('updateModal').classList.add('hidden');
         }
 
-        // Fungsi untuk mengirim data update ke server
         document.getElementById('updateForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const discount = document.getElementById('modal_discount').value;
+            const discount_part = document.getElementById('modal_discount_part').value;
+            const discount_ongkos = document.getElementById('modal_discount_ongkos').value;
             const ppn = document.getElementById('modal_ppn').value;
 
             fetch(`/invoice/update/${currentInvoiceId}`, {
@@ -475,7 +431,8 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify({
-                        discount: discount,
+                        discount_part: discount_part,
+                        discount_ongkos_pengerjaan: discount_ongkos,
                         ppn: ppn
                     })
                 })
@@ -487,7 +444,7 @@
                             title: 'Success',
                             text: 'Invoice updated successfully!',
                         }).then(() => {
-                            location.reload(); // Reload halaman setelah update
+                            location.reload();
                         });
                     } else {
                         showErrorPopup(data.message || 'Failed to update invoice.');
@@ -501,7 +458,6 @@
             closeModal();
         });
 
-        // Fungsi untuk menampilkan pop-up error menggunakan SweetAlert
         function showErrorPopup(message) {
             Swal.fire({
                 icon: 'error',

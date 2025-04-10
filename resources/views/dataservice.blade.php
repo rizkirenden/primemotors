@@ -486,7 +486,7 @@
                                                         @endforeach
                                                     @else
                                                         <tr>
-                                                            <td colspan="10"
+                                                            <td colspan="8"
                                                                 style="border: 1px solid #000; padding: 5px; text-align: center;">
                                                                 Tidak ada data part yang keluar.</td>
                                                         </tr>

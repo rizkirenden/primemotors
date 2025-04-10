@@ -19,8 +19,11 @@ class Invoice extends Model
         'jumlah',
         'harga_jual',
         'total_harga_part',
-        'biaya_jasa',
-        'discount',
+        'discount_part',
+        'jenis_pekerjaan',
+        'ongkos_pengerjaan',
+        'discount_ongkos_pengerjaan',
+        'total_harga_uraian_pekerjaan',
         'ppn',
         'total_harga',
 

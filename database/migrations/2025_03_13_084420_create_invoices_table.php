@@ -12,22 +12,24 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('invoices', function (Blueprint $table) {
-            $table->id(); // Auto-incrementing primary key
-            $table->string('no_invoice')->unique(); // Unique invoice number
+            $table->id();
+            $table->string('no_invoice')->unique();
             $table->foreignId('dataservice_id')->constrained()->onDelete('cascade');
             $table->string('kode_barang');
-            $table->date('tanggal_invoice'); // Invoice date
+            $table->date('tanggal_invoice');
             $table->string('nama_mekanik');
-            $table->string('nama_part'); // Part name
-            $table->integer('jumlah'); // Quantity
-            $table->decimal('harga_jual', 15, 2); // Selling price
-            $table->decimal('total_harga_part', 15, 2); // Total part price
-            $table->decimal('discount_part', 5, 2); // Discount
-            $table->decimal('biaya_jasa', 15, 2); // Service fee
-            $table->decimal('discount_biaya_jasa', 5, 2); // Discount
+            $table->string('nama_part');
+            $table->integer('jumlah');
+            $table->decimal('harga_jual', 15, 2);
+            $table->decimal('total_harga_part', 15, 2);
+            $table->decimal('discount_part', 5, 2);
+            $table->string('jenis_pekerjaan');
+            $table->decimal('ongkos_pengerjaan', 15, 2);
+            $table->decimal('discount_ongkos_pengerjaan', 5, 2);
+            $table->decimal('total_harga_uraian_pekerjaan', 15, 2);
             $table->decimal('ppn', 5, 2); // VAT
-            $table->decimal('total_harga', 15, 2); // Total price
-            $table->timestamps(); // Created_at and updated_at
+            $table->decimal('total_harga', 15, 2);
+            $table->timestamps();
         });
     }
 
