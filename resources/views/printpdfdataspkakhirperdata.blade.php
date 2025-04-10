@@ -19,7 +19,6 @@
 
         .header img {
             max-height: 150px;
-            /* Adjust logo size */
         }
 
         .contact-info {
@@ -108,15 +107,22 @@
             color: white;
             background-color: #000000;
             text-align: left;
-            /* Penyelarasan teks ke kiri */
             font-size: 12px;
-            /* Ukuran font lebih kecil */
         }
 
         .center-strong {
             text-align: center;
             display: block;
             width: 100%;
+        }
+
+        textarea {
+            width: 100%;
+            height: auto;
+            border: none;
+            resize: none;
+            font-family: inherit;
+            font-size: inherit;
         }
     </style>
 </head>
@@ -125,49 +131,44 @@
 
     <!-- Header with Logo -->
     <div class="header">
-        <img src="images/silver.PNG" alt="Logo"> <!-- Add your logo image here -->
+        <img src="images/silver.PNG" alt="Logo">
     </div>
     <strong class="center-strong">PT. PREMIER AUTO GROUP</strong>
-    <!-- Contact Information with FontAwesome Icons -->
+
+    <!-- Contact Information -->
     <div class="contact-info">
         <p>
-            <span>
-                <i class="fas fa-map-marker-alt"></i>Nama Jalan: Jalan XYZ, No. 123
-            </span>
-            <span>
-                <i class="fab fa-instagram"></i>Instagram: @yourinstagram
-            </span>
-            <span>
-                <i class="fas fa-phone"></i>Nomor Telepon: +62 123 456 789
-            </span>
+            <span><i class="fas fa-map-marker-alt"></i> Nama Jalan: Jalan XYZ, No. 123</span>
+            <span><i class="fab fa-instagram"></i> Instagram: @yourinstagram</span>
+            <span><i class="fas fa-phone"></i> Nomor Telepon: +62 123 456 789</span>
         </p>
     </div>
 
     <!-- Divider Line -->
     <div class="divider"></div>
 
-    <!-- Data Mekanik -->
+    <!-- Title -->
     <div class="center-text">
         <p><strong>SPK</strong></p>
     </div>
 
-    <!-- Current Date -->
-    <!-- Baris 1 Sebelah Kanan -->
+    <!-- Data Header -->
     <div class="data-row">
         <div class="data-label">No Spk: {{ $dataservices->no_spk }}</div>
         <div class="data-label">Tanggal: {{ $dataservices->tanggal }}</div>
         <div class="data-label">Teknisi:</div>
         <div class="data-label">Status: {{ $dataservices->status }}</div>
     </div>
-    <!-- Layout Horizontal untuk Data Costumer dan Data Kendaraan -->
+
+    <!-- Customer & Vehicle Info -->
     <div style="width: 100%;">
-        <div style="width: 48%; display: inline-block; vertical-align: top; margin: 0; padding: 0;">
+        <div style="width: 48%; display: inline-block; vertical-align: top;">
             <p style="margin: 2px 0;">Costumer: {{ $dataservices->costumer }}</p>
             <p style="margin: 2px 0;">Contact Person: {{ $dataservices->contact_person }}</p>
             <p style="margin: 2px 0;">Tanggal Masuk: {{ $dataservices->masuk }}</p>
             <p style="margin: 2px 0;">Tanggal Keluar: {{ $dataservices->keluar }}</p>
         </div>
-        <div style="width: 48%; display: inline-block; vertical-align: top; margin: 0; padding: 0;">
+        <div style="width: 48%; display: inline-block; vertical-align: top;">
             <p style="margin: 2px 0;">No Polisi: {{ $dataservices->no_polisi }}</p>
             <p style="margin: 2px 0;">Tahun: {{ $dataservices->tahun }}</p>
             <p style="margin: 2px 0;">Tipe: {{ $dataservices->tipe_mobile }}</p>
@@ -177,7 +178,7 @@
         </div>
     </div>
 
-    <!-- Keluhan Costumer -->
+    <!-- Customer Complaint -->
     <div class="data-container">
         <div class="data-row">
             <div class="data-label">Keluhan Costumer:</div>
@@ -185,7 +186,7 @@
         </div>
     </div>
 
-    <!-- Flex Container for NAMA PART Tables -->
+    <!-- Parts Table -->
     <div class="flex-container w-max">
         <table>
             <thead>
@@ -207,8 +208,13 @@
         </table>
     </div>
 
-    <!-- Tabel URAIAN PEKERJAAN -->
-    <div class="flex-container w-max">
+    <!-- Service Details Table (Fix JSON Decode) -->
+    @php
+        $jenisPekerjaan = json_decode($dataservices->jenis_pekerjaan, true);
+        $ongkosPengerjaan = json_decode($dataservices->ongkos_pengerjaan, true);
+    @endphp
+
+    <div class="flex-container w-max" style="margin-top: 20px;">
         <table>
             <thead>
                 <tr>
@@ -217,13 +223,19 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>{{ $dataservices->uraian_pekerjaan }}</td>
-                    <td>{{ $dataservices->uraian_jasa_perbaikan }}</td>
-                </tr>
+                @foreach ($jenisPekerjaan as $index => $pekerjaan)
+                    <tr>
+                        <td>{{ $pekerjaan }}</td>
+                        <td>
+                            {{ isset($ongkosPengerjaan[$index]) ? 'Rp ' . number_format((float) $ongkosPengerjaan[$index], 0, ',', '.') : '-' }}
+                        </td>
+
+                    </tr>
+                @endforeach
             </tbody>
         </table>
     </div>
+
 </body>
 
 </html>

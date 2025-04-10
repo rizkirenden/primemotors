@@ -140,7 +140,6 @@
                         <th class="px-4 py-2 text-left text-xs">Nama Part</th>
                         <th class="px-4 py-2 text-left text-xs">Tanggal Keluar</th>
                         <th class="px-4 py-2 text-left text-xs">Jumlah</th>
-                        <th class="px-4 py-2 text-left text-xs">Harga Toko</th>
                         <th class="px-4 py-2 text-left text-xs">Harga Jual</th>
                         <th class="px-4 py-2 text-left text-xs">Discount</th>
                         <th class="px-4 py-2 text-left text-xs">Total</th>
@@ -152,16 +151,22 @@
                     @foreach ($jualparts as $jualpart)
                         <tr>
                             <td class="px-4 py-2 text-xs">{{ $jualpart->nama_pelanggan }}</td>
-                            <td class="px-4 py-2">{{ $jualpart->kode_barang }}</td>
-                            <td class="px-4 py-2">{{ $jualpart->nama_part }}</td>
-                            <td class="px-4 py-2">{{ $jualpart->tanggal_keluar }}</td>
-                            <td class="px-4 py-2">{{ $jualpart->jumlah }}</td>
-                            <td class="px-4 py-2">{{ 'Rp ' . number_format($jualpart->harga_toko, 0, ',', '.') }}</td>
-                            <td class="px-4 py-2">{{ 'Rp ' . number_format($jualpart->harga_jual, 0, ',', '.') }}</td>
-                            <td class="px-4 py-2">{{ $jualpart->discount }}%</td>
-                            <td class="px-4 py-2">
-                                {{ 'Rp ' . number_format($jualpart->total_harga_part, 0, ',', '.') }}
+                            <td class="px-4 py-2 text-xs">{{ $jualpart->kode_barang }}</td>
+                            <td class="px-4 py-2 text-xs">{{ $jualpart->nama_part }}</td>
+                            <td class="px-4 py-2 text-xs">{{ $jualpart->tanggal_keluar }}</td>
+                            <td class="px-4 py-2 text-xs">{{ $jualpart->jumlah }}</td>
+
+                            <td class="px-4 py-2 text-xs">
+                                {{ 'Rp ' . number_format($jualpart->harga_jual / 1000, 0, ',', '.') }}
                             </td>
+                            <td class="px-4 py-2 text-xs">
+                                {{ $jualpart->discount == intval($jualpart->discount) ? intval($jualpart->discount) : number_format($jualpart->discount, 2, ',', '.') }}%
+                            </td>
+
+                            <td class="px-4 py-2 text-xs">
+                                {{ 'Rp ' . number_format($jualpart->total_harga_part, 3, ',', '.') }}
+                            </td>
+
                             <td class="px-4 py-2">
                                 <button class="px-4 py-2 text-white bg-black rounded-full mr-2"
                                     onclick="toggleDescription({{ $jualpart->id }})">
@@ -204,12 +209,20 @@
                         <tr id="desc-{{ $jualpart->id }}" class="hidden description-row">
                             <td colspan="10">
                                 <div class="description-container p-4">
-                                    <div class="grid grid-cols-3 gap-4">
+                                    <div class="grid grid-cols-3 gap-6">
+                                        <!-- First row (3 columns) -->
                                         <div><strong>Alamat Pelanggan:</strong> {{ $jualpart->alamat_pelanggan }}</div>
                                         <div><strong>No Telp:</strong> {{ $jualpart->nomor_pelanggan }}</div>
                                         <div><strong>STN:</strong> {{ $jualpart->stn }}</div>
+
+                                        <!-- Second row (3 columns) -->
                                         <div><strong>MERK:</strong> {{ $jualpart->merk }}</div>
                                         <div><strong>Tipe:</strong> {{ $jualpart->tipe }}</div>
+                                        <div><strong>Harga Toko:</strong>
+                                            {{ 'Rp ' . number_format($jualpart->harga_toko / 1000, 0, ',', '.') }}
+                                        </div>
+
+                                        <!-- Third row (4 columns) -->
                                         <div><strong>Metode Pembayaran:</strong> {{ $jualpart->metode_pembayaran }}
                                         </div>
                                         <div><strong>Tanggal Pembayaran:</strong> {{ $jualpart->tanggal_pembayaran }}

@@ -147,6 +147,7 @@ public function updateawal(Request $request, $id)
         'jenis_mobil' => json_encode($request->jenis_mobil),
         'waktu_pengerjaan' => json_encode($request->waktu_pengerjaan),
         'ongkos_pengerjaan' => json_encode($request->ongkos_pengerjaan),
+
     ]);
 
     return redirect()->route('dataservice')->with('success', 'Data service awal berhasil diperbarui!');
@@ -200,10 +201,6 @@ public function updateawal(Request $request, $id)
             'jumlah.*' => 'integer|min:0',
             'tanggal_keluar' => 'nullable|array',
             'tanggal_keluar.*' => 'date',
-            'uraian_jasa_perbaikan' => 'nullable|array',
-            'uraian_jasa_perbaikan.*' => 'nullable|string',
-            'harga_jasa_perbaikan' => 'nullable|array',
-            'harga_jasa_perbaikan.*' => 'nullable|numeric',
             'status' => 'required',
         ]);
 
@@ -211,7 +208,7 @@ public function updateawal(Request $request, $id)
         $dataservice = Dataservice::findOrFail($id);
 
         // Update data service
-        $dataservice->update($request->except(['kode_barang', 'nama_part', 'stn','tipe', 'merk', 'jumlah', 'tanggal_keluar', 'uraian_jasa_perbaikan', 'harga_jasa_perbaikan']));
+        $dataservice->update($request->except(['kode_barang', 'nama_part', 'stn','tipe', 'merk', 'jumlah', 'tanggal_keluar']));
 
         // Proses part keluar
         $kode_barang = $request->kode_barang ?? [];
@@ -221,16 +218,12 @@ public function updateawal(Request $request, $id)
         $tipe = $request->tipe ?? [];
         $jumlah = $request->jumlah ?? [];
         $tanggal_keluar = $request->tanggal_keluar ?? [];
-        $uraian_jasa_perbaikan = $request->uraian_jasa_perbaikan ?? [];
-        $harga_jasa_perbaikan = $request->harga_jasa_perbaikan ?? [];
 
         // Jika ada input kode_barang, simpan data ke Partkeluar
         if (!empty($kode_barang)) {
             foreach ($kode_barang as $index => $kode_barang_item) {
                 $tanggal_keluar_item = $tanggal_keluar[$index] ?? null;
                 $jumlah_item = $jumlah[$index] ?? 0;
-                $uraian_jasa_perbaikan_item = $uraian_jasa_perbaikan[$index] ?? null;
-                $harga_jasa_perbaikan_item = $harga_jasa_perbaikan[$index] ?? null;
 
                 if (!$kode_barang_item || $jumlah_item <= 0) {
                     continue;
@@ -274,8 +267,6 @@ public function updateawal(Request $request, $id)
                         'tipe' => $sparepart->tipe,
                         'tanggal_keluar' => $tanggal_keluar_item,
                         'jumlah' => $jumlah_item,
-                        'uraian_jasa_perbaikan' => $uraian_jasa_perbaikan_item,
-                        'harga_jasa_perbaikan' => $harga_jasa_perbaikan_item,
                     ]);
                 } else {
                     Partkeluar::create([
@@ -287,8 +278,6 @@ public function updateawal(Request $request, $id)
                         'tipe' => $sparepart->tipe,
                         'jumlah' => $jumlah_item,
                         'tanggal_keluar' => $tanggal_keluar_item,
-                        'uraian_jasa_perbaikan' => $uraian_jasa_perbaikan_item,
-                        'harga_jasa_perbaikan' => $harga_jasa_perbaikan_item,
                     ]);
                 }
 

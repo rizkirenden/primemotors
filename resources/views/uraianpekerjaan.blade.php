@@ -176,7 +176,7 @@
                     <tr>
                         <th class="px-4 py-2 text-left">Jenis Pekerjaan</th>
                         <th class="px-4 py-2 text-left">Jenis Mobil</th>
-                        <th class="px-4 py-2 text-left">Waktu Pengerjaan (jam)</th>
+                        <th class="px-4 py-2 text-left">Waktu Pengerjaan (Menit)</th>
                         <th class="px-4 py-2 text-left">Ongkos Pengerjaan</th>
                         <th class="px-4 py-2 text-left">Action</th>
                     </tr>
@@ -261,7 +261,7 @@
                         <input type="text" id="jenis_mobil" name="jenis_mobil" required>
                     </div>
                     <div>
-                        <label for="waktu_pengerjaan">Waktu Pengerjaan (jam)</label>
+                        <label for="waktu_pengerjaan">Waktu Pengerjaan (Menit)</label>
                         <input type="number" id="waktu_pengerjaan" name="waktu_pengerjaan" required>
                     </div>
                     <div>
@@ -296,7 +296,7 @@
                         <input type="text" id="jenis_mobil_edit" name="jenis_mobil" required>
                     </div>
                     <div>
-                        <label for="waktu_pengerjaan_edit">Waktu Pengerjaan (jam)</label>
+                        <label for="waktu_pengerjaan_edit">Waktu Pengerjaan (Menit)</label>
                         <input type="number" id="waktu_pengerjaan_edit" name="waktu_pengerjaan" required>
                     </div>
                     <div>

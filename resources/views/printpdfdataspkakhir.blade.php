@@ -221,8 +221,13 @@
             </table>
         </div>
 
-        <!-- Job Description Table -->
-        <div class="flex-container w-max">
+        @php
+            $jenisPekerjaan = json_decode($dataservice->jenis_pekerjaan, true);
+            $ongkosPengerjaan = json_decode($dataservice->ongkos_pengerjaan, true);
+        @endphp
+
+
+        <div class="flex-container w-max" style="margin-top: 20px;">
             <table>
                 <thead>
                     <tr>
@@ -231,13 +236,17 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>{{ $dataservice->uraian_pekerjaan }}</td>
-                        <td>{{ $dataservice->uraian_jasa_perbaikan }}</td>
-                    </tr>
+                    @foreach ($jenisPekerjaan as $index => $pekerjaan)
+                        <tr>
+                            <td>{{ $pekerjaan }}</td>
+                            <td>
+                                {{ isset($ongkosPengerjaan[$index]) ? 'Rp ' . number_format((float) $ongkosPengerjaan[$index], 0, ',', '.') : '-' }}
+                            </td>
+
+                        </tr>
+                    @endforeach
                 </tbody>
             </table>
-        </div>
         </div>
     @endforeach
 </body>

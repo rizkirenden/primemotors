@@ -37,8 +37,6 @@ class Dataservice extends Model
         'merk',
         'tanggal_keluar',
         'jumlah',
-        'uraian_jasa_perbaikan',
-        'harga_jasa_perbaikan',
         'status',
     ];
 

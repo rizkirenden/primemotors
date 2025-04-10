@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('invoices', function (Blueprint $table) {
             $table->id(); // Auto-incrementing primary key
             $table->string('no_invoice')->unique(); // Unique invoice number
-            $table->foreignId('dataservice_id')->constrained()->onDelete('cascade'); // Foreign key referencing 'dataservices' table
-            $table->string('kode_barang'); // Just a string column, not a foreign key
+            $table->foreignId('dataservice_id')->constrained()->onDelete('cascade');
+            $table->string('kode_barang');
             $table->date('tanggal_invoice'); // Invoice date
             $table->string('nama_mekanik');
             $table->string('nama_part'); // Part name

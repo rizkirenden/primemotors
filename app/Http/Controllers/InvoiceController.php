@@ -58,23 +58,18 @@ class InvoiceController extends Controller
             $discount_percent = $request->discount ?? 0; // Discount dalam persentase
             $ppn_percent = $request->ppn ?? 10; // PPN dalam persentase
 
-            // Hitung nilai discount dan ppn dalam rupiah
             $discount = ($discount_percent / 100) * ($total_harga_part + $biaya_jasa);
             $ppn = ($ppn_percent / 100) * ($total_harga_part + $biaya_jasa - $discount);
 
-            // Hitung total harga keseluruhan
             $total_harga = ($total_harga_part + $biaya_jasa - $discount) + $ppn;
 
-            // Ambil nomor invoice terakhir dan buat nomor invoice baru
             $lastInvoice = Invoice::orderBy('no_invoice', 'desc')->first();
             $lastInvoiceNumber = $lastInvoice ? (int)substr($lastInvoice->no_invoice, -4) : 0;
             $newInvoiceNumber = str_pad($lastInvoiceNumber + 1, 4, '0', STR_PAD_LEFT);
             $no_invoice = 'INV-' . date('Ymd') . '-' . $newInvoiceNumber;
 
-            // Ambil data part pertama
             $firstPart = $dataservice->partkeluar->first();
 
-            // Simpan data invoice ke database
             $invoice = Invoice::create([
                 'no_invoice' => $no_invoice,
                 'dataservice_id' => $dataservice->id,
@@ -82,7 +77,7 @@ class InvoiceController extends Controller
                 'tanggal_invoice' => now(),
                 'nama_part' => $firstPart->nama_part ?? null,
                 'jumlah' => $dataservice->partkeluar->sum('jumlah'),
-                'harga_jual' => $firstPart->datasparepat->harga_jual ?? 0, // Ambil harga_jual dari Datasparepat
+                'harga_jual' => $firstPart->datasparepat->harga_jual ?? 0,
                 'total_harga_part' => $total_harga_part,
                 'biaya_jasa' => $biaya_jasa,
                 'discount' => $discount_percent,
@@ -93,7 +88,6 @@ class InvoiceController extends Controller
 
             DB::commit();
 
-            // Redirect ke halaman laporantransaksi dengan pesan sukses
             return redirect()->route('laporantransaksi')->with('success', 'Invoice created successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
