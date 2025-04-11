@@ -172,13 +172,43 @@
         </div>
     </div>
 
-    <!-- Keluhan Costumer -->
-    <div class="data-container">
-        <div class="data-row">
-            <div class="data-label">Uraian Jasa Perbaikan :</div>
-            <textarea class="data-value">{{ $invoice->dataservice->uraian_jasa_perbaikan }}</textarea>
-        </div>
+    <div class="flex-container w-max">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 30%;">Jenis Pekerjaan</th>
+                    <th style="width: 15%;">Ongkos Pengerjaan</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php
+                    $jenisPekerjaan = is_array($invoice->jenis_pekerjaan)
+                        ? $invoice->jenis_pekerjaan
+                        : json_decode($invoice->jenis_pekerjaan, true);
+
+                    if (!is_array($jenisPekerjaan)) {
+                        $jenisPekerjaan = explode(',', $invoice->jenis_pekerjaan);
+                    }
+
+                    $ongkosPengerjaan = json_decode($invoice->ongkos_pengerjaan, true);
+                @endphp
+
+                @for ($i = 0; $i < max(count($jenisPekerjaan), count($ongkosPengerjaan)); $i++)
+                    <tr>
+                        <td>{{ $jenisPekerjaan[$i] ?? '-' }}</td>
+                        <td>
+                            @if (isset($ongkosPengerjaan[$i]))
+                                Rp. {{ number_format((float) $ongkosPengerjaan[$i], 0, ',', '.') }}
+                            @else
+                                Rp. 0
+                            @endif
+                        </td>
+                    </tr>
+                @endfor
+            </tbody>
+        </table>
     </div>
+
 
 
     <!-- Flex Container for NAMA PART Tables -->
@@ -199,7 +229,6 @@
                         <td>{{ $part->jumlah }}</td>
                         <td>Rp. {{ number_format($part->datasparepat->harga_jual, 0, ',', '.') }}</td>
                         <td>Rp. {{ number_format($part->jumlah * $part->datasparepat->harga_jual, 0, ',', '.') }}</td>
-                        <!-- Total harga per part -->
                     </tr>
                 @endforeach
             </tbody>
@@ -212,13 +241,16 @@
                 <td>Rp. {{ number_format($invoice->total_harga_part, 0, ',', '.') }}</td>
             </tr>
             <tr>
-
+                <th>Diskon</th>
+                <td>{{ $invoice->discount_part }}%</td>
+            </tr>
+            <tr>
                 <th>Biaya Jasa</th>
-                <td>Rp. {{ number_format($invoice->biaya_jasa, 0, ',', '.') }}</td>
+                <td>Rp. {{ number_format($invoice->total_harga_uraian_pekerjaan, 0, ',', '.') }}</td>
             </tr>
             <tr>
                 <th>Diskon</th>
-                <td>{{ $invoice->discount }}%</td>
+                <td>{{ $invoice->discount_ongkos_pengerjaan }}%</td>
             </tr>
             <tr>
                 <th>PPN</th>

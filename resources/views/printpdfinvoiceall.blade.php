@@ -188,13 +188,7 @@
             </div>
         </div>
 
-        <!-- Keluhan Costumer -->
-        <div class="data-container">
-            <div class="data-row">
-                <div class="data-label">Uraian Jasa Perbaikan :</div>
-                <div class="data-value">{{ $invoice->dataservice->uraian_jasa_perbaikan }}</div>
-            </div>
-        </div>
+        <!-- Keluhan Costumer --
 
         <!-- Flex Container for NAMA PART Tables -->
         <div class="flex-container w-max">
@@ -229,12 +223,16 @@
                     <td>Rp. {{ number_format($invoice->total_harga_part, 0, ',', '.') }}</td>
                 </tr>
                 <tr>
+                    <th>Diskon</th>
+                    <td>{{ $invoice->discount_part }}%</td>
+                </tr>
+                <tr>
                     <th>Biaya Jasa</th>
-                    <td>Rp. {{ number_format($invoice->biaya_jasa, 0, ',', '.') }}</td>
+                    <td>Rp. {{ number_format($invoice->total_harga_uraian_pekerjaan, 0, ',', '.') }}</td>
                 </tr>
                 <tr>
                     <th>Diskon</th>
-                    <td>{{ $invoice->discount }}%</td>
+                    <td>{{ $invoice->discount_ongkos_pengerjaan }}%</td>
                 </tr>
                 <tr>
                     <th>PPN</th>

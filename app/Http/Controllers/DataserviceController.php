@@ -281,7 +281,6 @@ public function updateawal(Request $request, $id)
                     ]);
                 }
 
-                $sparepart->jumlah -= $jumlah_item;
                 $sparepart->save();
             }
         }

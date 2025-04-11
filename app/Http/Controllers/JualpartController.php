@@ -80,7 +80,6 @@ class JualpartController extends Controller
             'merk' => $request->merk,
             'tanggal_keluar' => $request->tanggal_keluar,
             'jumlah' => $request->jumlah,
-            // Field lainnya tidak disimpan ke partkeluar
         ]);
 
         // Kurangi stok di Datasparepat

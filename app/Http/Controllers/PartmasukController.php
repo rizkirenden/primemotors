@@ -145,7 +145,8 @@ public function printPDF(Request $request)
     $partmasuks = $query->get();
 
     // Load view ke PDF
-    $pdf = Pdf::loadView('printpdfpartmasuk', compact('partmasuks'));
+    $pdf = Pdf::loadView('printpdfpartmasuk', compact('partmasuks'))
+                ->setPaper('a4', 'landscape');
 
     // Download PDF
     return $pdf->download('Data_Partmasuk.pdf');

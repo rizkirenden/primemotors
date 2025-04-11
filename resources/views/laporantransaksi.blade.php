@@ -183,7 +183,6 @@
                         <th class="px-4 py-2 text-left">No SPK</th>
                         <th class="px-4 py-2 text-left">Nama Mekanik</th>
                         <th class="px-4 py-2 text-left">Nama Part</th>
-                        <th class="px-4 py-2 text-left">Jumlah</th>
                         <th class="px-4 py-2 text-left">Harga Part</th>
                         <th class="px-4 py-2 text-left">Discount Part</th>
                         <th class="px-4 py-2 text-left">Total Harga Part</th>
@@ -204,7 +203,6 @@
                             <td class="px-4 py-2">{{ $invoice->dataservice->no_spk }}</td>
                             <td class="px-4 py-2">{{ $invoice->nama_mekanik }}</td>
                             <td class="px-4 py-2">{{ $invoice->nama_part }}</td>
-                            <td class="px-4 py-2">{{ $invoice->jumlah }}</td>
                             <td class="px-4 py-2">Rp {{ number_format($invoice->harga_jual, 0, ',', '.') }}</td>
                             <td class="px-4 py-2">{{ $invoice->discount_part }}%</td>
                             <td class="px-4 py-2">Rp {{ number_format($invoice->total_harga_part, 0, ',', '.') }}</td>
@@ -213,7 +211,9 @@
                                 $firstItem = $jenisPekerjaan[0] ?? ''; // Ambil elemen pertama jika ada
                             @endphp
                             <td class="px-4 py-2">{{ $firstItem }}</td>
-                            <td class="px-4 py-2">Rp {{ number_format($invoice->ongkos_pengerjaan, 0, ',', '.') }}</td>
+                            <td class="px-4 py-2">Rp
+                                {{ number_format(rtrim(rtrim(json_decode($invoice->ongkos_pengerjaan)[0], '0'), '.'), 0, ',', '.') }}
+                            </td>
                             <td class="px-4 py-2">{{ $invoice->discount_ongkos_pengerjaan }}%</td>
                             <td class="px-4 py-2">Rp
                                 {{ number_format($invoice->total_harga_uraian_pekerjaan, 0, ',', '.') }}</td>

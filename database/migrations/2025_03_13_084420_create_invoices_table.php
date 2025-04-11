@@ -24,7 +24,7 @@ return new class extends Migration
             $table->decimal('total_harga_part', 15, 2);
             $table->decimal('discount_part', 5, 2);
             $table->string('jenis_pekerjaan');
-            $table->decimal('ongkos_pengerjaan', 15, 2);
+            $table->text('ongkos_pengerjaan')->nullable();
             $table->decimal('discount_ongkos_pengerjaan', 5, 2);
             $table->decimal('total_harga_uraian_pekerjaan', 15, 2);
             $table->decimal('ppn', 5, 2); // VAT

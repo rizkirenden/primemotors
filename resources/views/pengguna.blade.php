@@ -5,104 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Pengguna</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <script>
-        // JavaScript for auto-search
-        function searchTable() {
-            const input = document.getElementById("search-input");
-            const filter = input.value.toLowerCase();
-            const rows = document.querySelectorAll("tbody tr");
-
-            rows.forEach(row => {
-                const columns = row.getElementsByTagName("td");
-                let match = false;
-
-                // Check each column in the row
-                for (let i = 0; i < columns.length; i++) {
-                    if (columns[i].textContent.toLowerCase().includes(filter)) {
-                        match = true;
-                        break; // If there's a match, go to the next row
-                    }
-                }
-
-                // Show or hide row based on search match
-                if (match) {
-                    row.style.display = "";
-                } else {
-                    row.style.display = "none";
-                }
-            });
-        }
-
-        // JavaScript for date filter
-        function filterByDate() {
-            const inputDate = document.getElementById("date-input");
-            const filterDate = inputDate.value;
-            const rows = document.querySelectorAll("tbody tr");
-
-            rows.forEach(row => {
-                const dateColumn = row.cells[4]; // Assuming the 5th column is date
-                const rowDate = dateColumn ? dateColumn.textContent.trim() : "";
-
-                if (filterDate && rowDate !== filterDate) {
-                    row.style.display = "none";
-                } else {
-                    row.style.display = "";
-                }
-            });
-        }
-
-        // Pagination function
-        let currentPage = 1;
-        const rowsPerPage = 5;
-
-        function paginate() {
-            const rows = document.querySelectorAll("tbody tr");
-            const totalRows = rows.length;
-            const totalPages = Math.ceil(totalRows / rowsPerPage);
-
-            // Show or hide rows based on the current page
-            rows.forEach((row, index) => {
-                const startIdx = (currentPage - 1) * rowsPerPage;
-                const endIdx = currentPage * rowsPerPage;
-
-                if (index >= startIdx && index < endIdx) {
-                    row.style.display = "";
-                } else {
-                    row.style.display = "none";
-                }
-            });
-
-            // Update pagination controls
-            const paginationContainer = document.getElementById("pagination");
-            paginationContainer.innerHTML = "";
-            for (let i = 1; i <= totalPages; i++) {
-                const pageButton = document.createElement("button");
-                pageButton.innerText = i;
-                pageButton.classList.add("px-6", "py-3", "border", "border-gray-300", "m-1", "rounded", "bg-black",
-                    "text-white", "hover:bg-gray-700");
-                pageButton.addEventListener("click", () => {
-                    currentPage = i;
-                    paginate();
-                });
-                paginationContainer.appendChild(pageButton);
-            }
-        }
-
-        window.onload = paginate; // Run pagination when the page loads
-
-        // Function to open the modal
-        function openModal() {
-            document.getElementById("userModal").classList.remove("hidden");
-        }
-
-        // Function to close the modal
-        function closeModal() {
-            document.getElementById("userModal").classList.add("hidden");
-        }
-    </script>
     <style>
         /* Add borders to the table header and body */
         thead {
@@ -233,23 +138,23 @@
                 <div class="mb-4">
                     <label for="nama" class="block text-sm font-medium text-gray-700">Nama Pengguna</label>
                     <input type="text" id="nama" name="nama"
-                        class="mt-1 px-4 py-2 w-full border border-gray-300 rounded-md">
+                        class="mt-1 px-4 py-2 w-full border border-gray-300 rounded-full">
                 </div>
                 <div class="mb-4">
                     <label for="nomor_hp" class="block text-sm font-medium text-gray-700">Nomor HP</label>
                     <input type="text" id="nomor_hp" name="nomor_hp"
-                        class="mt-1 px-4 py-2 w-full border border-gray-300 rounded-md">
+                        class="mt-1 px-4 py-2 w-full border border-gray-300 rounded-full">
                 </div>
                 <div class="mb-4">
                     <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
                     <input type="email" id="email" name="email"
-                        class="mt-1 px-4 py-2 w-full border border-gray-300 rounded-md">
+                        class="mt-1 px-4 py-2 w-full border border-gray-300 rounded-full">
                 </div>
                 <!-- Password field with show/hide functionality -->
                 <div class="mb-4">
                     <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
                     <input type="password" id="password" name="password"
-                        class="mt-1 px-4 py-2 w-full border border-gray-300 rounded-md">
+                        class="mt-1 px-4 py-2 w-full border border-gray-300 rounded-full">
                     <div class="mt-2 flex items-center">
                         <input type="checkbox" id="showPassword" class="mr-2" onclick="togglePasswordVisibility()">
                         <label for="showPassword" class="text-sm text-gray-600">Tampilkan Password</label>
@@ -258,17 +163,18 @@
                 <div class="mb-4">
                     <label for="level" class="block text-sm font-medium text-gray-700">Level</label>
                     <select id="level" name="level"
-                        class="mt-1 px-4 py-2 w-full border border-gray-300 rounded-md">
+                        class="mt-1 px-4 py-2 w-full border border-gray-300 rounded-full">
                         <option value="super_admin">Super Admin</option>
                         <option value="admin">Admin</option>
                         <option value="bengkel">Bengkel</option>
+                        <option value="owner">Owner</option>
                     </select>
                 </div>
                 <div class="flex justify-end space-x-2">
                     <button type="button" onclick="closeModal()"
-                        class="px-4 py-2 bg-black text-white rounded-md hover:bg-red-600">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-700">Simpan
-                        Data</button>
+                        class="px-4 py-2 bg-black text-white rounded-full hover:bg-red-600">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-black text-white rounded-full hover:bg-gray-700">Simpan
+                    </button>
                 </div>
             </form>
         </div>
@@ -279,10 +185,103 @@
             var passwordField = document.getElementById('password');
             var showPasswordCheckbox = document.getElementById('showPassword');
             if (showPasswordCheckbox.checked) {
-                passwordField.type = 'text'; // Show password
+                passwordField.type = 'text';
             } else {
-                passwordField.type = 'password'; // Hide password
+                passwordField.type = 'password';
             }
+        }
+        // JavaScript for auto-search
+        function searchTable() {
+            const input = document.getElementById("search-input");
+            const filter = input.value.toLowerCase();
+            const rows = document.querySelectorAll("tbody tr");
+
+            rows.forEach(row => {
+                const columns = row.getElementsByTagName("td");
+                let match = false;
+
+                // Check each column in the row
+                for (let i = 0; i < columns.length; i++) {
+                    if (columns[i].textContent.toLowerCase().includes(filter)) {
+                        match = true;
+                        break; // If there's a match, go to the next row
+                    }
+                }
+
+                // Show or hide row based on search match
+                if (match) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+
+        // JavaScript for date filter
+        function filterByDate() {
+            const inputDate = document.getElementById("date-input");
+            const filterDate = inputDate.value;
+            const rows = document.querySelectorAll("tbody tr");
+
+            rows.forEach(row => {
+                const dateColumn = row.cells[4]; // Assuming the 5th column is date
+                const rowDate = dateColumn ? dateColumn.textContent.trim() : "";
+
+                if (filterDate && rowDate !== filterDate) {
+                    row.style.display = "none";
+                } else {
+                    row.style.display = "";
+                }
+            });
+        }
+
+        // Pagination function
+        let currentPage = 1;
+        const rowsPerPage = 5;
+
+        function paginate() {
+            const rows = document.querySelectorAll("tbody tr");
+            const totalRows = rows.length;
+            const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+            // Show or hide rows based on the current page
+            rows.forEach((row, index) => {
+                const startIdx = (currentPage - 1) * rowsPerPage;
+                const endIdx = currentPage * rowsPerPage;
+
+                if (index >= startIdx && index < endIdx) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+
+            // Update pagination controls
+            const paginationContainer = document.getElementById("pagination");
+            paginationContainer.innerHTML = "";
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement("button");
+                pageButton.innerText = i;
+                pageButton.classList.add("px-6", "py-3", "border", "border-gray-300", "m-1", "rounded", "bg-black",
+                    "text-white", "hover:bg-gray-700");
+                pageButton.addEventListener("click", () => {
+                    currentPage = i;
+                    paginate();
+                });
+                paginationContainer.appendChild(pageButton);
+            }
+        }
+
+        window.onload = paginate; // Run pagination when the page loads
+
+        // Function to open the modal
+        function openModal() {
+            document.getElementById("userModal").classList.remove("hidden");
+        }
+
+        // Function to close the modal
+        function closeModal() {
+            document.getElementById("userModal").classList.add("hidden");
         }
     </script>
 </body>

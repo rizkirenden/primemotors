@@ -67,11 +67,9 @@ class DatasparepatController extends Controller
     }
     public function printPDF(Request $request)
 {
-    // Ambil parameter pencarian dan tanggal dari request
     $search = $request->input('search');
     $date = $request->input('date');
 
-    // Query data mekanik berdasarkan pencarian dan tanggal
     $query = Datasparepat::query();
 
     if ($search) {
@@ -86,12 +84,13 @@ class DatasparepatController extends Controller
               ->orWhere('tipe', 'like', '%' . $search . '%');
     }
 
-    // Ambil data yang sudah difilter
     $sparepats = $query->get();
 
-    // Load view ke PDF
-    $pdf = Pdf::loadView('printpdfdatasparepat', compact('sparepats'));
+    // Landscape PDF
+    $pdf = Pdf::loadView('printpdfdatasparepat', compact('sparepats'))
+                ->setPaper('a4', 'landscape');
 
-    return $pdf->stream('Data_Sparepat.pdf');
+    return $pdf->download('Data_Sparepat.pdf');
 }
+
 }

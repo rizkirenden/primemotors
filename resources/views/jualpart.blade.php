@@ -9,7 +9,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
-        /* Add your custom styles here */
         thead {
             border-bottom: 2px solid #ccc;
         }
@@ -18,7 +17,6 @@
             border-top: 1px solid #ccc;
         }
 
-        /* Pagination Styling */
         #pagination button:hover {
             background-color: #000000;
             border-color: #888;
@@ -76,7 +74,6 @@
             flex-grow: 1;
         }
 
-        /* Modal Styling */
         .modal {
             display: none;
         }
@@ -91,6 +88,10 @@
 
         .hidden {
             display: none;
+        }
+
+        .description-row td {
+            padding: 0 !important;
         }
     </style>
 </head>
@@ -155,16 +156,15 @@
                             <td class="px-4 py-2 text-xs">{{ $jualpart->nama_part }}</td>
                             <td class="px-4 py-2 text-xs">{{ $jualpart->tanggal_keluar }}</td>
                             <td class="px-4 py-2 text-xs">{{ $jualpart->jumlah }}</td>
-
                             <td class="px-4 py-2 text-xs">
                                 {{ 'Rp ' . number_format($jualpart->harga_jual / 1000, 0, ',', '.') }}
                             </td>
+
                             <td class="px-4 py-2 text-xs">
                                 {{ $jualpart->discount == intval($jualpart->discount) ? intval($jualpart->discount) : number_format($jualpart->discount, 2, ',', '.') }}%
                             </td>
-
                             <td class="px-4 py-2 text-xs">
-                                {{ 'Rp ' . number_format($jualpart->total_harga_part, 3, ',', '.') }}
+                                {{ 'Rp ' . number_format($jualpart->total_harga_part / 1000, 0, ',', '.') }}
                             </td>
 
                             <td class="px-4 py-2">
@@ -192,7 +192,9 @@
                                         '{{ $jualpart->status }}',
                                         '{{ $jualpart->metode_pembayaran }}',
                                         '{{ $jualpart->nama_pelanggan }}',
-                                        '{{ $jualpart->tanggal_pembayaran }}'
+                                        '{{ $jualpart->tanggal_pembayaran }}',
+                                        '{{ $jualpart->alamat_pelanggan }}',
+                                        '{{ $jualpart->nomor_pelanggan }}'
                                     )">
                                     <i class="fas fa-edit"></i>
                                 </a>
@@ -210,19 +212,16 @@
                             <td colspan="10">
                                 <div class="description-container p-4">
                                     <div class="grid grid-cols-3 gap-6">
-                                        <!-- First row (3 columns) -->
                                         <div><strong>Alamat Pelanggan:</strong> {{ $jualpart->alamat_pelanggan }}</div>
                                         <div><strong>No Telp:</strong> {{ $jualpart->nomor_pelanggan }}</div>
                                         <div><strong>STN:</strong> {{ $jualpart->stn }}</div>
 
-                                        <!-- Second row (3 columns) -->
                                         <div><strong>MERK:</strong> {{ $jualpart->merk }}</div>
                                         <div><strong>Tipe:</strong> {{ $jualpart->tipe }}</div>
                                         <div><strong>Harga Toko:</strong>
                                             {{ 'Rp ' . number_format($jualpart->harga_toko / 1000, 0, ',', '.') }}
                                         </div>
 
-                                        <!-- Third row (4 columns) -->
                                         <div><strong>Metode Pembayaran:</strong> {{ $jualpart->metode_pembayaran }}
                                         </div>
                                         <div><strong>Tanggal Pembayaran:</strong> {{ $jualpart->tanggal_pembayaran }}
@@ -297,8 +296,9 @@
                         class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
                     <input type="date" name="tanggal_keluar"
                         class="w-full px-4 py-2 border border-gray-300 rounded-full" required>
-                    <input type="number" name="jumlah" placeholder="Jumlah"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required min="1">
+                    <input type="number" name="jumlah" id="jumlah" placeholder="Jumlah"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required min="1"
+                        oninput="calculateTotal()">
                     <input type="text" id="harga_toko" name="harga_toko" placeholder="Harga Toko"
                         class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
                     <input type="text" id="margin_persen" name="margin_persen" placeholder="Margin Persen"
@@ -450,46 +450,48 @@
             });
         });
 
+        function formatRupiah(angka) {
+            const angkaString = angka.toString().replace(/\D/g, '');
+            const angkaNumber = parseInt(angkaString) || 0;
+            return 'Rp ' + angkaNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        function removeFormatRupiah(angka) {
+            return angka.replace(/\D/g, '');
+        }
+
         function calculateTotal() {
-            // Ambil nilai harga jual dan hapus format Rupiah (jika ada)
-            const hargaJual = parseFloat(document.getElementById('harga_jual').value.replace(/[^0-9.-]+/g, ""));
-            const discountPersen = parseFloat(document.getElementById('discount').value);
+            const hargaJual = parseFloat(removeFormatRupiah(document.getElementById('harga_jual').value));
+            const discountPersen = parseFloat(document.getElementById('discount').value) || 0;
+            const jumlah = parseFloat(document.getElementById('jumlah').value) || 1;
 
             if (!isNaN(hargaJual)) {
-                let totalHargaPart = hargaJual;
+                let totalHargaPart = hargaJual * jumlah;
 
-                // Jika discount persen valid, hitung discount
                 if (!isNaN(discountPersen)) {
-                    const discountAmount = (hargaJual * discountPersen) / 100;
+                    const discountAmount = (totalHargaPart * discountPersen) / 100;
                     totalHargaPart -= discountAmount;
                 }
 
-                // Pastikan total harga part tidak negatif
                 totalHargaPart = Math.max(totalHargaPart, 0);
-
-                // Format dan update nilai total harga part
                 document.getElementById('total_harga_part').value = formatRupiah(totalHargaPart.toString());
             }
         }
 
         function calculateTotalEdit() {
-            // Ambil nilai harga jual dan hapus format Rupiah (jika ada)
-            const hargaJual = parseFloat(document.getElementById('edit-harga_jual').value.replace(/[^0-9.-]+/g, ""));
-            const discountPersen = parseFloat(document.getElementById('edit-discount').value);
+            const hargaJual = parseFloat(removeFormatRupiah(document.getElementById('edit-harga_jual').value));
+            const discountPersen = parseFloat(document.getElementById('edit-discount').value) || 0;
+            const jumlah = parseFloat(document.getElementById('edit-jumlah').value) || 1;
 
             if (!isNaN(hargaJual)) {
-                let totalHargaPart = hargaJual;
+                let totalHargaPart = hargaJual * jumlah;
 
-                // Jika discount persen valid, hitung discount
                 if (!isNaN(discountPersen)) {
-                    const discountAmount = (hargaJual * discountPersen) / 100;
+                    const discountAmount = (totalHargaPart * discountPersen) / 100;
                     totalHargaPart -= discountAmount;
                 }
 
-                // Pastikan total harga part tidak negatif
                 totalHargaPart = Math.max(totalHargaPart, 0);
-
-                // Format dan update nilai total harga part
                 document.getElementById('edit-total_harga_part').value = formatRupiah(totalHargaPart.toString());
             }
         }
@@ -507,7 +509,6 @@
                     })
                     .then(data => {
                         if (data) {
-                            // Isi input fields dengan data yang diterima
                             document.getElementById('nama_part').value = data.nama_part;
                             document.getElementById('stn').value = data.stn;
                             document.getElementById('tipe').value = data.tipe;
@@ -515,8 +516,6 @@
                             document.getElementById('harga_toko').value = formatRupiah(data.harga_toko.toString());
                             document.getElementById('margin_persen').value = data.margin_persen;
                             document.getElementById('harga_jual').value = formatRupiah(data.harga_jual.toString());
-
-                            // Hitung ulang total
                             calculateTotal();
                         } else {
                             alert('Kode barang tidak ditemukan!');
@@ -546,7 +545,6 @@
                     })
                     .then(data => {
                         if (data) {
-                            // Isi input fields dengan data yang diterima
                             document.getElementById('edit-nama_part').value = data.nama_part;
                             document.getElementById('edit-stn').value = data.stn;
                             document.getElementById('edit-tipe').value = data.tipe;
@@ -554,8 +552,6 @@
                             document.getElementById('edit-harga_toko').value = formatRupiah(data.harga_toko.toString());
                             document.getElementById('edit-margin_persen').value = data.margin_persen;
                             document.getElementById('edit-harga_jual').value = formatRupiah(data.harga_jual.toString());
-
-                            // Hitung ulang total
                             calculateTotalEdit();
                         } else {
                             alert('Kode barang tidak ditemukan!');
@@ -594,19 +590,6 @@
             document.getElementById('edit-total_harga_part').value = '';
         }
 
-        function formatRupiah(angka) {
-            // Hilangkan semua karakter selain digit
-            const angkaTanpaFormat = angka.replace(/\D/g, '');
-
-            // Format ke Rupiah
-            return 'Rp ' + angkaTanpaFormat.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        }
-
-        function removeFormatRupiah(angka) {
-            // Hilangkan semua karakter selain digit
-            return angka.replace(/\D/g, '');
-        }
-
         function openEditModal(
             id,
             kode_barang,
@@ -624,7 +607,9 @@
             status,
             metode_pembayaran,
             nama_pelanggan,
-            tanggal_pembayaran
+            tanggal_pembayaran,
+            alamat_pelanggan,
+            nomor_pelanggan
         ) {
             document.getElementById("edit-id").value = id;
             document.getElementById("edit-kode_barang").value = kode_barang;
@@ -641,16 +626,11 @@
             document.getElementById("edit-total_harga_part").value = formatRupiah(total_harga_part);
             document.getElementById("edit-metode_pembayaran").value = metode_pembayaran;
             document.getElementById("edit-nama_pelanggan").value = nama_pelanggan;
-            document.getElementById("edit-alamat_pelanggan").value = document.querySelector(`#desc-${id} [data-alamat]`)
-                .textContent.trim();
-            document.getElementById("edit-nomor_pelanggan").value = document.querySelector(`#desc-${id} [data-nomor]`)
-                .textContent.trim();
+            document.getElementById("edit-alamat_pelanggan").value = alamat_pelanggan;
+            document.getElementById("edit-nomor_pelanggan").value = nomor_pelanggan;
             document.getElementById("edit-tanggal_pembayaran").value = tanggal_pembayaran;
 
-            // Update form action to match the ID being edited
             document.getElementById("edit-form").action = "/jualpart/" + id;
-
-            // Show edit modal
             document.getElementById("edit-modal").classList.remove("hidden");
         }
 
