@@ -194,7 +194,8 @@ class InvoiceController extends Controller
     public function print($id)
     {
         $invoice = Invoice::with(['dataservice.partkeluar.datasparepat', 'datasparepat'])->findOrFail($id);
-        $pdf = PDF::loadView('printpdfinvoice', compact('invoice'));
+        $pdf = PDF::loadView('printpdfinvoice', compact('invoice'))
+        ->setPaper('a4', 'landscape');
         return $pdf->download('invoice.pdf');
     }
 }

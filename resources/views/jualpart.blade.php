@@ -117,7 +117,7 @@
                                 <!-- Print PDF Button -->
                                 <button type="submit"
                                     class="px-4 py-2 bg-white text-black rounded-full hover:bg-gray-200 border border-gray-300">
-                                    <i class="fas fa-search text-black"></i> Search
+                                    <i class="fas fa-file-pdf text-black"></i> Print PDF
                                 </button>
                             </div>
                         </form>

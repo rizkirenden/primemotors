@@ -189,7 +189,8 @@ public function printPDF(Request $request)
     $partkeluars = $query->get();
 
     // Load view ke PDF
-    $pdf = Pdf::loadView('printpdfpartkeluar', compact('partkeluars'));
+    $pdf = Pdf::loadView('printpdfpartkeluar', compact('partkeluars'))
+    ->setPaper('a4', 'landscape');
 
     // Download PDF
     return $pdf->download('Data_Partkeluar.pdf');

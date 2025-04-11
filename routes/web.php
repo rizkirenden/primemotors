@@ -106,3 +106,5 @@ Route::post('/jualpart', [JualpartController::class, 'store'])->name('jualpart.s
 Route::put('/jualpart/{id}', [JualpartController::class, 'update'])->name('jualpart.update');
 Route::delete('jualpart/{id}', [JualpartController::class, 'destroy'])->name('jualpart.destroy');
 Route::get('/spareparts/{kode_barang}', [JualpartController::class, 'getSparepart']);
+Route::get('/printpdfjualpart', [JualpartController::class, 'printPDF'])->name('printpdfjualpart');
+Route::get('/printpdfjualpartperdata/{id}', [JualpartController::class, 'printPDFPerData'])->name('printpdfjualpart.perdata');

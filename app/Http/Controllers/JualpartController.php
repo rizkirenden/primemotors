@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Jualpart;
 use App\Models\Datasparepat;
 use App\Models\Partkeluar;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class JualpartController extends Controller
 {
@@ -29,7 +30,6 @@ class JualpartController extends Controller
 
     public function store(Request $request)
     {
-        // Bersihkan nilai harga dari format Rupiah
         $request->merge([
             'harga_toko' => preg_replace('/[^0-9]/', '', $request->harga_toko),
             'harga_jual' => preg_replace('/[^0-9]/', '', $request->harga_jual),
@@ -57,7 +57,6 @@ class JualpartController extends Controller
             'nomor_pelanggan' => 'required',
         ]);
 
-        // Cek stok tersedia
         $sparepart = Datasparepat::where('kode_barang', $request->kode_barang)->first();
         if (!$sparepart) {
             return redirect()->back()->with('error', 'Barang tidak ditemukan!');
@@ -67,10 +66,8 @@ class JualpartController extends Controller
             return redirect()->back()->with('error', 'Stok tidak mencukupi!');
         }
 
-        // Simpan data ke Jualpart
         $jualpart = Jualpart::create($request->all());
 
-        // Simpan data minimal ke Partkeluar
         Partkeluar::create([
             'jualpart_id' => $jualpart->id,
             'kode_barang' => $request->kode_barang,
@@ -82,7 +79,7 @@ class JualpartController extends Controller
             'jumlah' => $request->jumlah,
         ]);
 
-        // Kurangi stok di Datasparepat
+        $sparepart->jumlah -= $request->jumlah;
         $sparepart->save();
 
         return redirect()->route('jualpart')->with('success', 'Data penjualan berhasil disimpan!');
@@ -90,7 +87,6 @@ class JualpartController extends Controller
 
     public function update(Request $request, $id)
     {
-        // Bersihkan nilai harga dari format Rupiah
         $request->merge([
             'harga_toko' => preg_replace('/[^0-9]/', '', $request->harga_toko),
             'harga_jual' => preg_replace('/[^0-9]/', '', $request->harga_jual),
@@ -121,34 +117,28 @@ class JualpartController extends Controller
         $old_kode_barang = $jualpart->kode_barang;
         $old_jumlah = $jualpart->jumlah;
 
-        // Cek stok tersedia (hanya jika kode barang atau jumlah berubah)
         if ($request->kode_barang != $old_kode_barang || $request->jumlah != $old_jumlah) {
-            $sparepart = Datasparepat::where('kode_barang', $request->kode_barang)->first();
-            if (!$sparepart) {
-                return redirect()->back()->with('error', 'Barang tidak ditemukan!');
-            }
-
-            // Kembalikan stok lama
             $old_sparepart = Datasparepat::where('kode_barang', $old_kode_barang)->first();
             if ($old_sparepart) {
                 $old_sparepart->jumlah += $old_jumlah;
                 $old_sparepart->save();
             }
 
-            // Cek stok baru
-            if ($sparepart->jumlah < $request->jumlah) {
+            $new_sparepart = Datasparepat::where('kode_barang', $request->kode_barang)->first();
+            if (!$new_sparepart) {
+                return redirect()->back()->with('error', 'Barang tidak ditemukan!');
+            }
+
+            if ($new_sparepart->jumlah < $request->jumlah) {
                 return redirect()->back()->with('error', 'Stok tidak mencukupi!');
             }
 
-            // Kurangi stok baru
-            $sparepart->jumlah -= $request->jumlah;
-            $sparepart->save();
+            $new_sparepart->jumlah -= $request->jumlah;
+            $new_sparepart->save();
         }
 
-        // Update data di Jualpart
         $jualpart->update($request->all());
 
-        // Update data minimal di Partkeluar
         Partkeluar::updateOrCreate(
             ['jualpart_id' => $id],
             [
@@ -159,7 +149,6 @@ class JualpartController extends Controller
                 'merk' => $request->merk,
                 'tanggal_keluar' => $request->tanggal_keluar,
                 'jumlah' => $request->jumlah,
-                // Field lainnya tidak diupdate ke partkeluar
             ]
         );
 
@@ -170,19 +159,51 @@ class JualpartController extends Controller
     {
         $jualpart = Jualpart::findOrFail($id);
 
-        // Kembalikan stok
         $sparepart = Datasparepat::where('kode_barang', $jualpart->kode_barang)->first();
         if ($sparepart) {
             $sparepart->jumlah += $jualpart->jumlah;
             $sparepart->save();
         }
 
-        // Hapus data di Partkeluar
         Partkeluar::where('jualpart_id', $id)->delete();
-
-        // Hapus data Jualpart
         $jualpart->delete();
 
         return redirect()->route('jualpart')->with('success', 'Data penjualan berhasil dihapus!');
+    }
+
+    public function printPDF(Request $request)
+    {
+        $search = $request->input('search');
+        $dateStart = $request->input('date_start');
+        $dateEnd = $request->input('date_end');
+
+        $query = Jualpart::query();
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('kode_barang', 'like', '%' . $search . '%')
+                    ->orWhere('nama_part', 'like', '%' . $search . '%')
+                    ->orWhere('stn', 'like', '%' . $search . '%')
+                    ->orWhere('tipe', 'like', '%' . $search . '%')
+                    ->orWhere('nama_pelanggan', 'like', '%' . $search . '%');
+            });
+        }
+
+        if ($dateStart && $dateEnd) {
+            $query->whereBetween('tanggal_keluar', [$dateStart, $dateEnd]);
+        }
+
+        $jualparts = $query->with('jualpart')->get();
+
+        $pdf = Pdf::loadView('printpdfdataspkakhir', compact('dataservices'));
+
+        return $pdf->download('Jual_part.pdf');
+    }
+
+    public function printPDFPerData($id)
+    {
+        $jualpart = Jualpart::findOrFail($id);
+        $pdf = Pdf::loadView('printpdfjualpart', compact('jualpart'));
+        return $pdf->download('Data_JualPart.pdf');
     }
 }
