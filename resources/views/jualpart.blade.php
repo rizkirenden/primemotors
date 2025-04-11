@@ -108,7 +108,7 @@
                 <div class="mb-1 p-2">
                     <div class="flex justify-between items-center space-x-4">
                         <!-- Search -->
-                        <form action="{{ route('jualpart') }}" method="GET">
+                        <form action="{{ route('printpdfjualpart') }}" method="GET">
                             <div class="flex items-center space-x-4 w-full">
                                 <!-- Search Input -->
                                 <input type="text" name="search" id="search-input" placeholder="Search..."

@@ -193,9 +193,8 @@ class JualpartController extends Controller
             $query->whereBetween('tanggal_keluar', [$dateStart, $dateEnd]);
         }
 
-        $jualparts = $query->with('jualpart')->get();
-
-        $pdf = Pdf::loadView('printpdfdataspkakhir', compact('dataservices'));
+        $jualparts = $query->get();
+        $pdf = Pdf::loadView('printpdfjualpart', compact('jualparts'));
 
         return $pdf->download('Jual_part.pdf');
     }
@@ -203,7 +202,7 @@ class JualpartController extends Controller
     public function printPDFPerData($id)
     {
         $jualpart = Jualpart::findOrFail($id);
-        $pdf = Pdf::loadView('printpdfjualpart', compact('jualpart'));
+        $pdf = Pdf::loadView('printpdfjualpartperdata', compact('jualparts'));
         return $pdf->download('Data_JualPart.pdf');
     }
 }

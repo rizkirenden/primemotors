@@ -101,7 +101,7 @@
 
     <!-- Data Mekanik -->
     <div class="center-text">
-        <p><strong>Data Part Keluar</strong></p>
+        <p><strong>Penjualan Part</strong></p>
     </div>
 
     <!-- Current Date -->
@@ -111,27 +111,27 @@
     <table>
         <thead>
             <tr>
-                <th>Kode Barang</th>
+                <th>Nama Pelanggan</th>
                 <th>Nama Part</th>
                 <th>Merk</th>
                 <th>Stn</th>
                 <th>Tipe</th>
-                <th>Tanggal Keluar</th>
                 <th>Jumlah</th>
-                <th>Status</th>
+                <th>Discount</th>
+                <th>Total</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($partkeluars as $partkeluar)
+            @foreach ($jualparts as $jualpart)
                 <tr>
-                    <td>{{ $partkeluar->kode_barang }}</td>
-                    <td>{{ $partkeluar->nama_part }}</td>
-                    <td>{{ $partkeluar->merk }}</td>
-                    <td>{{ $partkeluar->stn }}</td>
-                    <td>{{ $partkeluar->tipe }}</td>
-                    <td>{{ $partkeluar->tanggal_keluar }}</td>
-                    <td>{{ $partkeluar->jumlah }}</td>
-                    <td>{{ $partkeluar->status }}</td>
+                    <td>{{ $jualpart->nama_pelanggan }}</td>
+                    <td>{{ $jualpart->nama_part }}</td>
+                    <td>{{ $jualpart->merk }}</td>
+                    <td>{{ $jualpart->stn }}</td>
+                    <td>{{ $jualpart->tipe }}</td>
+                    <td>{{ $jualpart->jumlah }}</td>
+                    <td>{{ $jualpart->discount }}</td>
+                    <td>Rp{{ number_format($jualpart->total_harga_part / 1000, 0, ',', '.') }}</td>
                 </tr>
             @endforeach
         </tbody>
