@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Jualpart;
 use App\Models\Datasparepat;
 use App\Models\Partkeluar;
+use App\Models\JualpartItem;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class JualpartController extends Controller
@@ -278,8 +279,14 @@ class JualpartController extends Controller
 
     public function printPDFPerData($id)
     {
-        $jualpart = Jualpart::with('items')->findOrFail($id);
-        $pdf = Pdf::loadView('printpdfjualpartperdata', compact('jualpart'));
+        $jualpart = Jualpart::findOrFail($id);
+        $items = JualpartItem::where('jualpart_id', $id)->get();
+
+        $pdf = Pdf::loadView('printpdfjualpartperdata', compact('jualpart', 'items'))
+                  ->setPaper('a4', 'landscape'); // Specify A4 paper size
+
         return $pdf->download('Data_JualPart_' . $id . '.pdf');
     }
+
+
 }
