@@ -170,9 +170,9 @@ class DatashowroomController extends Controller
         // Pastikan path foto benar
         foreach ($showrooms as $showroom) {
             if ($showroom->foto) {
-                $showroom->foto = public_path('storage/' . $showroom->foto);  // Ganti asset() dengan public_path()
+                $showroom->foto = public_path('storage/' . $showroom->foto);
             } else {
-                $showroom->foto = public_path('images/default-image.jpg'); // Default image
+                $showroom->foto = public_path('images/default-image.jpg');
             }
         }
 

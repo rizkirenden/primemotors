@@ -189,6 +189,10 @@
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
                                 </form>
+                                <a href="{{ route('printpdfjualpart.perdata', $jualpart->id) }}"
+                                    class="text-black hover:text-black ml-3">
+                                    <i class="fas fa-print"></i>
+                                </a>
                             </td>
                         </tr>
                         <tr id="desc-{{ $jualpart->id }}" class="hidden description-row">

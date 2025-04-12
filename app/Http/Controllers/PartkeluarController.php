@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Partkeluar;
 use App\Models\Datasparepat;
+use App\Models\JualpartItem;
+use App\Models\Jualpart;
 use Barryvdh\DomPDF\Facade\Pdf;
 class PartkeluarController extends Controller
 {
@@ -51,23 +53,43 @@ class PartkeluarController extends Controller
 
     // Menghapus data part keluar
     public function destroy($id)
-{
-    $partKeluar = PartKeluar::findOrFail($id);
+    {
+        $partKeluar = PartKeluar::findOrFail($id);
 
-    // Kembalikan stok hanya jika status approved
-    if ($partKeluar->status === 'approved') {
-        $sparepart = Datasparepat::where('kode_barang', $partKeluar->kode_barang)->first();
-        if ($sparepart) {
-            $sparepart->jumlah += $partKeluar->jumlah; // Tambah stok kembali
-            $sparepart->save();
+        // Kembalikan stok hanya jika status approved
+        if ($partKeluar->status === 'approved') {
+            $sparepart = Datasparepat::where('kode_barang', $partKeluar->kode_barang)->first();
+            if ($sparepart) {
+                $sparepart->jumlah += $partKeluar->jumlah; // Tambah stok kembali
+                $sparepart->save();
+            }
         }
+
+        // Jika terkait dengan penjualan (jualpart)
+        if ($partKeluar->jualpart_id) {
+            // Cari item penjualan yang terkait
+            $jualpartItem = JualpartItem::where('kode_barang', $partKeluar->kode_barang)
+                                ->where('jualpart_id', $partKeluar->jualpart_id)
+                                ->first();
+
+            if ($jualpartItem) {
+                // Hapus item penjualan
+                $jualpartItem->delete();
+
+                // Update total transaksi di data penjualan
+                $jualpart = Jualpart::find($partKeluar->jualpart_id);
+                if ($jualpart) {
+                    $jualpart->total_transaksi = $jualpart->items()->sum('total_harga_part');
+                    $jualpart->save();
+                }
+            }
+        }
+
+        // Hapus data part keluar
+        $partKeluar->delete();
+
+        return redirect()->route('partkeluar')->with('success', 'Data part keluar berhasil dihapus!');
     }
-
-    // Hapus data part keluar
-    $partKeluar->delete();
-
-    return redirect()->route('partkeluar')->with('success', 'Data part keluar berhasil dihapus!');
-}
 
     public function update(Request $request, $id)
 {
