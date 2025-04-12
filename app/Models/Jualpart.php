@@ -2,34 +2,32 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Jualpart extends Model
 {
-    use HasFactory;
-    protected $table = 'jualparts';
     protected $fillable = [
-        'kode_barang',
-        'nama_part',
-        'stn',
-        'tipe',
-        'merk',
-        'tanggal_keluar',
+        'invoice_number',
         'tanggal_pembayaran',
-        'jumlah',
-        'harga_toko',
-        'harga_jual',
-        'margin_persen',
-        'discount',
-        'total_harga_part',
         'metode_pembayaran',
         'nama_pelanggan',
         'alamat_pelanggan',
         'nomor_pelanggan',
+        'total_transaksi'
     ];
-    public function partkeluar()
+
+    public function items(): HasMany
     {
-        return $this->hasMany(Partkeluar::class, 'jualpart_id');
+        return $this->hasMany(JualpartItem::class);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            $model->invoice_number = 'INV-' . date('Ymd') . '-' . str_pad(static::count() + 1, 4, '0', STR_PAD_LEFT);
+        });
     }
 }

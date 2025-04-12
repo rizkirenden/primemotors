@@ -136,14 +136,13 @@
             <table class="min-w-full table-auto text-black">
                 <thead class="bg-white">
                     <tr>
+                        <th class="px-4 py-2 text-left text-xs">No Invoice</th>
                         <th class="px-4 py-2 text-left text-xs">Nama Pelanggan</th>
-                        <th class="px-4 py-2 text-left text-xs">Kode Barang</th>
-                        <th class="px-4 py-2 text-left text-xs">Nama Part</th>
-                        <th class="px-4 py-2 text-left text-xs">Tanggal Keluar</th>
-                        <th class="px-4 py-2 text-left text-xs">Jumlah</th>
-                        <th class="px-4 py-2 text-left text-xs">Harga Jual</th>
-                        <th class="px-4 py-2 text-left text-xs">Discount</th>
-                        <th class="px-4 py-2 text-left text-xs">Total</th>
+                        <th class="px-4 py-2 text-left text-xs">Alamat Pelanggan</th>
+                        <th class="px-4 py-2 text-left text-xs">No Telp Pelanggan</th>
+                        <th class="px-4 py-2 text-left text-xs">Tanggal Pembayaran</th>
+                        <th class="px-4 py-2 text-left text-xs">Total Harga</th>
+                        <th class="px-4 py-2 text-left text-xs">Metode Pembayaran</th>
                         <th class="px-4 py-2 text-left text-xs">Detail</th>
                         <th class="px-4 py-2 text-left text-xs">Action</th>
                     </tr>
@@ -151,22 +150,15 @@
                 <tbody class="bg-white">
                     @foreach ($jualparts as $jualpart)
                         <tr>
+                            <td class="px-4 py-2 text-xs">{{ $jualpart->invoice_number }}</td>
                             <td class="px-4 py-2 text-xs">{{ $jualpart->nama_pelanggan }}</td>
-                            <td class="px-4 py-2 text-xs">{{ $jualpart->kode_barang }}</td>
-                            <td class="px-4 py-2 text-xs">{{ $jualpart->nama_part }}</td>
-                            <td class="px-4 py-2 text-xs">{{ $jualpart->tanggal_keluar }}</td>
-                            <td class="px-4 py-2 text-xs">{{ $jualpart->jumlah }}</td>
+                            <td class="px-4 py-2 text-xs">{{ $jualpart->alamat_pelanggan }}</td>
+                            <td class="px-4 py-2 text-xs">{{ $jualpart->nomor_pelanggan }}</td>
+                            <td class="px-4 py-2 text-xs">{{ $jualpart->tanggal_pembayaran }}</td>
                             <td class="px-4 py-2 text-xs">
-                                {{ 'Rp ' . number_format($jualpart->harga_jual / 1000, 0, ',', '.') }}
+                                {{ 'Rp ' . number_format($jualpart->total_transaksi, 0, ',', '.') }}
                             </td>
-
-                            <td class="px-4 py-2 text-xs">
-                                {{ $jualpart->discount == intval($jualpart->discount) ? intval($jualpart->discount) : number_format($jualpart->discount, 2, ',', '.') }}%
-                            </td>
-                            <td class="px-4 py-2 text-xs">
-                                {{ 'Rp ' . number_format($jualpart->total_harga_part / 1000, 0, ',', '.') }}
-                            </td>
-
+                            <td class="px-4 py-2 text-xs">{{ $jualpart->metode_pembayaran }}</td>
                             <td class="px-4 py-2">
                                 <button class="px-4 py-2 text-white bg-black rounded-full mr-2"
                                     onclick="toggleDescription({{ $jualpart->id }})">
@@ -175,27 +167,7 @@
                             </td>
                             <td class="px-4 py-2">
                                 <a href="#" class="text-blue-500 hover:text-blue-700 mr-3"
-                                    onclick="openEditModal(
-                                        '{{ $jualpart->id }}',
-                                        '{{ $jualpart->kode_barang }}',
-                                        '{{ $jualpart->nama_part }}',
-                                        '{{ $jualpart->stn }}',
-                                        '{{ $jualpart->tipe }}',
-                                        '{{ $jualpart->merk }}',
-                                        '{{ $jualpart->tanggal_keluar }}',
-                                        '{{ $jualpart->jumlah }}',
-                                        '{{ $jualpart->harga_toko }}',
-                                        '{{ $jualpart->harga_jual }}',
-                                        '{{ $jualpart->margin_persen }}',
-                                        '{{ $jualpart->discount }}',
-                                        '{{ $jualpart->total_harga_part }}',
-                                        '{{ $jualpart->status }}',
-                                        '{{ $jualpart->metode_pembayaran }}',
-                                        '{{ $jualpart->nama_pelanggan }}',
-                                        '{{ $jualpart->tanggal_pembayaran }}',
-                                        '{{ $jualpart->alamat_pelanggan }}',
-                                        '{{ $jualpart->nomor_pelanggan }}'
-                                    )">
+                                    onclick="openEditModal({{ $jualpart->id }})">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <form action="{{ route('jualpart.destroy', $jualpart->id) }}" method="POST"
@@ -211,26 +183,46 @@
                         <tr id="desc-{{ $jualpart->id }}" class="hidden description-row">
                             <td colspan="10">
                                 <div class="description-container p-4">
-                                    <div class="grid grid-cols-3 gap-6">
-                                        <div><strong>Alamat Pelanggan:</strong> {{ $jualpart->alamat_pelanggan }}</div>
-                                        <div><strong>No Telp:</strong> {{ $jualpart->nomor_pelanggan }}</div>
-                                        <div><strong>STN:</strong> {{ $jualpart->stn }}</div>
-
-                                        <div><strong>MERK:</strong> {{ $jualpart->merk }}</div>
-                                        <div><strong>Tipe:</strong> {{ $jualpart->tipe }}</div>
-                                        <div><strong>Harga Toko:</strong>
-                                            {{ 'Rp ' . number_format($jualpart->harga_toko / 1000, 0, ',', '.') }}
-                                        </div>
-
-                                        <div><strong>Metode Pembayaran:</strong> {{ $jualpart->metode_pembayaran }}
-                                        </div>
-                                        <div><strong>Tanggal Pembayaran:</strong> {{ $jualpart->tanggal_pembayaran }}
-                                        </div>
-                                        <div><strong>Margin:</strong> {{ $jualpart->margin_persen }}%</div>
-                                        @foreach ($jualpart->partkeluar as $part)
-                                            <div><strong>Status Part Keluar:</strong> {{ $part->status }}</div>
-                                        @endforeach
-                                    </div>
+                                    @if ($jualpart->items && count($jualpart->items) > 0)
+                                        <table class="w-full">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-left">Kode Barang</th>
+                                                    <th class="text-left">Nama Part</th>
+                                                    <th class="text-left">Merk</th>
+                                                    <th class="text-left">Tipe</th>
+                                                    <th class="text-left">Tanggal Pembayaran</th>
+                                                    <th class="text-left">Jumlah</th>
+                                                    <th class="text-left">Harga Jual</th>
+                                                    <th class="text-left">Discount</th>
+                                                    <th class="text-left">Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($jualpart->items as $item)
+                                                    <tr>
+                                                        <td class="px-2 py-1">{{ $item->kode_barang }}</td>
+                                                        <td class="px-2 py-1">{{ $item->nama_part }}</td>
+                                                        <td class="px-2 py-1">{{ $item->merk }}</td>
+                                                        <td class="px-2 py-1">{{ $item->tipe }}</td>
+                                                        <td class="px-2 py-1">{{ $item->tanggal_keluar }}</td>
+                                                        <td class="px-2 py-1">{{ $item->jumlah }}</td>
+                                                        <td class="px-2 py-1">
+                                                            {{ 'Rp ' . number_format($item->harga_jual, 0, ',', '.') }}
+                                                        </td>
+                                                        <td class="px-2 py-1">
+                                                            {{ rtrim(rtrim(number_format($item->discount, 2, '.', ''), '0'), '.') }}%
+                                                        </td>
+                                                        <td class="px-2 py-1">
+                                                            {{ 'Rp ' . number_format($item->total_harga_part, 0, ',', '.') }}
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    @else
+                                        <p class="text-center text-gray-500">Tidak ada item pada transaksi ini</p>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -278,41 +270,11 @@
             <form action="{{ route('jualpart.store') }}" method="POST" class="w-full space-y-4">
                 @csrf
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <select name="kode_barang" id="kode_barang"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required
-                        onchange="fetchSparepartData()">
-                        <option value="">Pilih Kode Barang</option>
-                        @foreach ($spareparts as $sparepart)
-                            <option value="{{ $sparepart->kode_barang }}">{{ $sparepart->kode_barang }}</option>
-                        @endforeach
-                    </select>
-                    <input type="text" id="nama_part" name="nama_part" placeholder="Nama Part"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
-                    <input type="text" id="stn" name="stn" placeholder="STN"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
-                    <input type="text" id="tipe" name="tipe" placeholder="Tipe"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
-                    <input type="text" id="merk" name="merk" placeholder="Merk"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
-                    <input type="date" name="tanggal_keluar"
+                    <!-- Customer Info -->
+                    <input type="date" name="tanggal_pembayaran"
                         class="w-full px-4 py-2 border border-gray-300 rounded-full" required>
-                    <input type="number" name="jumlah" id="jumlah" placeholder="Jumlah"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required min="1"
-                        oninput="calculateTotal()">
-                    <input type="text" id="harga_toko" name="harga_toko" placeholder="Harga Toko"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
-                    <input type="text" id="margin_persen" name="margin_persen" placeholder="Margin Persen"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
-                    <input type="text" id="harga_jual" name="harga_jual" placeholder="Harga Jual"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
-                    <input type="number" name="discount" id="discount" placeholder="Discount (%)"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required
-                        oninput="calculateTotal()">
-                    <input type="text" name="total_harga_part" id="total_harga_part"
-                        placeholder="Total Harga Part" class="w-full px-4 py-2 border border-gray-300 rounded-full"
-                        required readonly>
-                    <select name="metode_pembayaran" id="metode_pembayaran"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required>
+                    <select name="metode_pembayaran" class="w-full px-4 py-2 border border-gray-300 rounded-full"
+                        required>
                         <option value="">Metode Pembayaran</option>
                         <option value="Tunai">Tunai</option>
                         <option value="Kredit">Kredit</option>
@@ -324,15 +286,60 @@
                         class="w-full px-4 py-2 border border-gray-300 rounded-full" required>
                     <input type="text" name="nomor_pelanggan" placeholder="Nomor Telepon"
                         class="w-full px-4 py-2 border border-gray-300 rounded-full" required>
-                    <input type="date" name="tanggal_pembayaran"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required>
                 </div>
+
+                <!-- Items Section -->
+                <div id="items-container" class="mt-4">
+                    <div class="item-row grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <select name="items[0][kode_barang]"
+                            class="kode_barang px-4 py-2 border border-gray-300 rounded-full" required
+                            onchange="fetchSparepartData(this, 0)">
+                            <option value="">Pilih Kode Barang</option>
+                            @foreach ($spareparts as $sparepart)
+                                <option value="{{ $sparepart->kode_barang }}">{{ $sparepart->kode_barang }}</option>
+                            @endforeach
+                        </select>
+                        <input type="text" name="items[0][nama_part]" placeholder="Nama Part"
+                            class="nama_part px-4 py-2 border border-gray-300 rounded-full" required readonly>
+                        <input type="text" name="items[0][stn]" placeholder="STN"
+                            class="stn px-4 py-2 border border-gray-300 rounded-full" required readonly>
+                        <input type="text" name="items[0][tipe]" placeholder="Tipe"
+                            class="tipe px-4 py-2 border border-gray-300 rounded-full" required readonly>
+                        <input type="text" name="items[0][merk]" placeholder="Merk"
+                            class="merk px-4 py-2 border border-gray-300 rounded-full" required readonly>
+                        <input type="date" name="items[0][tanggal_keluar]"
+                            class="tanggal_keluar px-4 py-2 border border-gray-300 rounded-full" required>
+                        <input type="text" name="items[0][harga_toko]" placeholder="Harga Toko"
+                            class="harga_toko px-4 py-2 border border-gray-300 rounded-full" required readonly>
+                        <input type="text" name="items[0][margin_persen]" placeholder="Margin %"
+                            class="margin_persen px-4 py-2 border border-gray-300 rounded-full" required readonly>
+                        <input type="text" name="items[0][harga_jual]" placeholder="Harga Jual"
+                            class="harga_jual px-4 py-2 border border-gray-300 rounded-full" required readonly>
+                        <input type="number" name="items[0][jumlah]" placeholder="Jumlah"
+                            class="jumlah px-4 py-2 border border-gray-300 rounded-full" required min="1"
+                            oninput="calculateItemTotal(0)">
+                        <input type="number" name="items[0][discount]" placeholder="Discount (%)"
+                            class="discount px-4 py-2 border border-gray-300 rounded-full" required
+                            oninput="calculateItemTotal(0)">
+                        <input type="text" name="items[0][total_harga_part]" placeholder="Total"
+                            class="total_harga_part px-4 py-2 border border-gray-300 rounded-full" required readonly>
+                        <button type="button" onclick="removeItem(this)"
+                            class="px-4 py-2 bg-red-500 text-white rounded-full">Hapus</button>
+                    </div>
+                </div>
+
+                <button type="button" onclick="addItem()"
+                    class="px-4 py-2 bg-blue-500 text-white rounded-full">Tambah Item</button>
+
                 <div class="mt-4 flex justify-between">
                     <button type="submit"
-                        class="w-1/2 px-4 py-2 bg-black text-white rounded-full hover:bg-gray-700 mr-2">Tambah
-                        Data</button>
+                        class="w-1/2 px-4 py-2 bg-black text-white rounded-full hover:bg-gray-700 mr-2">
+                        Simpan Transaksi
+                    </button>
                     <button type="button" onclick="closeModal()"
-                        class="w-1/2 px-4 py-2 bg-black text-white rounded-full hover:bg-red-700 ml-2">Close</button>
+                        class="w-1/2 px-4 py-2 bg-black text-white rounded-full hover:bg-red-700 ml-2">
+                        Close
+                    </button>
                 </div>
             </form>
         </div>
@@ -347,40 +354,11 @@
                 @csrf
                 @method('PUT')
                 <input type="hidden" id="edit-id" name="id">
+
+                <!-- Customer Info -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <select name="kode_barang" id="edit-kode_barang"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required
-                        onchange="fetchSparepartDataEdit()">
-                        <option value="">Pilih Kode Barang</option>
-                        @foreach ($spareparts as $sparepart)
-                            <option value="{{ $sparepart->kode_barang }}">{{ $sparepart->kode_barang }}</option>
-                        @endforeach
-                    </select>
-                    <input type="text" id="edit-nama_part" name="nama_part" placeholder="Nama Part"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
-                    <input type="text" id="edit-stn" name="stn" placeholder="STN"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
-                    <input type="text" id="edit-tipe" name="tipe" placeholder="Tipe"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
-                    <input type="text" id="edit-merk" name="merk" placeholder="Merk"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
-                    <input type="date" id="edit-tanggal_keluar" name="tanggal_keluar"
+                    <input type="date" id="edit-tanggal_pembayaran" name="tanggal_pembayaran"
                         class="w-full px-4 py-2 border border-gray-300 rounded-full" required>
-                    <input type="number" id="edit-jumlah" name="jumlah" placeholder="Jumlah"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required min="1"
-                        oninput="calculateTotalEdit()">
-                    <input type="text" id="edit-harga_toko" name="harga_toko" placeholder="Harga Toko"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
-                    <input type="text" id="edit-margin_persen" name="margin_persen" placeholder="Margin Persen"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
-                    <input type="text" id="edit-harga_jual" name="harga_jual" placeholder="Harga Jual"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required readonly>
-                    <input type="number" id="edit-discount" name="discount" placeholder="Discount (%)"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required
-                        oninput="calculateTotalEdit()">
-                    <input type="text" id="edit-total_harga_part" name="total_harga_part"
-                        placeholder="Total Harga Part" class="w-full px-4 py-2 border border-gray-300 rounded-full"
-                        required readonly>
                     <select name="metode_pembayaran" id="edit-metode_pembayaran"
                         class="w-full px-4 py-2 border border-gray-300 rounded-full" required>
                         <option value="">Metode Pembayaran</option>
@@ -397,21 +375,138 @@
                     <input type="text" id="edit-nomor_pelanggan" name="nomor_pelanggan"
                         placeholder="Nomor Telepon" class="w-full px-4 py-2 border border-gray-300 rounded-full"
                         required>
-                    <input type="date" id="edit-tanggal_pembayaran" name="tanggal_pembayaran"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full" required>
                 </div>
+
+                <!-- Items Section -->
+                <div id="edit-items-container" class="mt-4">
+                    <!-- Items will be added dynamically here -->
+                </div>
+
+                <button type="button" onclick="addEditItem()"
+                    class="px-4 py-2 bg-blue-500 text-white rounded-full">Tambah Item</button>
+
                 <div class="mt-4 flex justify-between">
                     <button type="submit"
-                        class="w-1/2 px-4 py-2 bg-black text-white rounded-full hover:bg-gray-700 mr-2">Update
-                        Data</button>
+                        class="w-1/2 px-4 py-2 bg-black text-white rounded-full hover:bg-gray-700 mr-2">
+                        Update Transaksi
+                    </button>
                     <button type="button" onclick="closeEditModal()"
-                        class="w-1/2 px-4 py-2 bg-black text-white rounded-full hover:bg-red-700 ml-2">Close</button>
+                        class="w-1/2 px-4 py-2 bg-black text-white rounded-full hover:bg-red-700 ml-2">
+                        Close
+                    </button>
                 </div>
             </form>
         </div>
     </div>
-
     <script>
+        let itemCounter = 1;
+
+        function addItem() {
+            const container = document.getElementById('items-container');
+            const newItem = document.createElement('div');
+            newItem.className = 'item-row grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4';
+            newItem.innerHTML = `
+        <select name="items[${itemCounter}][kode_barang]" class="kode_barang px-4 py-2 border border-gray-300 rounded-full" required onchange="fetchSparepartData(this, ${itemCounter})">
+            <option value="">Pilih Kode Barang</option>
+            @foreach ($spareparts as $sparepart)
+                <option value="{{ $sparepart->kode_barang }}">{{ $sparepart->kode_barang }}</option>
+            @endforeach
+        </select>
+        <input type="text" name="items[${itemCounter}][nama_part]" placeholder="Nama Part" class="nama_part px-4 py-2 border border-gray-300 rounded-full" required readonly>
+        <input type="text" name="items[${itemCounter}][stn]" placeholder="STN" class="stn px-4 py-2 border border-gray-300 rounded-full" required readonly>
+        <input type="text" name="items[${itemCounter}][tipe]" placeholder="Tipe" class="tipe px-4 py-2 border border-gray-300 rounded-full" required readonly>
+        <input type="text" name="items[${itemCounter}][merk]" placeholder="Merk" class="merk px-4 py-2 border border-gray-300 rounded-full" required readonly>
+        <input type="date" name="items[${itemCounter}][tanggal_keluar]" class="tanggal_keluar px-4 py-2 border border-gray-300 rounded-full" required>
+        <input type="text" name="items[${itemCounter}][harga_toko]" placeholder="Harga Toko" class="harga_toko px-4 py-2 border border-gray-300 rounded-full" required readonly>
+        <input type="text" name="items[${itemCounter}][margin_persen]" placeholder="Margin %" class="margin_persen px-4 py-2 border border-gray-300 rounded-full" required readonly>
+        <input type="text" name="items[${itemCounter}][harga_jual]" placeholder="Harga Jual" class="harga_jual px-4 py-2 border border-gray-300 rounded-full" required readonly>
+        <input type="number" name="items[${itemCounter}][jumlah]" placeholder="Jumlah" class="jumlah px-4 py-2 border border-gray-300 rounded-full" required min="1" oninput="calculateItemTotal(${itemCounter})">
+        <input type="number" name="items[${itemCounter}][discount]" placeholder="Discount (%)" class="discount px-4 py-2 border border-gray-300 rounded-full" required oninput="calculateItemTotal(${itemCounter})">
+        <input type="text" name="items[${itemCounter}][total_harga_part]" placeholder="Total" class="total_harga_part px-4 py-2 border border-gray-300 rounded-full" required readonly>
+        <button type="button" onclick="removeItem(this)" class="px-4 py-2 bg-red-500 text-white rounded-full">Hapus</button>
+    `;
+            container.appendChild(newItem);
+            itemCounter++;
+        }
+
+        function removeItem(button) {
+            const itemRow = button.closest('.item-row');
+            if (document.querySelectorAll('.item-row').length > 1) {
+                itemRow.remove();
+            } else {
+                alert('Anda harus memiliki setidaknya satu item');
+            }
+        }
+
+        function fetchSparepartData(selectElement, index) {
+            const kodeBarang = selectElement.value;
+            const itemRow = selectElement.closest('.item-row');
+
+            if (kodeBarang) {
+                fetch(`/spareparts/${kodeBarang}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data) {
+                            itemRow.querySelector('.nama_part').value = data.nama_part || '';
+                            itemRow.querySelector('.stn').value = data.stn || '';
+                            itemRow.querySelector('.tipe').value = data.tipe || '';
+                            itemRow.querySelector('.merk').value = data.merk || '';
+                            itemRow.querySelector('.harga_toko').value = formatRupiah(data.harga_toko?.toString() ||
+                                '0');
+                            itemRow.querySelector('.margin_persen').value = data.margin_persen || '0';
+                            itemRow.querySelector('.harga_jual').value = formatRupiah(data.harga_jual?.toString() ||
+                                '0');
+
+                            // Hitung total otomatis
+                            calculateItemTotal(index);
+                        } else {
+                            console.error('No data received');
+                            clearItemFields(itemRow);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Terjadi kesalahan saat mengambil data sparepart.');
+                        clearItemFields(itemRow);
+                    });
+            } else {
+                clearItemFields(itemRow);
+            }
+        }
+
+        function clearItemFields(itemRow) {
+            const fields = [
+                'nama_part', 'stn', 'tipe', 'merk',
+                'harga_toko', 'margin_persen', 'harga_jual', 'total_harga_part'
+            ];
+
+            fields.forEach(field => {
+                const element = itemRow.querySelector(`.${field}`);
+                if (element) element.value = '';
+            });
+        }
+
+        function calculateItemTotal(index) {
+            const itemRow = document.querySelectorAll('.item-row')[index];
+            if (!itemRow) return;
+
+            const hargaJual = parseFloat(removeFormatRupiah(itemRow.querySelector('.harga_jual').value)) || 0;
+            const discount = parseFloat(itemRow.querySelector('.discount').value) || 0;
+            const jumlah = parseFloat(itemRow.querySelector('.jumlah').value) || 1;
+
+            let total = hargaJual * jumlah;
+            if (!isNaN(discount)) {
+                total -= (total * discount) / 100;
+            }
+
+            itemRow.querySelector('.total_harga_part').value = formatRupiah(total.toString());
+        }
+
         // Modal functions
         function openModal() {
             document.getElementById("modal").classList.remove("hidden");
@@ -460,78 +555,7 @@
             return angka.replace(/\D/g, '');
         }
 
-        function calculateTotal() {
-            const hargaJual = parseFloat(removeFormatRupiah(document.getElementById('harga_jual').value));
-            const discountPersen = parseFloat(document.getElementById('discount').value) || 0;
-            const jumlah = parseFloat(document.getElementById('jumlah').value) || 1;
-
-            if (!isNaN(hargaJual)) {
-                let totalHargaPart = hargaJual * jumlah;
-
-                if (!isNaN(discountPersen)) {
-                    const discountAmount = (totalHargaPart * discountPersen) / 100;
-                    totalHargaPart -= discountAmount;
-                }
-
-                totalHargaPart = Math.max(totalHargaPart, 0);
-                document.getElementById('total_harga_part').value = formatRupiah(totalHargaPart.toString());
-            }
-        }
-
-        function calculateTotalEdit() {
-            const hargaJual = parseFloat(removeFormatRupiah(document.getElementById('edit-harga_jual').value));
-            const discountPersen = parseFloat(document.getElementById('edit-discount').value) || 0;
-            const jumlah = parseFloat(document.getElementById('edit-jumlah').value) || 1;
-
-            if (!isNaN(hargaJual)) {
-                let totalHargaPart = hargaJual * jumlah;
-
-                if (!isNaN(discountPersen)) {
-                    const discountAmount = (totalHargaPart * discountPersen) / 100;
-                    totalHargaPart -= discountAmount;
-                }
-
-                totalHargaPart = Math.max(totalHargaPart, 0);
-                document.getElementById('edit-total_harga_part').value = formatRupiah(totalHargaPart.toString());
-            }
-        }
-
-        function fetchSparepartData() {
-            const kodeBarang = document.getElementById('kode_barang').value;
-
-            if (kodeBarang) {
-                fetch(`/spareparts/${kodeBarang}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data) {
-                            document.getElementById('nama_part').value = data.nama_part;
-                            document.getElementById('stn').value = data.stn;
-                            document.getElementById('tipe').value = data.tipe;
-                            document.getElementById('merk').value = data.merk;
-                            document.getElementById('harga_toko').value = formatRupiah(data.harga_toko.toString());
-                            document.getElementById('margin_persen').value = data.margin_persen;
-                            document.getElementById('harga_jual').value = formatRupiah(data.harga_jual.toString());
-                            calculateTotal();
-                        } else {
-                            alert('Kode barang tidak ditemukan!');
-                            clearForm();
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Terjadi kesalahan saat mengambil data sparepart.');
-                        clearForm();
-                    });
-            } else {
-                clearForm();
-            }
-        }
-
+        // Edit modal functions
         function fetchSparepartDataEdit() {
             const kodeBarang = document.getElementById('edit-kode_barang').value;
 
@@ -568,15 +592,17 @@
             }
         }
 
-        function clearForm() {
-            document.getElementById('nama_part').value = '';
-            document.getElementById('stn').value = '';
-            document.getElementById('tipe').value = '';
-            document.getElementById('merk').value = '';
-            document.getElementById('harga_toko').value = '';
-            document.getElementById('margin_persen').value = '';
-            document.getElementById('harga_jual').value = '';
-            document.getElementById('total_harga_part').value = '';
+        function calculateTotalEdit() {
+            const hargaJual = parseFloat(removeFormatRupiah(document.getElementById('edit-harga_jual').value)) || 0;
+            const discountPersen = parseFloat(document.getElementById('edit-discount').value) || 0;
+            const jumlah = parseFloat(document.getElementById('edit-jumlah').value) || 1;
+
+            let totalHargaPart = hargaJual * jumlah;
+            if (!isNaN(discountPersen)) {
+                totalHargaPart -= (totalHargaPart * discountPersen) / 100;
+            }
+
+            document.getElementById('edit-total_harga_part').value = formatRupiah(totalHargaPart.toString());
         }
 
         function clearEditForm() {
@@ -590,77 +616,217 @@
             document.getElementById('edit-total_harga_part').value = '';
         }
 
-        function openEditModal(
-            id,
-            kode_barang,
-            nama_part,
-            stn,
-            tipe,
-            merk,
-            tanggal_keluar,
-            jumlah,
-            harga_toko,
-            harga_jual,
-            margin_persen,
-            discount,
-            total_harga_part,
-            status,
-            metode_pembayaran,
-            nama_pelanggan,
-            tanggal_pembayaran,
-            alamat_pelanggan,
-            nomor_pelanggan
-        ) {
-            document.getElementById("edit-id").value = id;
-            document.getElementById("edit-kode_barang").value = kode_barang;
-            document.getElementById("edit-nama_part").value = nama_part;
-            document.getElementById("edit-stn").value = stn;
-            document.getElementById("edit-tipe").value = tipe;
-            document.getElementById("edit-merk").value = merk;
-            document.getElementById("edit-tanggal_keluar").value = tanggal_keluar;
-            document.getElementById("edit-jumlah").value = jumlah;
-            document.getElementById("edit-harga_toko").value = formatRupiah(harga_toko);
-            document.getElementById("edit-harga_jual").value = formatRupiah(harga_jual);
-            document.getElementById("edit-margin_persen").value = margin_persen;
-            document.getElementById("edit-discount").value = discount;
-            document.getElementById("edit-total_harga_part").value = formatRupiah(total_harga_part);
-            document.getElementById("edit-metode_pembayaran").value = metode_pembayaran;
-            document.getElementById("edit-nama_pelanggan").value = nama_pelanggan;
-            document.getElementById("edit-alamat_pelanggan").value = alamat_pelanggan;
-            document.getElementById("edit-nomor_pelanggan").value = nomor_pelanggan;
-            document.getElementById("edit-tanggal_pembayaran").value = tanggal_pembayaran;
-
-            document.getElementById("edit-form").action = "/jualpart/" + id;
+        function openEditModal(id) {
             document.getElementById("edit-modal").classList.remove("hidden");
+
+            fetch(`/jualpart/${id}/edit`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data) throw new Error('No data received');
+
+                    // Set basic info
+                    document.getElementById('edit-id').value = data.id;
+                    document.getElementById('edit-tanggal_pembayaran').value = data.tanggal_pembayaran;
+                    document.getElementById('edit-metode_pembayaran').value = data.metode_pembayaran;
+                    document.getElementById('edit-nama_pelanggan').value = data.nama_pelanggan;
+                    document.getElementById('edit-alamat_pelanggan').value = data.alamat_pelanggan;
+                    document.getElementById('edit-nomor_pelanggan').value = data.nomor_pelanggan;
+
+                    // Clear and populate items
+                    const container = document.getElementById('edit-items-container');
+                    container.innerHTML = '';
+
+                    if (data.items && data.items.length > 0) {
+                        data.items.forEach((item, index) => {
+                            addEditItem(index, item);
+                        });
+                    } else {
+                        addEditItem(0);
+                    }
+
+                    // Set form action
+                    document.getElementById('edit-form').action = `/jualpart/${data.id}`;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan saat mengambil data.');
+                    closeEditModal();
+                });
+        }
+
+        function addEditItem(index = 0, itemData = null) {
+            const container = document.getElementById('edit-items-container');
+            const itemId = itemData ? itemData.id : `new-${index}`;
+            const itemIndex = container.children.length;
+
+            const newItem = document.createElement('div');
+            newItem.className = 'item-row grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4';
+            newItem.dataset.itemId = itemId;
+
+            newItem.innerHTML = `
+        <input type="hidden" name="items[${itemIndex}][id]" value="${itemId}">
+        <select name="items[${itemIndex}][kode_barang]" class="kode_barang px-4 py-2 border border-gray-300 rounded-full" required
+            onchange="fetchEditSparepartData(this, ${itemIndex})">
+            <option value="">Pilih Kode Barang</option>
+            @foreach ($spareparts as $sparepart)
+                <option value="{{ $sparepart->kode_barang }}" ${itemData && itemData.kode_barang === '{{ $sparepart->kode_barang }}' ? 'selected' : ''}>
+                    {{ $sparepart->kode_barang }}
+                </option>
+            @endforeach
+        </select>
+        <input type="text" name="items[${itemIndex}][nama_part]" placeholder="Nama Part"
+            class="nama_part px-4 py-2 border border-gray-300 rounded-full" required readonly
+            value="${itemData ? itemData.nama_part : ''}">
+        <input type="text" name="items[${itemIndex}][stn]" placeholder="STN"
+            class="stn px-4 py-2 border border-gray-300 rounded-full" required readonly
+            value="${itemData ? itemData.stn : ''}">
+        <input type="text" name="items[${itemIndex}][tipe]" placeholder="Tipe"
+            class="tipe px-4 py-2 border border-gray-300 rounded-full" required readonly
+            value="${itemData ? itemData.tipe : ''}">
+        <input type="text" name="items[${itemIndex}][merk]" placeholder="Merk"
+            class="merk px-4 py-2 border border-gray-300 rounded-full" required readonly
+            value="${itemData ? itemData.merk : ''}">
+        <input type="date" name="items[${itemIndex}][tanggal_keluar]"
+            class="tanggal_keluar px-4 py-2 border border-gray-300 rounded-full" required
+            value="${itemData ? itemData.tanggal_keluar : ''}">
+        <input type="text" name="items[${itemIndex}][harga_toko]" placeholder="Harga Toko"
+            class="harga_toko px-4 py-2 border border-gray-300 rounded-full" required readonly
+            value="${itemData ? formatRupiah(itemData.harga_toko.toString()) : ''}">
+        <input type="text" name="items[${itemIndex}][margin_persen]" placeholder="Margin %"
+            class="margin_persen px-4 py-2 border border-gray-300 rounded-full" required readonly
+            value="${itemData ? itemData.margin_persen : ''}">
+        <input type="text" name="items[${itemIndex}][harga_jual]" placeholder="Harga Jual"
+            class="harga_jual px-4 py-2 border border-gray-300 rounded-full" required readonly
+            value="${itemData ? formatRupiah(itemData.harga_jual.toString()) : ''}">
+        <input type="number" name="items[${itemIndex}][jumlah]" placeholder="Jumlah"
+            class="jumlah px-4 py-2 border border-gray-300 rounded-full" required min="1"
+            oninput="calculateEditItemTotal(${itemIndex})"
+            value="${itemData ? itemData.jumlah : 1}">
+        <input type="number" name="items[${itemIndex}][discount]" placeholder="Discount (%)"
+            class="discount px-4 py-2 border border-gray-300 rounded-full" required
+            oninput="calculateEditItemTotal(${itemIndex})"
+            value="${itemData ? itemData.discount : 0}">
+        <input type="text" name="items[${itemIndex}][total_harga_part]" placeholder="Total"
+            class="total_harga_part px-4 py-2 border border-gray-300 rounded-full" required readonly
+            value="${itemData ? formatRupiah(itemData.total_harga_part.toString()) : ''}">
+        <button type="button" onclick="removeEditItem(this)"
+            class="px-4 py-2 bg-red-500 text-white rounded-full">Hapus</button>
+    `;
+
+            container.appendChild(newItem);
+            // If itemData exists, fetch sparepart data if needed
+            if (itemData && !itemData.kode_barang) {
+                const selectElement = newItem.querySelector('.kode_barang');
+                fetchEditSparepartData(selectElement, itemIndex);
+            }
+        }
+
+        function removeEditItem(button) {
+            const itemRow = button.closest('.item-row');
+            if (document.querySelectorAll('#edit-items-container .item-row').length > 1) {
+                itemRow.remove();
+                // Re-index remaining items
+                document.querySelectorAll('#edit-items-container .item-row').forEach((row, index) => {
+                    Array.from(row.children).forEach(field => {
+                        if (field.name && field.name.includes('items[')) {
+                            field.name = field.name.replace(/items\[\d+\]/, `items[${index}]`);
+                        }
+                    });
+                });
+            } else {
+                alert('Anda harus memiliki setidaknya satu item');
+            }
+        }
+
+        function fetchEditSparepartData(selectElement, index) {
+            const kodeBarang = selectElement.value;
+            const itemRow = selectElement.closest('.item-row');
+
+            if (kodeBarang) {
+                fetch(`/spareparts/${kodeBarang}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data) {
+                            itemRow.querySelector('.nama_part').value = data.nama_part || '';
+                            itemRow.querySelector('.stn').value = data.stn || '';
+                            itemRow.querySelector('.tipe').value = data.tipe || '';
+                            itemRow.querySelector('.merk').value = data.merk || '';
+                            itemRow.querySelector('.harga_toko').value = formatRupiah(data.harga_toko?.toString() ||
+                                '0');
+                            itemRow.querySelector('.margin_persen').value = data.margin_persen || '0';
+                            itemRow.querySelector('.harga_jual').value = formatRupiah(data.harga_jual?.toString() ||
+                                '0');
+                            calculateEditItemTotal(index);
+                        } else {
+                            console.error('No data received');
+                            clearEditItemFields(itemRow);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Terjadi kesalahan saat mengambil data sparepart.');
+                        clearEditItemFields(itemRow);
+                    });
+            } else {
+                clearEditItemFields(itemRow);
+            }
+        }
+
+        function calculateEditItemTotal(index) {
+            const itemRow = document.querySelectorAll('#edit-items-container .item-row')[index];
+            if (!itemRow) return;
+
+            const hargaJual = parseFloat(removeFormatRupiah(itemRow.querySelector('.harga_jual').value)) || 0;
+            const discount = parseFloat(itemRow.querySelector('.discount').value) || 0;
+            const jumlah = parseFloat(itemRow.querySelector('.jumlah').value) || 1;
+
+            let total = hargaJual * jumlah;
+            if (!isNaN(discount)) {
+                total -= (total * discount) / 100;
+            }
+
+            itemRow.querySelector('.total_harga_part').value = formatRupiah(total.toString());
         }
 
         function closeEditModal() {
             document.getElementById("edit-modal").classList.add("hidden");
         }
 
-        // Format input harga saat form submit
-        document.querySelector('form').addEventListener('submit', function(event) {
-            const hargaFields = ['harga_toko', 'harga_jual', 'total_harga_part'];
-
-            hargaFields.forEach(field => {
-                if (document.getElementById(field)) {
-                    const value = document.getElementById(field).value;
-                    document.getElementById(field).value = removeFormatRupiah(value);
-                }
-            });
-        });
-
         // Format input harga saat edit form submit
-        document.getElementById('edit-form').addEventListener('submit', function(event) {
-            const hargaFields = ['edit-harga_toko', 'edit-harga_jual', 'edit-total_harga_part'];
+        document.getElementById('edit-form').addEventListener('submit', function(e) {
+            e.preventDefault();
 
-            hargaFields.forEach(field => {
-                if (document.getElementById(field)) {
-                    const value = document.getElementById(field).value;
-                    document.getElementById(field).value = removeFormatRupiah(value);
-                }
+            // Format semua nilai mata uang sebelum submit
+            document.querySelectorAll('#edit-items-container .item-row').forEach((row, index) => {
+                const fields = ['harga_toko', 'harga_jual', 'total_harga_part'];
+                fields.forEach(field => {
+                    const element = row.querySelector(`.${field}`);
+                    if (element) {
+                        element.value = removeFormatRupiah(element.value);
+                    }
+                });
             });
+
+            // Submit form
+            this.submit();
         });
+
+        // Helper functions
+        function formatRupiah(angka) {
+            const angkaString = angka.toString().replace(/\D/g, '');
+            const angkaNumber = parseInt(angkaString) || 0;
+            return 'Rp ' + angkaNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        function removeFormatRupiah(angka) {
+            return angka.replace(/\D/g, '');
+        }
     </script>
 </body>
 

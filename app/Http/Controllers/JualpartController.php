@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\Jualpart;
 use App\Models\Datasparepat;
@@ -13,196 +14,292 @@ class JualpartController extends Controller
     public function index()
     {
         $spareparts = Datasparepat::all();
-        $jualparts = Jualpart::paginate(10);
+        $jualparts = Jualpart::with('items')->paginate(10);
         return view('jualpart', compact('jualparts', 'spareparts'));
     }
 
     public function getSparepart($kode_barang)
     {
-        $sparepart = Datasparepat::where('kode_barang', $kode_barang)->first();
-
-        if ($sparepart) {
-            return response()->json($sparepart);
-        } else {
-            return response()->json(['error' => 'Sparepart not found'], 404);
-        }
+        $sparepart = Datasparepat::where('kode_barang', $kode_barang)->firstOrFail();
+        return response()->json($sparepart);
     }
 
     public function store(Request $request)
     {
-        $request->merge([
-            'harga_toko' => preg_replace('/[^0-9]/', '', $request->harga_toko),
-            'harga_jual' => preg_replace('/[^0-9]/', '', $request->harga_jual),
-            'margin_persen' => preg_replace('/[^0-9.]/', '', $request->margin_persen),
-            'total_harga_part' => preg_replace('/[^0-9]/', '', $request->total_harga_part)
+        $validated = $request->validate([
+        'tanggal_pembayaran' => 'required|date',
+        'metode_pembayaran' => 'required',
+        'nama_pelanggan' => 'required',
+        'alamat_pelanggan' => 'required',
+        'nomor_pelanggan' => 'required',
+        'items' => 'required|array|min:1',
+        'items.*.kode_barang' => 'required',
+        'items.*.tanggal_keluar' => 'required|date',
+        'items.*.jumlah' => 'required|integer|min:1',
+        'items.*.discount' => 'required|numeric|min:0|max:100',
         ]);
 
-        $request->validate([
-            'kode_barang' => 'required',
-            'nama_part' => 'required',
-            'stn' => 'required',
-            'tipe' => 'required',
-            'merk' => 'required',
-            'tanggal_keluar' => 'required|date',
-            'tanggal_pembayaran' => 'required|date',
-            'jumlah' => 'required|integer|min:1',
-            'harga_toko' => 'required|numeric',
-            'margin_persen' => 'required|numeric',
-            'harga_jual' => 'required|numeric',
-            'discount' => 'required|numeric',
-            'total_harga_part' => 'required|numeric',
-            'metode_pembayaran' => 'required',
-            'nama_pelanggan' => 'required',
-            'alamat_pelanggan' => 'required',
-            'nomor_pelanggan' => 'required',
-        ]);
+        DB::beginTransaction();
 
-        $sparepart = Datasparepat::where('kode_barang', $request->kode_barang)->first();
-        if (!$sparepart) {
-            return redirect()->back()->with('error', 'Barang tidak ditemukan!');
+        try {
+            $jualpart = Jualpart::create([
+                'tanggal_pembayaran' => $validated['tanggal_pembayaran'],
+                'metode_pembayaran' => $validated['metode_pembayaran'],
+                'nama_pelanggan' => $validated['nama_pelanggan'],
+                'alamat_pelanggan' => $validated['alamat_pelanggan'],
+                'nomor_pelanggan' => $validated['nomor_pelanggan'],
+                'total_transaksi' => 0
+            ]);
+
+            $totalTransaksi = 0;
+
+            foreach ($validated['items'] as $item) {
+                $sparepart = Datasparepat::where('kode_barang', $item['kode_barang'])->firstOrFail();
+
+                if ($sparepart->jumlah < $item['jumlah']) {
+                    throw new \Exception("Insufficient stock for {$sparepart->nama_part}");
+                }
+
+                $hargaJual = $sparepart->harga_jual;
+                $totalHarga = $hargaJual * $item['jumlah'];
+                $discountAmount = ($totalHarga * $item['discount']) / 100;
+                $totalHargaAfterDiscount = $totalHarga - $discountAmount;
+
+                $jualpart->items()->create([
+                    'kode_barang' => $sparepart->kode_barang,
+                    'nama_part' => $sparepart->nama_part,
+                    'stn' => $sparepart->stn,
+                    'tipe' => $sparepart->tipe,
+                    'merk' => $sparepart->merk,
+                    'tanggal_keluar' => $item['tanggal_keluar'],
+                    'jumlah' => $item['jumlah'],
+                    'harga_toko' => $sparepart->harga_toko,
+                    'margin_persen' => $sparepart->margin_persen,
+                    'harga_jual' => $hargaJual,
+                    'discount' => $item['discount'],
+                    'total_harga_part' => $totalHargaAfterDiscount
+                ]);
+
+                Partkeluar::create([
+                    'jualpart_id' => $jualpart->id,
+                    'kode_barang' => $sparepart->kode_barang,
+                    'nama_part' => $sparepart->nama_part,
+                    'stn' => $sparepart->stn,
+                    'tipe' => $sparepart->tipe,
+                    'merk' => $sparepart->merk,
+                    'tanggal_keluar' => $item['tanggal_keluar'],
+                    'jumlah' => $item['jumlah'],
+                ]);
+
+                $sparepart->jumlah -= $item['jumlah'];
+                $sparepart->save();
+
+                $totalTransaksi += $totalHargaAfterDiscount;
+            }
+
+            $jualpart->update(['total_transaksi' => $totalTransaksi]);
+            DB::commit();
+
+            return redirect()->route('jualpart')->with('success', 'Data penjualan berhasil disimpan!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', $e->getMessage())->withInput();
         }
+    }
 
-        if ($sparepart->jumlah < $request->jumlah) {
-            return redirect()->back()->with('error', 'Stok tidak mencukupi!');
-        }
-
-        $jualpart = Jualpart::create($request->all());
-
-        Partkeluar::create([
-            'jualpart_id' => $jualpart->id,
-            'kode_barang' => $request->kode_barang,
-            'nama_part' => $request->nama_part,
-            'stn' => $request->stn,
-            'tipe' => $request->tipe,
-            'merk' => $request->merk,
-            'tanggal_keluar' => $request->tanggal_keluar,
-            'jumlah' => $request->jumlah,
-        ]);
-
-        $sparepart->jumlah -= $request->jumlah;
-        $sparepart->save();
-
-        return redirect()->route('jualpart')->with('success', 'Data penjualan berhasil disimpan!');
+    public function edit($id)
+    {
+        $jualpart = Jualpart::with('items')->findOrFail($id);
+        return response()->json($jualpart);
     }
 
     public function update(Request $request, $id)
     {
-        $request->merge([
-            'harga_toko' => preg_replace('/[^0-9]/', '', $request->harga_toko),
-            'harga_jual' => preg_replace('/[^0-9]/', '', $request->harga_jual),
-            'margin_persen' => preg_replace('/[^0-9.]/', '', $request->margin_persen),
-            'total_harga_part' => preg_replace('/[^0-9]/', '', $request->total_harga_part)
+        $validated = $request->validate([
+             'tanggal_pembayaran' => 'required|date',
+        'metode_pembayaran' => 'required',
+        'nama_pelanggan' => 'required',
+        'alamat_pelanggan' => 'required',
+        'nomor_pelanggan' => 'required',
+        'items' => 'required|array|min:1',
+        'items.*.kode_barang' => 'required',
+        'items.*.tanggal_keluar' => 'required|date',
+        'items.*.jumlah' => 'required|integer|min:1',
+        'items.*.discount' => 'required|numeric|min:0|max:100',
         ]);
 
-        $request->validate([
-            'kode_barang' => 'required',
-            'nama_part' => 'required',
-            'stn' => 'required',
-            'tipe' => 'required',
-            'merk' => 'required',
-            'tanggal_keluar' => 'required|date',
-            'jumlah' => 'required|integer|min:1',
-            'harga_toko' => 'required|numeric',
-            'harga_jual' => 'required|numeric',
-            'margin_persen' => 'required|numeric',
-            'discount' => 'required|numeric',
-            'total_harga_part' => 'required|numeric',
-            'metode_pembayaran' => 'required',
-            'nama_pelanggan' => 'required',
-            'alamat_pelanggan' => 'required',
-            'nomor_pelanggan' => 'required',
-        ]);
+        DB::beginTransaction();
 
-        $jualpart = Jualpart::findOrFail($id);
-        $old_kode_barang = $jualpart->kode_barang;
-        $old_jumlah = $jualpart->jumlah;
+        try {
+            $jualpart = Jualpart::with('items')->findOrFail($id);
+            $jualpart->update([
+                'tanggal_pembayaran' => $validated['tanggal_pembayaran'],
+                'metode_pembayaran' => $validated['metode_pembayaran'],
+                'nama_pelanggan' => $validated['nama_pelanggan'],
+                'alamat_pelanggan' => $validated['alamat_pelanggan'],
+                'nomor_pelanggan' => $validated['nomor_pelanggan'],
+            ]);
 
-        if ($request->kode_barang != $old_kode_barang || $request->jumlah != $old_jumlah) {
-            $old_sparepart = Datasparepat::where('kode_barang', $old_kode_barang)->first();
-            if ($old_sparepart) {
-                $old_sparepart->jumlah += $old_jumlah;
-                $old_sparepart->save();
+            $totalTransaksi = 0;
+            $existingItemIds = [];
+
+            foreach ($validated['items'] as $item) {
+                $sparepart = Datasparepat::where('kode_barang', $item['kode_barang'])->firstOrFail();
+
+                if (isset($item['id'])) {
+                    $existingItem = $jualpart->items()->findOrFail($item['id']);
+                    $quantityDiff = $item['jumlah'] - $existingItem->jumlah;
+
+                    if ($quantityDiff > 0 && $sparepart->jumlah < $quantityDiff) {
+                        throw new \Exception("Insufficient stock for {$sparepart->nama_part}");
+                    }
+
+                    $sparepart->jumlah -= $quantityDiff;
+                    $sparepart->save();
+
+                    $hargaJual = $sparepart->harga_jual;
+                    $totalHarga = $hargaJual * $item['jumlah'];
+                    $discountAmount = ($totalHarga * $item['discount']) / 100;
+                    $totalHargaAfterDiscount = $totalHarga - $discountAmount;
+
+                    $existingItem->update([
+                        'tanggal_keluar' => $item['tanggal_keluar'],
+                        'jumlah' => $item['jumlah'],
+                        'discount' => $item['discount'],
+                        'total_harga_part' => $totalHargaAfterDiscount
+                    ]);
+
+                    Partkeluar::where('jualpart_id', $jualpart->id)
+                        ->where('kode_barang', $sparepart->kode_barang)
+                        ->update([
+                            'tanggal_keluar' => $item['tanggal_keluar'],
+                            'jumlah' => $item['jumlah'],
+                        ]);
+
+                    $existingItemIds[] = $existingItem->id;
+                    $totalTransaksi += $totalHargaAfterDiscount;
+                } else {
+                    if ($sparepart->jumlah < $item['jumlah']) {
+                        throw new \Exception("Insufficient stock for {$sparepart->nama_part}");
+                    }
+
+                    $hargaJual = $sparepart->harga_jual;
+                    $totalHarga = $hargaJual * $item['jumlah'];
+                    $discountAmount = ($totalHarga * $item['discount']) / 100;
+                    $totalHargaAfterDiscount = $totalHarga - $discountAmount;
+
+                    $newItem = $jualpart->items()->create([
+                        'kode_barang' => $sparepart->kode_barang,
+                        'nama_part' => $sparepart->nama_part,
+                        'stn' => $sparepart->stn,
+                        'tipe' => $sparepart->tipe,
+                        'merk' => $sparepart->merk,
+                        'tanggal_keluar' => $item['tanggal_keluar'],
+                        'jumlah' => $item['jumlah'],
+                        'harga_toko' => $sparepart->harga_toko,
+                        'margin_persen' => $sparepart->margin_persen,
+                        'harga_jual' => $hargaJual,
+                        'discount' => $item['discount'],
+                        'total_harga_part' => $totalHargaAfterDiscount
+                    ]);
+
+                    Partkeluar::create([
+                        'jualpart_id' => $jualpart->id,
+                        'kode_barang' => $sparepart->kode_barang,
+                        'nama_part' => $sparepart->nama_part,
+                        'stn' => $sparepart->stn,
+                        'tipe' => $sparepart->tipe,
+                        'merk' => $sparepart->merk,
+                        'tanggal_keluar' => $item['tanggal_keluar'],
+                        'jumlah' => $item['jumlah'],
+                    ]);
+
+                    $sparepart->jumlah -= $item['jumlah'];
+                    $sparepart->save();
+
+                    $existingItemIds[] = $newItem->id;
+                    $totalTransaksi += $totalHargaAfterDiscount;
+                }
             }
 
-            $new_sparepart = Datasparepat::where('kode_barang', $request->kode_barang)->first();
-            if (!$new_sparepart) {
-                return redirect()->back()->with('error', 'Barang tidak ditemukan!');
+            // Delete removed items
+            $itemsToDelete = $jualpart->items()->whereNotIn('id', $existingItemIds)->get();
+            foreach ($itemsToDelete as $item) {
+                $sparepart = Datasparepat::where('kode_barang', $item->kode_barang)->first();
+                if ($sparepart) {
+                    $sparepart->jumlah += $item->jumlah;
+                    $sparepart->save();
+                }
+
+                Partkeluar::where('jualpart_id', $jualpart->id)
+                    ->where('kode_barang', $item->kode_barang)
+                    ->delete();
+
+                $item->delete();
             }
 
-            if ($new_sparepart->jumlah < $request->jumlah) {
-                return redirect()->back()->with('error', 'Stok tidak mencukupi!');
-            }
+            $jualpart->update(['total_transaksi' => $totalTransaksi]);
+            DB::commit();
 
-            $new_sparepart->jumlah -= $request->jumlah;
-            $new_sparepart->save();
+            return redirect()->route('jualpart')->with('success', 'Data penjualan berhasil diupdate!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', $e->getMessage())->withInput();
         }
-
-        $jualpart->update($request->all());
-
-        Partkeluar::updateOrCreate(
-            ['jualpart_id' => $id],
-            [
-                'kode_barang' => $request->kode_barang,
-                'nama_part' => $request->nama_part,
-                'stn' => $request->stn,
-                'tipe' => $request->tipe,
-                'merk' => $request->merk,
-                'tanggal_keluar' => $request->tanggal_keluar,
-                'jumlah' => $request->jumlah,
-            ]
-        );
-
-        return redirect()->route('jualpart')->with('success', 'Data penjualan berhasil diupdate!');
     }
 
     public function destroy($id)
     {
-        $jualpart = Jualpart::findOrFail($id);
+        DB::beginTransaction();
+        try {
+            $jualpart = Jualpart::with('items')->findOrFail($id);
 
-        $sparepart = Datasparepat::where('kode_barang', $jualpart->kode_barang)->first();
-        if ($sparepart) {
-            $sparepart->jumlah += $jualpart->jumlah;
-            $sparepart->save();
+            foreach ($jualpart->items as $item) {
+                $sparepart = Datasparepat::where('kode_barang', $item->kode_barang)->first();
+                if ($sparepart) {
+                    $sparepart->jumlah += $item->jumlah;
+                    $sparepart->save();
+                }
+            }
+
+            Partkeluar::where('jualpart_id', $id)->delete();
+            $jualpart->items()->delete();
+            $jualpart->delete();
+
+            DB::commit();
+            return redirect()->route('jualpart')->with('success', 'Data penjualan berhasil dihapus!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', $e->getMessage());
         }
-
-        Partkeluar::where('jualpart_id', $id)->delete();
-        $jualpart->delete();
-
-        return redirect()->route('jualpart')->with('success', 'Data penjualan berhasil dihapus!');
     }
 
     public function printPDF(Request $request)
     {
-        $search = $request->input('search');
-        $dateStart = $request->input('date_start');
-        $dateEnd = $request->input('date_end');
+        $query = Jualpart::with('items');
 
-        $query = Jualpart::query();
-
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('kode_barang', 'like', '%' . $search . '%')
-                    ->orWhere('nama_part', 'like', '%' . $search . '%')
-                    ->orWhere('stn', 'like', '%' . $search . '%')
-                    ->orWhere('tipe', 'like', '%' . $search . '%')
-                    ->orWhere('nama_pelanggan', 'like', '%' . $search . '%');
+        if ($request->search) {
+            $query->where(function($q) use ($request) {
+                $q->where('invoice_number', 'like', '%'.$request->search.'%')
+                  ->orWhere('nama_pelanggan', 'like', '%'.$request->search.'%');
             });
         }
 
-        if ($dateStart && $dateEnd) {
-            $query->whereBetween('tanggal_keluar', [$dateStart, $dateEnd]);
+        if ($request->date_start && $request->date_end) {
+            $query->whereHas('items', function($q) use ($request) {
+                $q->whereBetween('tanggal_keluar', [$request->date_start, $request->date_end]);
+            });
         }
 
         $jualparts = $query->get();
         $pdf = Pdf::loadView('printpdfjualpart', compact('jualparts'));
-
-        return $pdf->download('Jual_part.pdf');
+        return $pdf->download('Jual_part_'.now()->format('YmdHis').'.pdf');
     }
 
     public function printPDFPerData($id)
     {
-        $jualpart = Jualpart::findOrFail($id);
-        $pdf = Pdf::loadView('printpdfjualpartperdata', compact('jualparts'));
-        return $pdf->download('Data_JualPart.pdf');
+        $jualpart = Jualpart::with('items')->findOrFail($id);
+        $pdf = Pdf::loadView('printpdfjualpartperdata', compact('jualpart'));
+        return $pdf->download('Data_JualPart_'.$id.'.pdf');
     }
 }

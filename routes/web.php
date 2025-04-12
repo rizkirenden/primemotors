@@ -104,6 +104,7 @@ Route::delete('/uraianpekerjaan/{id}', [UraianpekerjaanController::class, 'destr
 Route::get('/jualpart', [JualpartController::class, 'index'])->name('jualpart');
 Route::post('/jualpart', [JualpartController::class, 'store'])->name('jualpart.store');
 Route::put('/jualpart/{id}', [JualpartController::class, 'update'])->name('jualpart.update');
+Route::get('/jualpart/{id}/edit', [JualPartController::class, 'edit'])->name('jualpart.edit');
 Route::delete('jualpart/{id}', [JualpartController::class, 'destroy'])->name('jualpart.destroy');
 Route::get('/spareparts/{kode_barang}', [JualpartController::class, 'getSparepart']);
 Route::get('/printpdfjualpart', [JualpartController::class, 'printPDF'])->name('printpdfjualpart');
