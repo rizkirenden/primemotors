@@ -51,21 +51,24 @@ class PartkeluarController extends Controller
 
     // Menghapus data part keluar
     public function destroy($id)
-    {
-        $partKeluar = PartKeluar::findOrFail($id);
+{
+    $partKeluar = PartKeluar::findOrFail($id);
 
-        // Kembalikan stok di tabel datasparepats
+    // Kembalikan stok hanya jika status approved
+    if ($partKeluar->status === 'approved') {
         $sparepart = Datasparepat::where('kode_barang', $partKeluar->kode_barang)->first();
         if ($sparepart) {
             $sparepart->jumlah += $partKeluar->jumlah; // Tambah stok kembali
             $sparepart->save();
         }
-
-        // Hapus data part keluar
-        $partKeluar->delete();
-
-        return redirect()->route('partkeluar')->with('success', 'Data part keluar berhasil dihapus!');
     }
+
+    // Hapus data part keluar
+    $partKeluar->delete();
+
+    return redirect()->route('partkeluar')->with('success', 'Data part keluar berhasil dihapus!');
+}
+
     public function update(Request $request, $id)
 {
     $request->validate([
