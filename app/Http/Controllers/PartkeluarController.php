@@ -103,7 +103,7 @@ class PartkeluarController extends Controller
     // Update stok di tabel datasparepats (kurangi stok baru)
     $sparepart = Datasparepat::where('kode_barang', $request->kode_barang)->first();
     if ($sparepart) {
-        $sparepart->jumlah -= $request->jumlah; // Kurangi stok baru
+        $sparepart->jumlah -= $request->jumlah;
         $sparepart->save();
     }
 

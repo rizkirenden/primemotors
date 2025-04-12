@@ -84,6 +84,17 @@
             padding: 20px;
             background-color: white;
             border-radius: 8px;
+            max-height: 80vh;
+            /* Set maximum height */
+            overflow-y: auto;
+            /* Enable vertical scrolling */
+        }
+
+        .modal-content.large {
+            max-width: 90vw;
+            /* Wider for larger content */
+            max-height: 90vh;
+            /* Taller for larger content */
         }
 
         .hidden {
@@ -265,7 +276,7 @@
     <!-- Modal for adding data -->
     <div id="modal"
         class="modal hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-        <div class="modal-content bg-white p-6 rounded-lg max-w-4xl w-full">
+        <div class="modal-content bg-white p-6 rounded-lg max-w-4xl w-full large">
             <h2 class="text-center text-xl font-semibold mb-4">Tambah Data Jual Part</h2>
             <form action="{{ route('jualpart.store') }}" method="POST" class="w-full space-y-4">
                 @csrf
@@ -328,8 +339,8 @@
                     </div>
                 </div>
 
-                <button type="button" onclick="addItem()"
-                    class="px-4 py-2 bg-blue-500 text-white rounded-full">Tambah Item</button>
+                <button type="button" onclick="addItem()" class="px-4 py-2 bg-black text-white rounded-full">Tambah
+                    Item</button>
 
                 <div class="mt-4 flex justify-between">
                     <button type="submit"
@@ -348,7 +359,7 @@
     <!-- Edit Modal for Editing Data -->
     <div id="edit-modal"
         class="modal hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-        <div class="modal-content bg-white p-6 rounded-lg max-w-4xl w-full">
+        <div class="modal-content bg-white p-6 rounded-lg max-w-4xl w-full large">
             <h2 class="text-center text-xl font-semibold mb-4">Edit Data Jual Part</h2>
             <form method="POST" id="edit-form" class="w-full space-y-4">
                 @csrf
@@ -383,7 +394,7 @@
                 </div>
 
                 <button type="button" onclick="addEditItem()"
-                    class="px-4 py-2 bg-blue-500 text-white rounded-full">Tambah Item</button>
+                    class="px-4 py-2 bg-black text-white rounded-full">Tambah Item</button>
 
                 <div class="mt-4 flex justify-between">
                     <button type="submit"
