@@ -179,11 +179,13 @@
 
                         <th class="px-4 py-2 text-left">Kode Barang</th>
                         <th class="px-4 py-2 text-left">Nama Part</th>
+                        <th class="px-4 py-2 text-left">Stn</th>
+                        <th class="px-4 py-2 text-left">Merk</th>
+                        <th class="px-4 py-2 text-left">Tipe</th>
                         <th class="px-4 py-2 text-left">Harga Toko</th>
                         <th class="px-4 py-2 text-left">Margin Keuntungan</th>
                         <th class="px-4 py-2 text-left">Harga Jual</th>
                         <th class="px-4 py-2 text-left">Jumlah</th>
-                        <th class="px-4 py-2 text-left">Detail</th>
                         <th class="px-4 py-2 text-left">Action</th>
                     </tr>
                 </thead>
@@ -193,16 +195,13 @@
 
                             <td class="px-4 py-2">{{ $sparepat->kode_barang }}</td>
                             <td class="px-4 py-2">{{ $sparepat->nama_part }}</td>
+                            <td class="px-4 py-2">{{ $sparepat->stn }}</td>
+                            <td class="px-4 py-2">{{ $sparepat->merk }}</td>
+                            <td class="px-4 py-2">{{ $sparepat->tipe }}</td>
                             <td class="px-4 py-2">Rp {{ number_format($sparepat->harga_toko, 0, ',', '.') }}</td>
                             <td class="px-4 py-2">{{ number_format($sparepat->margin_persen, 0, ',', '.') }}%</td>
                             <td class="px-4 py-2">Rp {{ number_format($sparepat->harga_jual, 0, ',', '.') }}</td>
                             <td class="px-4 py-2">{{ $sparepat->jumlah }}</td>
-                            <td class="px-4 py-2">
-                                <button class="px-4 py-2 text-white bg-black rounded-full"
-                                    onclick="toggleDescription({{ $sparepat->id }})">
-                                    Lihat Detail
-                                </button>
-                            </td>
                             <td class="px-4 py-2">
                                 <!-- Action Icons -->
                                 <a href="#" class="text-blue-500 hover:text-blue-700 mr-3"

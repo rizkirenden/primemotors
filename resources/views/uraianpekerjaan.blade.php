@@ -146,7 +146,7 @@
                 <div class="mb-1 p-2">
                     <div class="flex justify-between items-center space-x-4">
                         <!-- Search -->
-                        <form action="{{ route('printpdfpartmasuk') }}" method="GET">
+                        <form action="{{ route('printpdfuraianpekerjaan') }}" method="GET">
                             <div class="flex items-center space-x-4 w-full">
                                 <!-- Search Input -->
                                 <input type="text" id="search-input" name="search" placeholder="Search..."

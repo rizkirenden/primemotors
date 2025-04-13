@@ -261,6 +261,7 @@
                         <th class="px-4 py-2 text-left">Keluar</th>
                         <th class="px-4 py-2 text-left">No Polisi</th>
                         <th class="px-4 py-2 text-left">Mekanik</th>
+                        <th class="px-4 py-2 text-left">Status</th>
                         <th class="px-4 py-2 text-left">Detail</th>
                         <th class="px-4 py-2 text-left">Action</th>
                     </tr>
@@ -275,6 +276,7 @@
                                 <td class="px-4 py-2">{{ $dataservice->keluar }}</td>
                                 <td class="px-4 py-2">{{ $dataservice->no_polisi }}</td>
                                 <td class="px-4 py-2">{{ $dataservice->nama_mekanik }}</td>
+                                <td class="px-4 py-2">{{ $dataservice->status }}</td>
                                 <td class="px-4 py-2">
                                     <button class="px-4 py-2 text-white bg-black rounded-full"
                                         onclick="toggleDescription({{ $dataservice->id }})">
@@ -357,7 +359,6 @@
                                             <div><strong>No Mesin:</strong> {{ $dataservice->no_mesin }}</div>
                                             <div><strong>Kilometer:</strong>
                                                 {{ rtrim(number_format($dataservice->kilometer, 2), '.00') }} KM</div>
-                                            <div><strong>Status:</strong> {{ $dataservice->status }}</div>
                                         </div>
 
                                         <!-- Second Row: Customer Complaints -->

@@ -230,6 +230,21 @@
     </div>
 
     <script>
+        function searchTable() {
+            const input = document.getElementById("search-input").value.toLowerCase();
+            const table = document.querySelector("table");
+            const trs = table.querySelectorAll("tbody tr");
+
+            trs.forEach(tr => {
+                const namaMekanik = tr.children[0].textContent.toLowerCase();
+                if (namaMekanik.includes(input)) {
+                    tr.style.display = "";
+                } else {
+                    tr.style.display = "none";
+                }
+            });
+        }
+
         function showErrorPopup(message) {
             Swal.fire({
                 icon: 'error',

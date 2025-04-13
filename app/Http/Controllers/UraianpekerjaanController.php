@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\UraianPekerjaan;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class UraianpekerjaanController extends Controller
 {
@@ -60,5 +61,25 @@ class UraianpekerjaanController extends Controller
         $uraianPekerjaan->delete();
 
         return redirect()->route('uraianpekerjaan')->with('success', 'Data berhasil dihapus!');
+    }
+    public function printPDF(Request $request)
+    {
+        $search = $request->input('search');
+
+        $query = UraianPekerjaan::query();
+
+        if ($search) {
+            $query->where('jenis_pekerjaan', 'like', '%' . $search . '%')
+                  ->orWhere('jenis_mobil', 'like', '%' . $search . '%')
+                  ->orWhere('waktu_pengerjaan', 'like', '%' . $search . '%')
+                  ->orWhere('ongkos_pengerjaan', 'like', '%' . $search . '%');
+        }
+
+        $uraianPekerjaans = $query->get();
+
+        $pdf = Pdf::loadView('printpdfuraianpekerjaan', compact('uraianPekerjaans'))
+                    ->setPaper('a4', 'landscape');
+
+        return $pdf->download('Data_Pekerjaan.pdf');
     }
 }

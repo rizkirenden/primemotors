@@ -100,6 +100,7 @@ Route::get('/uraianpekerjaan', [UraianpekerjaanController::class, 'index'])->nam
 Route::post('/uraianpekerjaan', [UraianpekerjaanController::class, 'store'])->name('uraianpekerjaan.store');
 Route::put('/uraianpekerjaan/{id}', [UraianpekerjaanController::class, 'update'])->name('uraianpekerjaan.update');
 Route::delete('/uraianpekerjaan/{id}', [UraianpekerjaanController::class, 'destroy'])->name('uraianpekerjaan.destroy');
+Route::get('/printpdfuraianpekerjaan', [UraianpekerjaanController::class, 'printPDF'])->name('printpdfuraianpekerjaan');
 
 Route::get('/jualpart', [JualpartController::class, 'index'])->name('jualpart');
 Route::post('/jualpart', [JualpartController::class, 'store'])->name('jualpart.store');

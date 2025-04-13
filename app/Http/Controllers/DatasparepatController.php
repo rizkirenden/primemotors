@@ -86,7 +86,6 @@ class DatasparepatController extends Controller
 
     $sparepats = $query->get();
 
-    // Landscape PDF
     $pdf = Pdf::loadView('printpdfdatasparepat', compact('sparepats'))
                 ->setPaper('a4', 'landscape');
 

@@ -151,7 +151,7 @@
                             <td class="px-4 py-2">{{ $mekanik->tanggal_masuk_karyawan }}</td>
                             <td class="px-4 py-2">
                                 <a href="#" class="text-blue-500 hover:text-blue-700 mr-3"
-                                    onclick="openEditModal({{ $mekanik->id }}, '{{ $mekanik->nama_mekanik }}', '{{ $mekanik->nomor_hp }}', '{{ $mekanik->alamat }}', '{{ $mekanik->tanggal_lahir }}')">
+                                    onclick="openEditModal({{ $mekanik->id }}, '{{ $mekanik->nama_mekanik }}', '{{ $mekanik->nomor_hp }}', '{{ $mekanik->alamat }}', '{{ $mekanik->tanggal_lahir }}', '{{ $mekanik->tanggal_masuk_karyawan }}')">
                                     <i class="fas fa-edit"></i>
                                 </a>
 
@@ -301,21 +301,19 @@
         });
 
         function openEditModal(id, nama_mekanik, nomor_hp, alamat, tanggal_lahir, tanggal_masuk_karyawan) {
-            // Menetapkan nilai untuk input di modal edit
             document.getElementById("edit-id").value = id;
             document.getElementById("edit-nama_mekanik").value = nama_mekanik;
             document.getElementById("edit-nomor_hp").value = nomor_hp;
             document.getElementById("edit-alamat").value = alamat;
             document.getElementById("edit-tanggal_lahir").value = tanggal_lahir;
-            document.getElementById("edit-tanggal_masuk_mekanik").value = tanggal_masuk_karyawan;
+            document.getElementById("edit-tanggal_masuk_karyawan").value = tanggal_masuk_karyawan;
 
-            // Update form action untuk mencocokkan dengan ID yang akan diupdate
             const formAction = document.querySelector("#edit-modal form");
-            formAction.action = "/datamekanik/" + id; // Update URL dengan ID mekanik
+            formAction.action = "/datamekanik/" + id;
 
-            // Tampilkan modal edit
             document.getElementById("edit-modal").classList.remove("hidden");
         }
+
 
 
         function closeEditModal() {

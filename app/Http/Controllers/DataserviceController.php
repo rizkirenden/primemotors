@@ -293,17 +293,27 @@ public function updateawal(Request $request, $id)
     {
         $dataservice = Dataservice::findOrFail($id);
 
-        // Kembalikan stok di tabel datasparepats
-        $sparepart = Datasparepat::where('kode_barang', $dataservice->kode_barang)->first();
-        if ($sparepart) {
-            $sparepart->jumlah += $dataservice->jumlah; // Tambah stok kembali
-            $sparepart->save();
-        }
+        // Kembalikan stok untuk semua part keluar yang terkait jika status approved
+        if ($dataservice->status === 'approved') {
+            // Dapatkan semua part keluar yang terkait dengan dataservice ini
+            $partKeluars = Partkeluar::where('dataservice_id', $dataservice->id)->get();
 
-        // Hapus data part keluar
-        $partKeluar = Partkeluar::where('kode_barang', $dataservice->kode_barang)->first();
-        if ($partKeluar) {
-            $partKeluar->delete();
+            foreach ($partKeluars as $partKeluar) {
+                // Kembalikan stok untuk setiap part yang statusnya approved
+                if ($partKeluar->status === 'approved') {
+                    $sparepart = Datasparepat::where('kode_barang', $partKeluar->kode_barang)->first();
+                    if ($sparepart) {
+                        $sparepart->jumlah += $partKeluar->jumlah;
+                        $sparepart->save();
+                    }
+                }
+
+                // Hapus part keluar
+                $partKeluar->delete();
+            }
+        } else {
+            // Jika status bukan approved, cukup hapus part keluar terkait tanpa mengembalikan stok
+            Partkeluar::where('dataservice_id', $dataservice->id)->delete();
         }
 
         // Hapus data service

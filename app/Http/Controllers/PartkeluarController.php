@@ -51,45 +51,42 @@ class PartkeluarController extends Controller
         return redirect()->route('partkeluar')->with('success', 'Data part keluar berhasil disimpan!');
     }
 
-    // Menghapus data part keluar
-    public function destroy($id)
-    {
-        $partKeluar = PartKeluar::findOrFail($id);
+   // Menghapus data part keluar
+public function destroy($id)
+{
+    $partKeluar = PartKeluar::findOrFail($id);
 
-        // Kembalikan stok hanya jika status approved
-        if ($partKeluar->status === 'approved') {
-            $sparepart = Datasparepat::where('kode_barang', $partKeluar->kode_barang)->first();
-            if ($sparepart) {
-                $sparepart->jumlah += $partKeluar->jumlah; // Tambah stok kembali
-                $sparepart->save();
-            }
+    // Kembalikan stok hanya jika status approved
+    if ($partKeluar->status === 'approved') {
+        $sparepart = Datasparepat::where('kode_barang', $partKeluar->kode_barang)->first();
+        if ($sparepart) {
+            $sparepart->jumlah += $partKeluar->jumlah;
+            $sparepart->save();
         }
-
-        // Jika terkait dengan penjualan (jualpart)
-        if ($partKeluar->jualpart_id) {
-            // Cari item penjualan yang terkait
-            $jualpartItem = JualpartItem::where('kode_barang', $partKeluar->kode_barang)
-                                ->where('jualpart_id', $partKeluar->jualpart_id)
-                                ->first();
-
-            if ($jualpartItem) {
-                // Hapus item penjualan
-                $jualpartItem->delete();
-
-                // Update total transaksi di data penjualan
-                $jualpart = Jualpart::find($partKeluar->jualpart_id);
-                if ($jualpart) {
-                    $jualpart->total_transaksi = $jualpart->items()->sum('total_harga_part');
-                    $jualpart->save();
-                }
-            }
-        }
-
-        // Hapus data part keluar
-        $partKeluar->delete();
-
-        return redirect()->route('partkeluar')->with('success', 'Data part keluar berhasil dihapus!');
     }
+
+    // Hapus juga jika ada relasi dengan jualpart
+    if ($partKeluar->jualpart_id) {
+        $jualpartItem = JualpartItem::where('kode_barang', $partKeluar->kode_barang)
+                            ->where('jualpart_id', $partKeluar->jualpart_id)
+                            ->first();
+
+        if ($jualpartItem) {
+            $jualpartItem->delete();
+
+            $jualpart = Jualpart::find($partKeluar->jualpart_id);
+            if ($jualpart) {
+                $jualpart->total_transaksi = $jualpart->items()->sum('total_harga_part');
+                $jualpart->save();
+            }
+        }
+    }
+
+    $partKeluar->delete();
+
+    return redirect()->route('partkeluar')->with('success', 'Data part keluar berhasil dihapus dan stok telah dikembalikan jika diperlukan.');
+}
+
 
     public function update(Request $request, $id)
 {

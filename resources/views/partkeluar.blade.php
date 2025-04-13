@@ -169,13 +169,6 @@
                                 </button>
                             </div>
                         </form>
-
-                        <!-- Add Data Button -->
-                        <button onclick="openAddModal()"
-                            class="px-6 py-2 bg-white text-black rounded-full hover:bg-gray-200 border border-gray-300 ml-auto flex items-center space-x-2">
-                            <i class="fas fa-plus text-black"></i>
-                            <span>Tambah</span>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -295,8 +288,7 @@
                 @csrf
                 <div class="modal-input-row">
                     <div style="margin-bottom: 1rem;">
-                        <label for="kode_barang"
-                            style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Kode
+                        <label for="kode_barang" style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Kode
                             Barang</label>
                         <select id="kode_barang" name="kode_barang" required onchange="fetchSparepartData()"
                             style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem;">
