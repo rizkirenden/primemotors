@@ -60,10 +60,18 @@ class DatasparepatController extends Controller
         return redirect()->route('datasparepat');
     }
 
-    public function destroy($id){
-        $sparepat = Datasparepat::findOrFail($id);
-        $sparepat->delete();
-        return redirect()->route('datasparepat');
+    public function destroy($id)
+    {
+        try {
+            $sparepat = Datasparepat::findOrFail($id);
+            $sparepat->delete();
+
+            return redirect()->route('datasparepat')
+                   ->with('success', 'Data sparepart berhasil dihapus!');
+        } catch (\Exception $e) {
+            return redirect()->route('datasparepat')
+                   ->with('error', 'Gagal menghapus data sparepart: ' . $e->getMessage());
+        }
     }
     public function printPDF(Request $request)
 {

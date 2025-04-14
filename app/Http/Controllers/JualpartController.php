@@ -242,18 +242,30 @@ class JualpartController extends Controller
         try {
             $jualpart = Jualpart::with('items')->findOrFail($id);
 
-            // Jangan tambahkan kembali stok
+            // Check if there are still parts associated
+            if ($jualpart->items()->count() > 0) {
+                return redirect()->back()->with('error', 'Data Part Masih Ada, Tolong Kordinasi Ke Bengkel');
+            }
+
+            // Delete related records
             $jualpart->items()->delete();
             Partkeluar::where('jualpart_id', $id)->delete();
+
+            // Delete the main record
             $jualpart->delete();
 
             DB::commit();
             return redirect()->route('jualpart')->with('success', 'Data penjualan berhasil dihapus!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal menghapus data: ' . $e->getMessage());
         }
     }
+    public function checkItems($id)
+{
+    $jualpart = Jualpart::with('items')->findOrFail($id);
+    return response()->json(['has_items' => $jualpart->items()->count() > 0]);
+}
 
     public function printPDF(Request $request)
     {

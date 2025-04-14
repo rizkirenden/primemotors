@@ -66,16 +66,23 @@ class DatamekanikController extends Controller
 
     // Destroy method to delete a mekanik record
     public function destroy($id)
-    {
+{
+    try {
         // Find the mekanik by ID
         $mekanik = Datamekanik::findOrFail($id);
 
         // Delete the mekanik record
         $mekanik->delete();
 
-        // Redirect back to the index route after deleting
-        return redirect()->route('datamekanik');
+        // Redirect back with success message
+        return redirect()->route('datamekanik')
+               ->with('success', 'Data mekanik berhasil dihapus!');
+    } catch (\Exception $e) {
+        // Redirect back with error message if deletion fails
+        return redirect()->route('datamekanik')
+               ->with('error', 'Gagal menghapus data mekanik: ' . $e->getMessage());
     }
+}
     public function printPDF(Request $request)
     {
         // Ambil parameter pencarian dan tanggal dari request

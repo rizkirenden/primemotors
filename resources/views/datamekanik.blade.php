@@ -6,8 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Data Mekanik</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         /* Add your custom styles here */
         thead {
@@ -31,7 +33,6 @@
             padding-top: 10px;
             padding-bottom: 10px;
             border-top: 2px solid #ccc;
-
         }
 
         #pagination button {
@@ -63,7 +64,6 @@
             color: white;
             border-color: #000000;
         }
-
 
         .pagination-wrapper {
             display: flex;
@@ -98,8 +98,40 @@
     @include('sidebar')
 
     <div class="flex-1 p-3 overflow-x-auto">
+        <!-- Success/Error Messages -->
+        @if (session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
+                role="alert">
+                <span class="block sm:inline">{{ session('success') }}</span>
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3"
+                    onclick="this.parentElement.style.display='none'">
+                    <svg class="fill-current h-6 w-6 text-green-500" role="button" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20">
+                        <title>Close</title>
+                        <path
+                            d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" />
+                    </svg>
+                </span>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <span class="block sm:inline">{{ session('error') }}</span>
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3"
+                    onclick="this.parentElement.style.display='none'">
+                    <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20">
+                        <title>Close</title>
+                        <path
+                            d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" />
+                    </svg>
+                </span>
+            </div>
+        @endif
+
         <!-- Card -->
-        <div class="bg-white shadow-lg rounded-lg ">
+        <div class="bg-white shadow-lg rounded-lg">
             <!-- Filter Section -->
             <div class="bg-black border-2 border-white rounded-tl-lg rounded-tr-lg">
                 <div class="mb-1 p-2">
@@ -154,18 +186,11 @@
                                     onclick="openEditModal({{ $mekanik->id }}, '{{ $mekanik->nama_mekanik }}', '{{ $mekanik->nomor_hp }}', '{{ $mekanik->alamat }}', '{{ $mekanik->tanggal_lahir }}', '{{ $mekanik->tanggal_masuk_karyawan }}')">
                                     <i class="fas fa-edit"></i>
                                 </a>
-
-
-                                <form action="{{ route('datamekanik.destroy', $mekanik->id) }}" method="POST"
-                                    class="inline-block">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:text-red-700">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </form>
+                                <button onclick="confirmDelete({{ $mekanik->id }})"
+                                    class="text-red-500 hover:text-red-700">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
                             </td>
-
                         </tr>
                     @endforeach
                 </tbody>
@@ -200,7 +225,6 @@
                     @endif
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -228,6 +252,7 @@
                 class="mt-2 w-full px-4 py-2 bg-black text-white rounded-full hover:bg-red-700">Close</button>
         </div>
     </div>
+
     <!-- Edit Modal for Editing Data -->
     <div id="edit-modal"
         class="modal hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
@@ -250,13 +275,10 @@
                 <button type="submit"
                     class="w-full px-4 py-2 bg-black text-white rounded-full hover:bg-gray-700">Update Data</button>
             </form>
-
             <button onclick="closeEditModal()"
                 class="mt-2 w-full px-4 py-2 bg-black text-white rounded-full hover:bg-red-700">Close</button>
         </div>
     </div>
-
-
 
     <script>
         // Modal functions
@@ -314,11 +336,65 @@
             document.getElementById("edit-modal").classList.remove("hidden");
         }
 
-
-
         function closeEditModal() {
             document.getElementById("edit-modal").classList.add("hidden");
         }
+
+        // Delete confirmation function
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data yang dihapus tidak dapat dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // If confirmed, submit the delete form
+                    deleteMekanik(id);
+                }
+            });
+        }
+
+        function deleteMekanik(id) {
+            // Create a form dynamically
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/datamekanik/${id}`;
+
+            // Add CSRF token
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = '_token';
+            csrfToken.value = document.querySelector('meta[name="csrf-token"]').content;
+            form.appendChild(csrfToken);
+
+            // Add method spoofing for DELETE
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'DELETE';
+            form.appendChild(methodInput);
+
+            // Add form to body and submit
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        function showErrorPopup(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: message,
+            });
+        }
+
+        @if (session('error'))
+            showErrorPopup("{{ session('error') }}");
+        @endif
     </script>
 </body>
 

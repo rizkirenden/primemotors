@@ -7,6 +7,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Jual Part</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
         thead {
@@ -112,7 +114,36 @@
     @include('sidebar')
 
     <div class="flex-1 p-3 overflow-x-auto">
-        <!-- Card -->
+        @if (session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
+                role="alert">
+                <span class="block sm:inline">{{ session('success') }}</span>
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3"
+                    onclick="this.parentElement.style.display='none'">
+                    <svg class="fill-current h-6 w-6 text-green-500" role="button" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20">
+                        <title>Close</title>
+                        <path
+                            d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" />
+                    </svg>
+                </span>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <span class="block sm:inline">{{ session('error') }}</span>
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3"
+                    onclick="this.parentElement.style.display='none'">
+                    <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20">
+                        <title>Close</title>
+                        <path
+                            d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" />
+                    </svg>
+                </span>
+            </div>
+        @endif
         <div class="bg-white shadow-lg rounded-lg ">
             <!-- Filter Section -->
             <div class="bg-black border-2 border-white rounded-tl-lg rounded-tr-lg">
@@ -177,18 +208,19 @@
                                 </button>
                             </td>
                             <td class="px-4 py-2">
+                                <!-- Tombol Edit -->
                                 <a href="#" class="text-blue-500 hover:text-blue-700 mr-3"
                                     onclick="openEditModal({{ $jualpart->id }})">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <form action="{{ route('jualpart.destroy', $jualpart->id) }}" method="POST"
-                                    class="inline-block">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:text-red-700">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </form>
+
+                                <!-- Tombol Hapus dengan konfirmasi -->
+                                <button onclick="confirmDelete({{ $jualpart->id }})"
+                                    class="text-red-500 hover:text-red-700">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+
+                                <!-- Tombol Cetak -->
                                 <a href="{{ route('printpdfjualpart.perdata', $jualpart->id) }}"
                                     class="text-black hover:text-black ml-3">
                                     <i class="fas fa-print"></i>
@@ -841,6 +873,61 @@
 
         function removeFormatRupiah(angka) {
             return angka.replace(/\D/g, '');
+        }
+        // Fungsi untuk konfirmasi delete
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data penjualan part akan dihapus permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // First check if there are items
+                    fetch(`/jualpart/${id}/check-items`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.has_items) {
+                                Swal.fire(
+                                    'Gagal!',
+                                    'Data Part Masih Ada, Tolong Kordinasi Ke Bengkel',
+                                    'error'
+                                );
+                            } else {
+                                deleteJualPart(id);
+                            }
+                        });
+                }
+            });
+        }
+        // Fungsi untuk menghapus data
+        function deleteJualPart(id) {
+            // Buat form delete secara dinamis
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/jualpart/${id}`;
+
+            // Tambahkan CSRF token
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = '_token';
+            csrfToken.value = document.querySelector('meta[name="csrf-token"]').content;
+            form.appendChild(csrfToken);
+
+            // Tambahkan method spoofing untuk DELETE
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'DELETE';
+            form.appendChild(methodInput);
+
+            // Tambahkan form ke body dan submit
+            document.body.appendChild(form);
+            form.submit();
         }
     </script>
 </body>
