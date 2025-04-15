@@ -12,9 +12,14 @@ class PartkeluarController extends Controller
 {
     public function index()
     {
-        $partKeluars = PartKeluar::paginate(10); // Ambil semua data part keluar
+        // Tambahkan eager loading untuk semua relasi
+        $partKeluars = PartKeluar::with(['jualpart', 'dataservice', 'datasparepat'])
+                            ->orderBy('tanggal_keluar', 'desc')
+                            ->paginate(10);
+
         $spareparts = Datasparepat::all();
-        return view('partkeluar', compact('partKeluars','spareparts')); // Kirim data ke view
+
+        return view('partkeluar', compact('partKeluars', 'spareparts'));
     }
 
     // Menyimpan data part keluar

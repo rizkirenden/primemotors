@@ -56,12 +56,12 @@ class UraianpekerjaanController extends Controller
     }
 
     public function destroy($id)
-    {
-        $uraianPekerjaan = UraianPekerjaan::findOrFail($id);
-        $uraianPekerjaan->delete();
+{
+    $uraianPekerjaan = UraianPekerjaan::findOrFail($id);
+    $uraianPekerjaan->delete();
 
-        return redirect()->route('uraianpekerjaan')->with('success', 'Data berhasil dihapus!');
-    }
+    return redirect()->route('uraianpekerjaan')->with('success', 'Data berhasil dihapus!');
+}
     public function printPDF(Request $request)
     {
         $search = $request->input('search');

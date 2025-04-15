@@ -291,36 +291,30 @@ public function updateawal(Request $request, $id)
     // Menghapus data service
     public function destroy($id)
     {
+        // Ambil data service
         $dataservice = Dataservice::findOrFail($id);
 
-        // Kembalikan stok untuk semua part keluar yang terkait jika status approved
-        if ($dataservice->status === 'approved') {
-            // Dapatkan semua part keluar yang terkait dengan dataservice ini
-            $partKeluars = Partkeluar::where('dataservice_id', $dataservice->id)->get();
-
-            foreach ($partKeluars as $partKeluar) {
-                // Kembalikan stok untuk setiap part yang statusnya approved
-                if ($partKeluar->status === 'approved') {
-                    $sparepart = Datasparepat::where('kode_barang', $partKeluar->kode_barang)->first();
-                    if ($sparepart) {
-                        $sparepart->jumlah += $partKeluar->jumlah;
-                        $sparepart->save();
-                    }
-                }
-
-                // Hapus part keluar
-                $partKeluar->delete();
-            }
-        } else {
-            // Jika status bukan approved, cukup hapus part keluar terkait tanpa mengembalikan stok
-            Partkeluar::where('dataservice_id', $dataservice->id)->delete();
+        // Cek apakah masih ada relasi partkeluar terkait
+        if ($dataservice->partkeluar()->count() > 0) {
+            return redirect()->back()->with('error', 'Masih ada data Partkeluar terkait. Tidak bisa dihapus.');
         }
 
-        // Hapus data service
+        // Tidak ada partkeluar, lanjutkan hapus
         $dataservice->delete();
 
         return redirect()->route('dataservice')->with('success', 'Data service berhasil dihapus!');
     }
+    public function checkPartkeluar($id)
+    {
+        $dataservice = Dataservice::findOrFail($id);
+
+        $hasPartkeluar = $dataservice->partkeluar()->count() > 0;
+
+        return response()->json([
+            'has_partkeluar' => $hasPartkeluar
+        ]);
+    }
+
 
     public function printspkawalPDF(Request $request)
     {

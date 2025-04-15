@@ -16,4 +16,6 @@ class UraianPekerjaan extends Model
         'waktu_pengerjaan',
         'ongkos_pengerjaan',
     ];
+
 }
+

@@ -57,6 +57,7 @@
 
     @include('sidebar')
     <div class="flex-1 p-3 overflow-x-auto">
+        <h1 class="text-2xl text-white mb-4">Data Pengguna</h1>
         <!-- Card -->
         <div class="bg-white shadow-lg rounded-lg ">
             <!-- Filter Section -->

@@ -80,6 +80,7 @@ Route::post('/dataservice', [DataserviceController::class, 'store'])->name('data
 Route::put('/dataservice/{id}', [DataserviceController::class, 'update'])->name('dataservice.update');
 Route::put('/dataservice/{id}/updateawal', [DataserviceController::class, 'updateawal'])->name('dataservice.updateawal');
 Route::delete('/dataservice/{id}', [DataserviceController::class, 'destroy'])->name('dataservice.destroy');
+Route::get('/dataservice/{id}/check-partkeluar', [DataserviceController::class, 'checkPartkeluar']);
 Route::get('/printpdfdataspkawal', [DataserviceController::class, 'printspkawalPDF'])->name('printpdfdataspkawal');
 Route::get('/printpdfdatasakhir', [DataserviceController::class, 'printspkakhirPDF'])->name('printpdfdataspkakhir');
 Route::get('/printpdfdataspkawalperdata/{id}', [DataserviceController::class, 'printAwalPerData'])->name('printpdfdataspkawal.perdata');

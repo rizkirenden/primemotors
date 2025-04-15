@@ -74,10 +74,10 @@ class DatashowroomController extends Controller
     public function update(Request $request, $id)
     {
         // Validasi data yang diterima dari form
-        $request->validate([
+        $validatedData = $request->validate([
             'nomor_polisi' => 'required|string|max:10',
             'merk_model' => 'required|string|max:255',
-            'tahun_pembuatan' => 'required|integer',
+            'tahun_pembuatan' => 'required|date', // Diubah dari integer ke date
             'nomor_rangka' => 'required|string|max:20',
             'nomor_mesin' => 'required|string|max:20',
             'bahan_bakar' => 'required|string|max:20',
@@ -92,29 +92,34 @@ class DatashowroomController extends Controller
             'fitur_keamanan' => 'required|string',
             'riwayat_servis' => 'required|string',
             'status' => 'required|in:terjual,tersedia',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validasi upload foto
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         // Cari showroom berdasarkan ID
         $showroom = Datashowroom::findOrFail($id);
 
+        // Format harga sebelum disimpan
+        if ($request->has('harga')) {
+            $validatedData['harga'] = str_replace(['Rp', '.', ','], '', $request->harga);
+        }
+
         // Cek apakah ada foto baru yang diupload
         if ($request->hasFile('foto')) {
             // Hapus foto lama jika ada
             if ($showroom->foto && file_exists(storage_path('app/public/' . $showroom->foto))) {
-                unlink(storage_path('app/public/' . $showroom->foto)); // Hapus foto lama
+                unlink(storage_path('app/public/' . $showroom->foto));
             }
 
             // Simpan foto baru
             $fotoPath = $request->file('foto')->store('vehicle_photos', 'public');
-            $showroom->foto = $fotoPath; // Update path foto
+            $validatedData['foto'] = $fotoPath;
         }
 
-        // Update data showroom di database, kecuali foto
-        $showroom->update($request->except('foto'));
+        // Update data showroom
+        $showroom->update($validatedData);
 
-        // Redirect ke halaman showroom
-        return redirect()->route('datashowroom');
+        // Redirect ke halaman showroom dengan pesan sukses
+        return redirect()->route('datashowroom')->with('success', 'Data berhasil diperbarui');
     }
 
     // Menghapus showroom dari database
@@ -132,7 +137,7 @@ class DatashowroomController extends Controller
         $showroom->delete();
 
         // Redirect ke halaman showroom
-        return redirect()->route('datashowroom');
+        return redirect()->route('datashowroom')->with('success', 'Data Showroom berhasil dihapus');
     }
 
     public function printPDF(Request $request)

@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         /* Add borders to the table header and body */
         thead {
@@ -139,6 +140,37 @@
 
     @include('sidebar')
     <div class="flex-1 p-3 overflow-x-auto">
+        @if (session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
+                role="alert">
+                <span class="block sm:inline">{{ session('success') }}</span>
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3"
+                    onclick="this.parentElement.style.display='none'">
+                    <svg class="fill-current h-6 w-6 text-green-500" role="button" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20">
+                        <title>Close</title>
+                        <path
+                            d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" />
+                    </svg>
+                </span>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <span class="block sm:inline">{{ session('error') }}</span>
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3"
+                    onclick="this.parentElement.style.display='none'">
+                    <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20">
+                        <title>Close</title>
+                        <path
+                            d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" />
+                    </svg>
+                </span>
+            </div>
+        @endif
+        <h1 class="text-2xl text-white mb-4">Data Part Keluar</h1>
         <!-- Card -->
         <div class="bg-white shadow-lg rounded-lg ">
             <!-- Filter Section -->
@@ -184,6 +216,7 @@
                         <th class="px-4 py-2 text-left">Merk</th>
                         <th class="px-4 py-2 text-left">Tanggal Keluar</th>
                         <th class="px-4 py-2 text-left">Jumlah</th>
+                        <th class="px-4 py-2 text-left">Nama Pelanggan</th>
                         <th class="px-4 py-2 text-left">Status</th>
                         <th class="px-4 py-2 text-left">Action</th>
                     </tr>
@@ -198,6 +231,15 @@
                             <td class="px-4 py-2">{{ $partKeluar->merk }}</td>
                             <td class="px-4 py-2">{{ $partKeluar->tanggal_keluar }}</td>
                             <td class="px-4 py-2">{{ $partKeluar->jumlah }}</td>
+                            <td class="px-4 py-2">
+                                @if ($partKeluar->jualpart)
+                                    {{ $partKeluar->jualpart->nama_pelanggan }} (Penjualan Part)
+                                @elseif($partKeluar->dataservice)
+                                    {{ $partKeluar->dataservice->costumer }} (Service)
+                                @else
+                                    -
+                                @endif
+                            </td>
                             <td class="px-4 py-2">
                                 @if ($partKeluar->status === 'pending')
                                     <form action="{{ route('partkeluar.approve', $partKeluar->id) }}" method="POST"
@@ -236,13 +278,15 @@
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <!-- Tombol Hapus -->
-                                <form action="{{ route('partkeluar.destroy', $partKeluar->id) }}" method="POST"
-                                    class="inline-block">
+                                <button onclick="confirmDelete({{ $partKeluar->id }}, '{{ $partKeluar->nama_part }}')"
+                                    class="text-red-500 hover:text-red-700">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                                <form id="delete-form-{{ $partKeluar->id }}"
+                                    action="{{ route('partkeluar.destroy', $partKeluar->id) }}" method="POST"
+                                    class="hidden">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:text-red-700">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
                                 </form>
                             </td>
                         </tr>
@@ -288,7 +332,8 @@
                 @csrf
                 <div class="modal-input-row">
                     <div style="margin-bottom: 1rem;">
-                        <label for="kode_barang" style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Kode
+                        <label for="kode_barang"
+                            style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Kode
                             Barang</label>
                         <select id="kode_barang" name="kode_barang" required onchange="fetchSparepartData()"
                             style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem;">
@@ -553,18 +598,22 @@
             document.getElementById("modal-edit").classList.add("hidden");
         }
 
-        function showErrorPopup(message) {
+        function confirmDelete(id, namaPart) {
             Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: message,
+                title: 'Apakah Anda yakin?',
+                html: `Anda akan menghapus part <strong>${namaPart}</strong>.<br>Data yang sudah dihapus tidak bisa dikembalikan!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#000000',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + id).submit();
+                }
             });
         }
-
-        // Cek jika ada pesan error dari controller
-        @if (session('error'))
-            showErrorPopup("{{ session('error') }}");
-        @endif
     </script>
 </body>
 

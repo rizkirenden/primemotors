@@ -147,9 +147,13 @@ class JualpartController extends Controller
                 $discountAmount = ($totalHarga * $item['discount']) / 100;
                 $totalHargaAfterDiscount = $totalHarga - $discountAmount;
 
-                if (isset($item['id'])) {
-                    $existingItem = $jualpart->items()->findOrFail($item['id']);
+                // Check if this is an existing item by looking for matching kode_barang
+                $existingItem = $jualpart->items()
+                    ->where('kode_barang', $item['kode_barang'])
+                    ->first();
 
+                if ($existingItem) {
+                    // Update existing item
                     $existingItem->update([
                         'tanggal_keluar' => $item['tanggal_keluar'],
                         'jumlah' => $item['jumlah'],
@@ -157,6 +161,7 @@ class JualpartController extends Controller
                         'total_harga_part' => $totalHargaAfterDiscount
                     ]);
 
+                    // Update corresponding Partkeluar record
                     $partKeluar = Partkeluar::where('jualpart_id', $jualpart->id)
                         ->where('kode_barang', $item['kode_barang'])
                         ->first();
@@ -167,23 +172,11 @@ class JualpartController extends Controller
                             'jumlah' => $item['jumlah']
                         ]);
                         $existingPartKeluarIds[] = $partKeluar->id;
-                    } else {
-                        $newPartKeluar = Partkeluar::create([
-                            'jualpart_id' => $jualpart->id,
-                            'kode_barang' => $sparepart->kode_barang,
-                            'nama_part' => $sparepart->nama_part,
-                            'stn' => $sparepart->stn,
-                            'tipe' => $sparepart->tipe,
-                            'merk' => $sparepart->merk,
-                            'tanggal_keluar' => $item['tanggal_keluar'],
-                            'jumlah' => $item['jumlah']
-                        ]);
-                        $existingPartKeluarIds[] = $newPartKeluar->id;
                     }
 
                     $existingItemIds[] = $existingItem->id;
-                    $totalTransaksi += $totalHargaAfterDiscount;
                 } else {
+                    // Create new item
                     $newItem = $jualpart->items()->create([
                         'kode_barang' => $sparepart->kode_barang,
                         'nama_part' => $sparepart->nama_part,
@@ -199,6 +192,7 @@ class JualpartController extends Controller
                         'total_harga_part' => $totalHargaAfterDiscount
                     ]);
 
+                    // Create new Partkeluar record
                     $newPartKeluar = Partkeluar::create([
                         'jualpart_id' => $jualpart->id,
                         'kode_barang' => $sparepart->kode_barang,
@@ -212,19 +206,18 @@ class JualpartController extends Controller
 
                     $existingPartKeluarIds[] = $newPartKeluar->id;
                     $existingItemIds[] = $newItem->id;
-                    $totalTransaksi += $totalHargaAfterDiscount;
                 }
+
+                $totalTransaksi += $totalHargaAfterDiscount;
             }
 
+            // Delete items that were removed from the form
+            $jualpart->items()->whereNotIn('id', $existingItemIds)->delete();
+
+            // Delete partkeluar records that were removed
             Partkeluar::where('jualpart_id', $jualpart->id)
                 ->whereNotIn('id', $existingPartKeluarIds)
                 ->delete();
-
-            $itemsToDelete = $jualpart->items()->whereNotIn('id', $existingItemIds)->get();
-            foreach ($itemsToDelete as $item) {
-                // Jangan kembalikan stok
-                $item->delete();
-            }
 
             $jualpart->update(['total_transaksi' => $totalTransaksi]);
             DB::commit();

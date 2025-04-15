@@ -114,6 +114,7 @@
     @include('sidebar')
 
     <div class="flex-1 p-3 overflow-x-auto">
+        <h1 class="text-2xl text-white mb-4">Data Jual Part</h1>
         @if (session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
                 role="alert">
@@ -765,11 +766,23 @@
 
             container.appendChild(newItem);
             // If itemData exists, fetch sparepart data if needed
-            if (itemData && !itemData.kode_barang) {
-                const selectElement = newItem.querySelector('.kode_barang');
-                fetchEditSparepartData(selectElement, itemIndex);
+            if (itemData) {
+                const itemRow = container.lastElementChild;
+                itemRow.querySelector('.nama_part').value = itemData.nama_part || '';
+                itemRow.querySelector('.stn').value = itemData.stn || '';
+                itemRow.querySelector('.tipe').value = itemData.tipe || '';
+                itemRow.querySelector('.merk').value = itemData.merk || '';
+                itemRow.querySelector('.harga_toko').value = formatRupiah(itemData.harga_toko?.toString() || '0');
+                itemRow.querySelector('.margin_persen').value = itemData.margin_persen || '0';
+                itemRow.querySelector('.harga_jual').value = formatRupiah(itemData.harga_jual?.toString() || '0');
+                itemRow.querySelector('.jumlah').value = itemData.jumlah || 1;
+                itemRow.querySelector('.discount').value = itemData.discount || 0;
+                itemRow.querySelector('.total_harga_part').value = formatRupiah(itemData.total_harga_part?.toString() ||
+                    '0');
+                itemRow.querySelector('.tanggal_keluar').value = itemData.tanggal_keluar || '';
             }
         }
+
 
         function removeEditItem(button) {
             const itemRow = button.closest('.item-row');
@@ -845,12 +858,11 @@
             document.getElementById("edit-modal").classList.add("hidden");
         }
 
-        // Format input harga saat edit form submit
         document.getElementById('edit-form').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            // Format semua nilai mata uang sebelum submit
-            document.querySelectorAll('#edit-items-container .item-row').forEach((row, index) => {
+            // Format all currency values before submit
+            document.querySelectorAll('#edit-items-container .item-row').forEach((row) => {
                 const fields = ['harga_toko', 'harga_jual', 'total_harga_part'];
                 fields.forEach(field => {
                     const element = row.querySelector(`.${field}`);

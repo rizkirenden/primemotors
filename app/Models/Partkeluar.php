@@ -33,6 +33,6 @@ class Partkeluar extends Model
     }
     public function jualpart()
     {
-        return $this->belongsTo(Dataservice::class, 'jualpart_id');
+        return $this->belongsTo(Jualpart::class, 'jualpart_id');
     }
 }

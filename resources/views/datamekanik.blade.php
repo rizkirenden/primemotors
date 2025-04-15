@@ -98,6 +98,7 @@
     @include('sidebar')
 
     <div class="flex-1 p-3 overflow-x-auto">
+        <h1 class="text-2xl font-bold text-white mb-4">Data Mekanik</h1>
         <!-- Success/Error Messages -->
         @if (session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"

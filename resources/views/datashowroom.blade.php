@@ -7,6 +7,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Showroom Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
         /* Custom CSS */
@@ -169,6 +171,37 @@
 
     <!-- Main Content -->
     <div class="flex-1 p-3 overflow-x-auto">
+        @if (session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
+                role="alert">
+                <span class="block sm:inline">{{ session('success') }}</span>
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3"
+                    onclick="this.parentElement.style.display='none'">
+                    <svg class="fill-current h-6 w-6 text-green-500" role="button" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20">
+                        <title>Close</title>
+                        <path
+                            d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" />
+                    </svg>
+                </span>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <span class="block sm:inline">{{ session('error') }}</span>
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3"
+                    onclick="this.parentElement.style.display='none'">
+                    <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20">
+                        <title>Close</title>
+                        <path
+                            d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" />
+                    </svg>
+                </span>
+            </div>
+        @endif
+        <h1 class="text-2xl text-white mb-4">Data Showroom</h1>
         <!-- Card -->
         <div class="bg-white shadow-lg rounded-lg">
             <!-- Filter Section -->
@@ -268,14 +301,10 @@
                                 )">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <form action="{{ route('datashowroom.destroy', $showroom->id) }}" method="POST"
-                                    class="inline-block">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:text-red-700">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </form>
+                                <button onclick="confirmDelete({{ $showroom->id }})"
+                                    class="text-red-500 hover:text-red-700">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
                             </td>
                         </tr>
                         <!-- Detail Row -->
@@ -737,22 +766,37 @@
             document.getElementById("modal-edit").classList.remove("hidden");
 
             // Format harga ke dalam bentuk "Rp x.xxx.xxx"
-            let formattedHarga = 'Rp ' + parseInt(harga).toLocaleString();
+            let formattedHarga = 'Rp ' + parseInt(harga).toLocaleString('id-ID');
 
             // Isi form edit dengan data
             document.getElementById('nomor-polisi-edit').value = nomor_polisi;
             document.getElementById('merk-model-edit').value = merk_model;
-            document.getElementById('tahun-pembuatan-edit').value = tahun_pembuatan;
+
+            // Format tanggal untuk input type="date"
+            const tahunDate = new Date(tahun_pembuatan);
+            const tahunFormatted = tahunDate.toISOString().split('T')[0];
+            document.getElementById('tahun-pembuatan-edit').value = tahunFormatted;
+
             document.getElementById('nomor-rangka-edit').value = nomor_rangka;
             document.getElementById('nomor-mesin-edit').value = nomor_mesin;
             document.getElementById('bahan-bakar-edit').value = bahan_bakar;
             document.getElementById('kapasitas-mesin-edit').value = kapasitas_mesin;
             document.getElementById('jumlah-roda-edit').value = jumlah_roda;
             document.getElementById('harga-edit').value = formattedHarga;
-            document.getElementById('harga-edit').setAttribute('data-raw-value', harga); // Simpan nilai asli
-            document.getElementById('tanggal-registrasi-edit').value = tanggal_registrasi;
-            document.getElementById('masa-berlaku-stnk-edit').value = masa_berlaku_stnk;
-            document.getElementById('masa-berlaku-pajak-edit').value = masa_berlaku_pajak;
+            document.getElementById('harga-edit').setAttribute('data-raw-value', harga);
+
+            // Format tanggal registrasi
+            const tglRegDate = new Date(tanggal_registrasi);
+            document.getElementById('tanggal-registrasi-edit').value = tglRegDate.toISOString().split('T')[0];
+
+            // Format masa berlaku STNK
+            const stnkDate = new Date(masa_berlaku_stnk);
+            document.getElementById('masa-berlaku-stnk-edit').value = stnkDate.toISOString().split('T')[0];
+
+            // Format masa berlaku pajak
+            const pajakDate = new Date(masa_berlaku_pajak);
+            document.getElementById('masa-berlaku-pajak-edit').value = pajakDate.toISOString().split('T')[0];
+
             document.getElementById('status-kepemilikan-edit').value = status_kepemilikan;
             document.getElementById('kilometer-edit').value = kilometer;
             document.getElementById('fitur-keamanan-edit').value = fitur_keamanan;
@@ -765,7 +809,7 @@
             // Tampilkan foto lama (jika ada)
             if (foto) {
                 document.getElementById('foto-container-edit').innerHTML = `
-            <img src="{{ asset('storage/') }}/${foto}" alt="Foto Kendaraan" width="100" class="rounded-md">
+            <img src="/storage/${foto}" alt="Foto Kendaraan" width="100" class="rounded-md">
             <p class="text-gray-500 mt-2">Foto Lama</p>
         `;
             } else {
@@ -773,8 +817,66 @@
             }
         }
 
+        // Untuk form Edit
+        document.getElementById('inputFormEdit').addEventListener('submit', function(event) {
+            let hargaInput = document.getElementById('harga-edit');
+            // Hapus format "Rp" dan titik sebelum submit
+            hargaInput.value = hargaInput.value.replace(/[^\d]/g, '');
+        });
+
         function closeEditModal() {
             document.getElementById("modal-edit").classList.add("hidden");
+        }
+        // Delete confirmation function
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data yang dihapus tidak dapat dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // If confirmed, submit the delete form
+                    deleteShowroom(id);
+                }
+            });
+        }
+
+        function deleteShowroom(id) {
+            // Create a form dynamically
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/datashowroom/${id}`;
+
+            // Add CSRF token
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = '_token';
+            csrfToken.value = document.querySelector('meta[name="csrf-token"]').content;
+            form.appendChild(csrfToken);
+
+            // Add method spoofing for DELETE
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'DELETE';
+            form.appendChild(methodInput);
+
+            // Add form to body and submit
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        function showErrorPopup(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: message,
+            });
         }
     </script>
 </body>

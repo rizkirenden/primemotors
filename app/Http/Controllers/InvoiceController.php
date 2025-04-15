@@ -101,7 +101,7 @@ class InvoiceController extends Controller
             ]);
 
             DB::commit();
-            return redirect()->route('laporantransaksi')->with('success', 'Invoice created successfully!');
+            return redirect()->route('laporantransaksi')->with('success', 'Invoice Berhasil Dibuat');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Failed to create invoice: ' . $e->getMessage());
@@ -151,7 +151,7 @@ class InvoiceController extends Controller
         $invoice = Invoice::findOrFail($id);
         $invoice->delete();
 
-        return redirect()->route('laporantransaksi')->with('success', 'Invoice deleted successfully!');
+        return redirect()->route('laporantransaksi')->with('success', 'Invoice Berhasil Dihapus');
     }
 
     public function printPDF(Request $request)
