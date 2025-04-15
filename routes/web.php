@@ -12,6 +12,7 @@ use App\Http\Controllers\InsentifController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\UraianpekerjaanController;
 use App\Http\Controllers\JualpartController;
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -67,6 +68,13 @@ Route::put('/partkeluar/{id}/approve', [PartkeluarController::class, 'approve'])
 Route::put('/partkeluar/{id}/cancel', [PartkeluarController::class, 'cancel'])->name('partkeluar.cancel');
 
 Route::get('/pengguna', [PenggunaController::class, 'index'])->name('pengguna');
+Route::post('/pengguna', [PenggunaController::class, 'store'])->name('pengguna.store');
+Route::put('/pengguna/{pengguna}', [PenggunaController::class, 'update'])->name('pengguna.update');
+Route::delete('/pengguna/{pengguna}', [PenggunaController::class, 'destroy'])->name('pengguna.destroy');
+
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/datashowroom', [DatashowroomController::class, 'index'])->name('datashowroom');
 Route::post('/datashowroom', [DatashowroomController::class, 'store'])->name('datashowroom.store');
@@ -112,3 +120,4 @@ Route::get('/jualpart/{id}/check-items', [JualpartController::class, 'checkItems
 Route::get('/spareparts/{kode_barang}', [JualpartController::class, 'getSparepart']);
 Route::get('/printpdfjualpart', [JualpartController::class, 'printPDF'])->name('printpdfjualpart');
 Route::get('/printpdfjualpartperdata/{id}', [JualpartController::class, 'printPDFPerData'])->name('printpdfjualpart.perdata');
+
