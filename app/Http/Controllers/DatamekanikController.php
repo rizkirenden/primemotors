@@ -11,8 +11,8 @@ class DatamekanikController extends Controller
     // Index method to return the view
     public function index()
     {
-        $mekaniks = Datamekanik::paginate(10); // You can adjust the pagination as needed
-        return view('datamekanik', compact('mekaniks')); // Make sure your view is datamekanik.index
+        $mekaniks = Datamekanik::orderBy('created_at', 'desc')->paginate(10);
+        return view('datamekanik', compact('mekaniks'));
     }
 
     // Store method to handle form submission
