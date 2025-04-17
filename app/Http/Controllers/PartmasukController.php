@@ -12,10 +12,11 @@ class PartmasukController extends Controller
     // Menampilkan halaman part masuk
     public function index()
     {
-        $partMasuks = Partmasuk::paginate(10); // Ambil semua data part masuk
+        $partMasuks = Partmasuk::orderBy('created_at', 'desc')->paginate(10); // Data terbaru di atas
         $spareparts = Datasparepat::all(); // Ambil semua data sparepart
         return view('partmasuk', compact('partMasuks', 'spareparts')); // Kirim data ke view
     }
+
 
     // Menyimpan data part masuk
     public function store(Request $request)

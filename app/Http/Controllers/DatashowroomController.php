@@ -11,11 +11,11 @@ class DatashowroomController extends Controller
     // Menampilkan daftar showroom dengan pagination
     public function index()
     {
-        $showrooms = Datashowroom::paginate(10); // Menampilkan 10 data per halaman
+        $showrooms = Datashowroom::orderBy('created_at', 'desc') // Urutkan dari yang terbaru
+                                  ->paginate(10); // Menampilkan 10 data per halaman
         return view('datashowroom', compact('showrooms'));
     }
 
-    // Menampilkan form untuk menambahkan showroom baru
     public function create()
     {
         return view('datashowroom.create');

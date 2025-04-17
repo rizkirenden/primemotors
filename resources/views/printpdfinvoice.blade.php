@@ -242,7 +242,8 @@
             </tr>
             <tr>
                 <th>Diskon</th>
-                <td>{{ $invoice->discount_part }}%</td>
+                <td>{{ rtrim(rtrim($invoice->discount_part, '0'), '.') }}%</td>
+
             </tr>
             <tr>
                 <th>Biaya Jasa</th>
@@ -250,11 +251,11 @@
             </tr>
             <tr>
                 <th>Diskon</th>
-                <td>{{ $invoice->discount_ongkos_pengerjaan }}%</td>
+                <td>{{ rtrim(rtrim($invoice->discount_ongkos_pengerjaan, '0'), '.') }}%</td>
             </tr>
             <tr>
                 <th>PPN</th>
-                <td>{{ $invoice->ppn }}%</td>
+                <td>{{ rtrim(rtrim($invoice->ppn, '0'), '.') }}%</td>
             </tr>
             <tr>
                 <th>Total Harga</th>

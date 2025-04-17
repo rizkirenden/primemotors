@@ -8,9 +8,10 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class DatasparepatController extends Controller
 {
     public function index(){
-        $sparepats = Datasparepat::paginate(10);
+        $sparepats = Datasparepat::orderBy('created_at', 'desc')->paginate(10);
         return view('datasparepat', compact('sparepats'));
     }
+
     public function create(){
         return view('datasparepat.create');
     }

@@ -11,56 +11,60 @@ use App\Models\Invoice;
 use App\Models\Partmasuk;
 use App\Models\Partkeluar;
 use App\Models\Jualpart; // Add Jualpart model
+use App\Models\Pengguna;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
     public function index()
-    {
-        // Ambil semua data dari masing-masing model
-        $mekanik = Datamekanik::count();
-        $sparepat = Datasparepat::count();
-        $service = Dataservice::count();
-        $showroom = Datashowroom::count();
+{
+    // Ambil semua data dari masing-masing model
+    $mekanik = Datamekanik::count();
+    $sparepat = Datasparepat::count();
+    $service = Dataservice::count();
+    $showroom = Datashowroom::count();
+    $petugas = Pengguna::count();  // Get the count of users
 
-        // Ambil tahun unik dari field tanggal_invoice (untuk semua data)
-        $years = Invoice::selectRaw('YEAR(tanggal_invoice) as year')
-            ->union(
-                Jualpart::selectRaw('YEAR(tanggal_pembayaran) as year')
-            )
-            ->distinct()
-            ->orderBy('year', 'desc')
-            ->pluck('year');
+    // Ambil tahun unik dari field tanggal_invoice (untuk semua data)
+    $years = Invoice::selectRaw('YEAR(tanggal_invoice) as year')
+        ->union(
+            Jualpart::selectRaw('YEAR(tanggal_pembayaran) as year')
+        )
+        ->distinct()
+        ->orderBy('year', 'desc')
+        ->pluck('year');
 
-        // Ambil data invoice dan kelompokkan berdasarkan bulan
-        $invoices = Invoice::all();
-        $invoiceData = $this->getInvoiceDataByMonth($invoices);
+    // Ambil data invoice dan kelompokkan berdasarkan bulan
+    $invoices = Invoice::all();
+    $invoiceData = $this->getInvoiceDataByMonth($invoices);
 
-        // Ambil data part keluar dan kelompokkan berdasarkan bulan
-        $partKeluar = Partkeluar::where('status', 'approved')->get();
-        $partKeluarData = $this->getPartKeluarDataByMonth($partKeluar);
+    // Ambil data part keluar dan kelompokkan berdasarkan bulan
+    $partKeluar = Partkeluar::where('status', 'approved')->get();
+    $partKeluarData = $this->getPartKeluarDataByMonth($partKeluar);
 
-        // Ambil data part masuk dan kelompokkan berdasarkan bulan
-        $partMasuk = Partmasuk::all();
-        $partMasukData = $this->getPartMasukDataByMonth($partMasuk);
+    // Ambil data part masuk dan kelompokkan berdasarkan bulan
+    $partMasuk = Partmasuk::all();
+    $partMasukData = $this->getPartMasukDataByMonth($partMasuk);
 
-        // Ambil data penjualan part (Jualpart) dan kelompokkan berdasarkan bulan
-        $jualParts = Jualpart::all();
-        $jualPartData = $this->getJualPartDataByMonth($jualParts);
+    // Ambil data penjualan part (Jualpart) dan kelompokkan berdasarkan bulan
+    $jualParts = Jualpart::all();
+    $jualPartData = $this->getJualPartDataByMonth($jualParts);
 
-        // Kirim data ke view
-        return view('dasboard', compact(
-            'mekanik',
-            'sparepat',
-            'service',
-            'showroom',
-            'invoiceData',
-            'years',
-            'partKeluarData',
-            'partMasukData',
-            'jualPartData'
-        ));
-    }
+    // Kirim data ke view
+    return view('dasboard', compact(
+        'mekanik',
+        'sparepat',
+        'service',
+        'showroom',
+        'petugas',  // Pass the petugas data
+        'invoiceData',
+        'years',
+        'partKeluarData',
+        'partMasukData',
+        'jualPartData'
+    ));
+}
+
 
     private function getInvoiceDataByMonth($invoices)
     {

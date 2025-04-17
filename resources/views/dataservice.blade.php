@@ -208,6 +208,7 @@
     @include('sidebar')
     <div class="flex-1 p-3 overflow-x-auto">
         <h1 class="text-2xl text-white mb-4">Data Service</h1>
+
         @if (session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
                 role="alert">
@@ -244,27 +245,27 @@
                 <div class="mb-1 p-2">
                     <div class="flex justify-between items-center space-x-4">
                         <!-- Search -->
-                        <form action="{{ route('printpdfdataspkawal') }}" method="GET">
-                            <div class="flex items-center space-x-4 w-full">
-                                <!-- Search Input -->
-                                <input type="text" id="search-input" name="search" placeholder="Search..."
-                                    class="px-4 py-2 rounded-full text-black w-64 bg-white border border-gray-300"
-                                    value="{{ request('search') }}" onkeyup="searchTable()">
+                        <form action="{{ route('printpdfdataspkawal') }}" method="GET"
+                            class="flex items-center space-x-4 w-full">
+                            <!-- Search Input -->
+                            <input type="text" id="search-input" name="search" placeholder="Search..."
+                                class="px-4 py-2 rounded-full text-black w-64 bg-white border border-gray-300"
+                                value="{{ request('search') }}" onkeyup="searchTable()">
 
-                                <!-- Filter Date Range -->
-                                <input type="date" id="date-start" name="date_start"
-                                    class="px-4 py-2 rounded-full text-black bg-white border border-gray-300"
-                                    value="{{ request('date_start') }}">
-                                <input type="date" id="date-end" name="date_end"
-                                    class="px-4 py-2 rounded-full text-black bg-white border border-gray-300"
-                                    value="{{ request('date_end') }}">
+                            <!-- Filter Date Range -->
+                            <input type="date" id="date-start" name="date_start"
+                                class="px-4 py-2 rounded-full text-black bg-white border border-gray-300"
+                                value="{{ request('date_start') }}">
+                            <input type="date" id="date-end" name="date_end"
+                                class="px-4 py-2 rounded-full text-black bg-white border border-gray-300"
+                                value="{{ request('date_end') }}">
 
-                                <!-- Print PDF Button -->
+                            <!-- Tombol PDF (Awal & Akhir) -->
+                            <div class="flex space-x-2">
                                 <button type="submit"
                                     class="px-4 py-2 bg-white text-black rounded-full hover:bg-gray-200 border border-gray-300">
                                     <i class="fas fa-file-pdf text-black"></i> Awal
                                 </button>
-                            </div>
                         </form>
                         <form action="{{ route('printpdfdataspkakhir') }}" method="GET">
                             <button type="submit"
@@ -272,52 +273,76 @@
                                 <i class="fas fa-file-pdf text-black"></i> Akhir
                             </button>
                         </form>
-                        <!-- Add Data Button -->
-                        <button onclick="openAddModal()"
-                            class="px-6 py-2 bg-white text-black rounded-full hover:bg-gray-200 border border-gray-300 ml-auto flex items-center space-x-2">
-                            <i class="fas fa-plus text-black"></i>
-                            <span>Tambah</span>
-                        </button>
                     </div>
+                    </form>
+
+                    <!-- Add Data Button -->
+                    <button onclick="openAddModal()"
+                        class="px-6 py-2 bg-white text-black rounded-full hover:bg-gray-200 border border-gray-300 ml-auto flex items-center space-x-2">
+                        <i class="fas fa-plus text-black"></i>
+                        <span>Tambah</span>
+                    </button>
                 </div>
             </div>
+        </div>
 
-            <!-- Table -->
-            <table class="min-w-full table-auto text-black">
-                <thead class="bg-white">
-                    <tr>
-                        <th class="px-4 py-2 text-left">No SPK</th>
-                        <th class="px-4 py-2 text-left">Costumer</th>
-                        <th class="px-4 py-2 text-left">Masuk</th>
-                        <th class="px-4 py-2 text-left">Keluar</th>
-                        <th class="px-4 py-2 text-left">No Polisi</th>
-                        <th class="px-4 py-2 text-left">Mekanik</th>
-                        <th class="px-4 py-2 text-left">Status</th>
-                        <th class="px-4 py-2 text-left">Detail</th>
-                        <th class="px-4 py-2 text-left">Action</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white">
-                    @if (isset($dataservices) && $dataservices->count() > 0)
-                        @foreach ($dataservices as $dataservice)
-                            <tr data-id="{{ $dataservice->id }}">
-                                <td class="px-4 py-2">{{ $dataservice->no_spk }}</td>
-                                <td class="px-4 py-2">{{ $dataservice->costumer }}</td>
-                                <td class="px-4 py-2">{{ $dataservice->masuk }}</td>
-                                <td class="px-4 py-2">{{ $dataservice->keluar }}</td>
-                                <td class="px-4 py-2">{{ $dataservice->no_polisi }}</td>
-                                <td class="px-4 py-2">{{ $dataservice->nama_mekanik }}</td>
-                                <td class="px-4 py-2">{{ $dataservice->status }}</td>
-                                <td class="px-4 py-2">
-                                    <button class="px-4 py-2 text-white bg-black rounded-full"
-                                        onclick="toggleDescription({{ $dataservice->id }})">
-                                        Lihat Detail
-                                    </button>
-                                </td>
-                                <td class="px-4 py-2">
-                                    <!-- Action Icons -->
-                                    <a href="#" class="text-blue-500 hover:text-blue-700 mr-3"
-                                        onclick="openEditModal(
+        <!-- Table -->
+        <table class="min-w-full table-auto text-black">
+            <thead class="bg-white">
+                <tr>
+                    <th class="px-4 py-2 text-left">No SPK</th>
+                    <th class="px-4 py-2 text-left">Costumer</th>
+                    <th class="px-4 py-2 text-left">Masuk</th>
+                    <th class="px-4 py-2 text-left">Keluar</th>
+                    <th class="px-4 py-2 text-left">No Polisi</th>
+                    <th class="px-4 py-2 text-left">Mekanik</th>
+                    <th class="px-4 py-2 text-left">Status</th>
+                    <th class="px-4 py-2 text-left">Detail</th>
+                    <th class="px-4 py-2 text-left">Action</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white">
+                @if (isset($dataservices) && $dataservices->count() > 0)
+                    @foreach ($dataservices as $dataservice)
+                        <tr data-id="{{ $dataservice->id }}">
+                            <td class="px-4 py-2">{{ $dataservice->no_spk }}</td>
+                            <td class="px-4 py-2">{{ $dataservice->costumer }}</td>
+                            <td class="px-4 py-2">{{ $dataservice->masuk }}</td>
+                            <td class="px-4 py-2">{{ $dataservice->keluar }}</td>
+                            <td class="px-4 py-2">{{ $dataservice->no_polisi }}</td>
+                            <td class="px-4 py-2">{{ $dataservice->nama_mekanik }}</td>
+                            <td class="px-4 py-2">{{ $dataservice->status }}</td>
+                            <td class="px-4 py-2">
+                                <button class="px-4 py-2 text-white bg-black rounded-full"
+                                    onclick="toggleDescription({{ $dataservice->id }})">
+                                    Lihat Detail
+                                </button>
+                            </td>
+                            <td class="px-4 py-2">
+                                <!-- Di dalam loop foreach $dataservices, tambahkan tombol ini di kolom action -->
+                                <a href="#" class="text-green-500 hover:text-blue-700 mr-3"
+                                    onclick="openEditAwalModal(
+                                            '{{ $dataservice->id }}',
+                                            '{{ $dataservice->no_spk }}',
+                                            '{{ $dataservice->costumer }}',
+                                            '{{ $dataservice->contact_person }}',
+                                            '{{ $dataservice->masuk }}',
+                                            '{{ $dataservice->keluar }}',
+                                            '{{ $dataservice->no_polisi }}',
+                                            '{{ $dataservice->tahun }}',
+                                            '{{ $dataservice->tipe_mobile }}',
+                                            '{{ $dataservice->warna }}',
+                                            '{{ $dataservice->no_rangka }}',
+                                            '{{ $dataservice->no_mesin }}',
+                                            '{{ $dataservice->kilometer }}',
+                                            '{{ $dataservice->keluhan_costumer }}',
+                                            '{{ $dataservice->status }}'
+                                        )">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <!-- Action Icons -->
+                                <a href="#" class="text-blue-500 hover:text-blue-700 mr-3"
+                                    onclick="openEditModal(
                                             '{{ $dataservice->id }}',
                                             '{{ $dataservice->no_spk }}',
                                             '{{ $dataservice->costumer }}',
@@ -347,222 +372,221 @@
                                             '{{ $dataservice->waktu_pengerjaan }}',
                                             '{{ $dataservice->ongkos_pengerjaan }}'
                                         )">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <button type="button" class="text-red-500 hover:text-red-700"
-                                        onclick="confirmDelete({{ $dataservice->id }})">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                    <a href="{{ route('printpdfdataspkawal.perdata', $dataservice->id) }}"
-                                        class="text-black hover:text-black ml-3">
-                                        <i class="fas fa-print"></i> Awal
-                                    </a>
-                                    <a href="{{ route('printpdfdataspkakhir.perdata', $dataservice->id) }}"
-                                        class="text-black hover:text-black ml-3">
-                                        <i class="fas fa-print"></i> Akhir
-                                    </a>
-                                    <form action="{{ route('invoice.store', $dataservice->id) }}" method="POST"
-                                        style="display: inline;">
-                                        @csrf
-                                        <button type="submit" class="text-black hover:text-black ml-3">
-                                            <i class="fas fa-print"></i> Invoice
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            <!-- Detail Row -->
-                            <tr id="desc-{{ $dataservice->id }}" class="description-row">
-                                <td colspan="20">
-                                    <div class="description-container">
-                                        <!-- First Row: Contact Person, Year, Type, Color, Chassis Number, Engine Number, Kilometer, Status -->
-                                        <div
-                                            style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-                                            <div><strong>Contact Person:</strong> {{ $dataservice->contact_person }}
-                                            </div>
-                                            <div><strong>Tahun:</strong> {{ $dataservice->tahun }}</div>
-                                            <div><strong>Tipe:</strong> {{ $dataservice->tipe_mobile }}</div>
-                                            <div><strong>Warna:</strong> {{ $dataservice->warna }}</div>
-                                            <div><strong>No Rangka:</strong> {{ $dataservice->no_rangka }}</div>
-                                            <div><strong>No Mesin:</strong> {{ $dataservice->no_mesin }}</div>
-                                            <div><strong>Kilometer:</strong>
-                                                {{ rtrim(number_format($dataservice->kilometer, 2), '.00') }} KM</div>
+                                    <i class="fas fa-pen-square"></i>
+                                </a>
+                                <button type="button" class="text-red-500 hover:text-red-700"
+                                    onclick="confirmDelete({{ $dataservice->id }})">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                                <a href="{{ route('printpdfdataspkawal.perdata', $dataservice->id) }}"
+                                    class="text-black hover:text-black ml-3">
+                                    <i class="fas fa-print"></i> Awal
+                                </a>
+                                <a href="{{ route('printpdfdataspkakhir.perdata', $dataservice->id) }}"
+                                    class="text-black hover:text-black ml-3">
+                                    <i class="fas fa-print"></i> Akhir
+                                </a>
+                                <!-- Ganti form dengan button biasa -->
+                                <form id="invoice-form-{{ $dataservice->id }}"
+                                    action="{{ route('invoice.store', $dataservice->id) }}" method="POST"
+                                    style="display: none;">
+                                    @csrf
+                                </form>
+                                <button onclick="checkPendingParts({{ $dataservice->id }})"
+                                    class="text-black hover:text-black ml-3">
+                                    <i class="fas fa-print"></i> Invoice
+                                </button>
+                            </td>
+                        </tr>
+                        <!-- Detail Row -->
+                        <tr id="desc-{{ $dataservice->id }}" class="description-row">
+                            <td colspan="20">
+                                <div class="description-container">
+                                    <!-- First Row: Contact Person, Year, Type, Color, Chassis Number, Engine Number, Kilometer, Status -->
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                                        <div><strong>Contact Person:</strong> {{ $dataservice->contact_person }}
                                         </div>
+                                        <div><strong>Tahun:</strong> {{ $dataservice->tahun }}</div>
+                                        <div><strong>Tipe:</strong> {{ $dataservice->tipe_mobile }}</div>
+                                        <div><strong>Warna:</strong> {{ $dataservice->warna }}</div>
+                                        <div><strong>No Rangka:</strong> {{ $dataservice->no_rangka }}</div>
+                                        <div><strong>No Mesin:</strong> {{ $dataservice->no_mesin }}</div>
+                                        <div><strong>Kilometer:</strong>
+                                            {{ rtrim(number_format($dataservice->kilometer, 2), '.00') }} KM</div>
+                                    </div>
 
-                                        <!-- Second Row: Customer Complaints -->
-                                        <div style="margin-bottom: 20px;">
-                                            <div><strong>Keluhan Customer:</strong></div>
-                                            <textarea style="width: 100%; height: 80px; resize: vertical;" readonly>{{ $dataservice->keluhan_costumer }}</textarea>
-                                        </div>
+                                    <!-- Second Row: Customer Complaints -->
+                                    <div style="margin-bottom: 20px;">
+                                        <div><strong>Keluhan Customer:</strong></div>
+                                        <textarea style="width: 100%; height: 80px; resize: vertical;" readonly>{{ $dataservice->keluhan_costumer }}</textarea>
+                                    </div>
 
-                                        <!-- Third Row: Work Descriptions -->
-                                        <div style="margin-bottom: 20px;">
-                                            <div><strong>Uraian Pekerjaan:</strong></div>
-                                            <table style="width: 100%; border-collapse: collapse;">
-                                                <thead>
-                                                    <tr>
-                                                        <th style="border: 1px solid #000; padding: 5px;"><strong>Jenis
-                                                                Pekerjaan:</strong></th>
-                                                        <th style="border: 1px solid #000; padding: 5px;"><strong>Jenis
-                                                                Mobil:</strong></th>
-                                                        <th style="border: 1px solid #000; padding: 5px;"><strong>Waktu
-                                                                Pengerjaan (Menit):</strong></th>
-                                                        <th style="border: 1px solid #000; padding: 5px;">
-                                                            <strong>Ongkos Pengerjaan:</strong>
-                                                        </th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @php
-                                                        $jenisPekerjaan = json_decode(
-                                                            $dataservice->jenis_pekerjaan,
-                                                            true,
-                                                        );
-                                                        $jenisMobil = json_decode($dataservice->jenis_mobil, true);
-                                                        $waktuPengerjaan = json_decode(
-                                                            $dataservice->waktu_pengerjaan,
-                                                            true,
-                                                        );
-                                                        $ongkosPengerjaan = json_decode(
-                                                            $dataservice->ongkos_pengerjaan,
-                                                            true,
-                                                        );
-                                                    @endphp
+                                    <!-- Third Row: Work Descriptions -->
+                                    <div style="margin-bottom: 20px;">
+                                        <div><strong>Uraian Pekerjaan:</strong></div>
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <thead>
+                                                <tr>
+                                                    <th style="border: 1px solid #000; padding: 5px;"><strong>Jenis
+                                                            Pekerjaan:</strong></th>
+                                                    <th style="border: 1px solid #000; padding: 5px;"><strong>Jenis
+                                                            Mobil:</strong></th>
+                                                    <th style="border: 1px solid #000; padding: 5px;"><strong>Waktu
+                                                            Pengerjaan (Menit):</strong></th>
+                                                    <th style="border: 1px solid #000; padding: 5px;">
+                                                        <strong>Ongkos Pengerjaan:</strong>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @php
+                                                    $jenisPekerjaan = json_decode($dataservice->jenis_pekerjaan, true);
+                                                    $jenisMobil = json_decode($dataservice->jenis_mobil, true);
+                                                    $waktuPengerjaan = json_decode(
+                                                        $dataservice->waktu_pengerjaan,
+                                                        true,
+                                                    );
+                                                    $ongkosPengerjaan = json_decode(
+                                                        $dataservice->ongkos_pengerjaan,
+                                                        true,
+                                                    );
+                                                @endphp
 
-                                                    @if (!empty($jenisPekerjaan) && is_array($jenisPekerjaan))
-                                                        @foreach ($jenisPekerjaan as $index => $jenis)
-                                                            <tr>
-                                                                <td style="border: 1px solid #000; padding: 5px;">
-                                                                    {{ $jenis }}</td>
-                                                                <td style="border: 1px solid #000; padding: 5px;">
-                                                                    {{ $jenisMobil[$index] ?? '-' }}</td>
-                                                                <td style="border: 1px solid #000; padding: 5px;">
-                                                                    {{ $waktuPengerjaan[$index] ?? '-' }}</td>
-                                                                <td style="border: 1px solid #000; padding: 5px;">
-                                                                    @php
-                                                                        $ongkosPekerjaan = json_decode(
-                                                                            $dataservice->ongkos_pengerjaan,
-                                                                            true,
-                                                                        );
-                                                                    @endphp
-                                                                    {{ isset($ongkosPekerjaan[$index]) ? 'Rp. ' . number_format((float) $ongkosPekerjaan[$index], 0, ',', '.') : '-' }}
-                                                                </td>
-                                                            </tr>
-                                                        @endforeach
-                                                    @else
+                                                @if (!empty($jenisPekerjaan) && is_array($jenisPekerjaan))
+                                                    @foreach ($jenisPekerjaan as $index => $jenis)
                                                         <tr>
-                                                            <td colspan="4"
-                                                                style="border: 1px solid #000; padding: 5px; text-align: center;">
-                                                                Tidak ada data uraian pekerjaan.
+                                                            <td style="border: 1px solid #000; padding: 5px;">
+                                                                {{ $jenis }}</td>
+                                                            <td style="border: 1px solid #000; padding: 5px;">
+                                                                {{ $jenisMobil[$index] ?? '-' }}</td>
+                                                            <td style="border: 1px solid #000; padding: 5px;">
+                                                                {{ $waktuPengerjaan[$index] ?? '-' }}</td>
+                                                            <td style="border: 1px solid #000; padding: 5px;">
+                                                                @php
+                                                                    $ongkosPekerjaan = json_decode(
+                                                                        $dataservice->ongkos_pengerjaan,
+                                                                        true,
+                                                                    );
+                                                                @endphp
+                                                                {{ isset($ongkosPekerjaan[$index]) ? 'Rp. ' . number_format((float) $ongkosPekerjaan[$index], 0, ',', '.') : '-' }}
                                                             </td>
                                                         </tr>
-                                                    @endif
-                                                </tbody>
-                                            </table>
-                                        </div>
-
-                                        <!-- Fourth Row: Part Details -->
-                                        <div style="margin-bottom: 20px;">
-                                            <div><strong>Detail Part:</strong></div>
-                                            <table style="width: 100%; border-collapse: collapse;">
-                                                <thead>
+                                                    @endforeach
+                                                @else
                                                     <tr>
-                                                        <th style="border: 1px solid #000; padding: 5px;"><strong>Kode
-                                                                Barang</strong></th>
-                                                        <th style="border: 1px solid #000; padding: 5px;"><strong>Nama
-                                                                Part</strong></th>
-                                                        <th style="border: 1px solid #000; padding: 5px;">
-                                                            <strong>STN</strong>
-                                                        </th>
-                                                        <th style="border: 1px solid #000; padding: 5px;">
-                                                            <strong>Tipe</strong>
-                                                        </th>
-                                                        <th style="border: 1px solid #000; padding: 5px;">
-                                                            <strong>Merk</strong>
-                                                        </th>
-                                                        <th style="border: 1px solid #000; padding: 5px;">
-                                                            <strong>Tanggal Keluar</strong>
-                                                        </th>
-                                                        <th style="border: 1px solid #000; padding: 5px;">
-                                                            <strong>Jumlah</strong>
-                                                        </th>
-                                                        <th style="border: 1px solid #000; padding: 5px;">
-                                                            <strong>Status</strong>
-                                                        </th>
+                                                        <td colspan="4"
+                                                            style="border: 1px solid #000; padding: 5px; text-align: center;">
+                                                            Tidak ada data uraian pekerjaan.
+                                                        </td>
                                                     </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @if ($dataservice->partkeluar->count() > 0)
-                                                        @foreach ($dataservice->partkeluar as $part)
-                                                            <tr>
-                                                                <td style="border: 1px solid #000; padding: 5px;">
-                                                                    {{ $part->kode_barang }}</td>
-                                                                <td style="border: 1px solid #000; padding: 5px;">
-                                                                    {{ $part->nama_part }}</td>
-                                                                <td style="border: 1px solid #000; padding: 5px;">
-                                                                    {{ $part->stn }}</td>
-                                                                <td style="border: 1px solid #000; padding: 5px;">
-                                                                    {{ $part->tipe }}</td>
-                                                                <td style="border: 1px solid #000; padding: 5px;">
-                                                                    {{ $part->merk }}</td>
-                                                                <td style="border: 1px solid #000; padding: 5px;">
-                                                                    {{ $part->tanggal_keluar ?? '-' }}</td>
-                                                                <td style="border: 1px solid #000; padding: 5px;">
-                                                                    {{ $part->jumlah }}</td>
-                                                                <td style="border: 1px solid #000; padding: 5px;">
-                                                                    {{ $part->status }}</td>
-                                                            </tr>
-                                                        @endforeach
-                                                    @else
-                                                        <tr>
-                                                            <td colspan="8"
-                                                                style="border: 1px solid #000; padding: 5px; text-align: center;">
-                                                                Tidak ada data part yang keluar.</td>
-                                                        </tr>
-                                                    @endif
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                                @endif
+                                            </tbody>
+                                        </table>
                                     </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                    @else
-                        <tr>
-                            <td colspan="10" class="text-center py-4">Tidak ada data ditemukan.</td>
+
+                                    <!-- Fourth Row: Part Details -->
+                                    <div style="margin-bottom: 20px;">
+                                        <div><strong>Detail Part:</strong></div>
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <thead>
+                                                <tr>
+                                                    <th style="border: 1px solid #000; padding: 5px;"><strong>Kode
+                                                            Barang</strong></th>
+                                                    <th style="border: 1px solid #000; padding: 5px;"><strong>Nama
+                                                            Part</strong></th>
+                                                    <th style="border: 1px solid #000; padding: 5px;">
+                                                        <strong>STN</strong>
+                                                    </th>
+                                                    <th style="border: 1px solid #000; padding: 5px;">
+                                                        <strong>Tipe</strong>
+                                                    </th>
+                                                    <th style="border: 1px solid #000; padding: 5px;">
+                                                        <strong>Merk</strong>
+                                                    </th>
+                                                    <th style="border: 1px solid #000; padding: 5px;">
+                                                        <strong>Tanggal Keluar</strong>
+                                                    </th>
+                                                    <th style="border: 1px solid #000; padding: 5px;">
+                                                        <strong>Jumlah</strong>
+                                                    </th>
+                                                    <th style="border: 1px solid #000; padding: 5px;">
+                                                        <strong>Status</strong>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @if ($dataservice->partkeluar->count() > 0)
+                                                    @foreach ($dataservice->partkeluar as $part)
+                                                        <tr>
+                                                            <td style="border: 1px solid #000; padding: 5px;">
+                                                                {{ $part->kode_barang }}</td>
+                                                            <td style="border: 1px solid #000; padding: 5px;">
+                                                                {{ $part->nama_part }}</td>
+                                                            <td style="border: 1px solid #000; padding: 5px;">
+                                                                {{ $part->stn }}</td>
+                                                            <td style="border: 1px solid #000; padding: 5px;">
+                                                                {{ $part->tipe }}</td>
+                                                            <td style="border: 1px solid #000; padding: 5px;">
+                                                                {{ $part->merk }}</td>
+                                                            <td style="border: 1px solid #000; padding: 5px;">
+                                                                {{ $part->tanggal_keluar ?? '-' }}</td>
+                                                            <td style="border: 1px solid #000; padding: 5px;">
+                                                                {{ $part->jumlah }}</td>
+                                                            <td style="border: 1px solid #000; padding: 5px;">
+                                                                {{ $part->status }}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                @else
+                                                    <tr>
+                                                        <td colspan="8"
+                                                            style="border: 1px solid #000; padding: 5px; text-align: center;">
+                                                            Tidak ada data part yang keluar.</td>
+                                                    </tr>
+                                                @endif
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </td>
                         </tr>
-                    @endif
-                </tbody>
-            </table>
+                    @endforeach
+                @else
+                    <tr>
+                        <td colspan="10" class="text-center py-4">Tidak ada data ditemukan.</td>
+                    </tr>
+                @endif
+            </tbody>
+        </table>
 
-            <!-- Pagination Section -->
-            <div class="pagination-wrapper">
-                <div class="pagination-container" id="pagination">
-                    <!-- Previous Page Link -->
-                    @if ($dataservices->onFirstPage())
-                        <span class="disabled m-1 px-4 py-2 rounded-full">Prev</span>
-                    @else
-                        <a href="{{ $dataservices->previousPageUrl() }}"
-                            class="px-4 py-2 m-1 rounded-full hover:bg-black hover:text-white">Prev</a>
-                    @endif
+        <!-- Pagination Section -->
+        <div class="pagination-wrapper">
+            <div class="pagination-container" id="pagination">
+                <!-- Previous Page Link -->
+                @if ($dataservices->onFirstPage())
+                    <span class="disabled m-1 px-4 py-2 rounded-full">Prev</span>
+                @else
+                    <a href="{{ $dataservices->previousPageUrl() }}"
+                        class="px-4 py-2 m-1 rounded-full hover:bg-black hover:text-white">Prev</a>
+                @endif
 
-                    <!-- Page Number Links -->
-                    @for ($i = 1; $i <= $dataservices->lastPage(); $i++)
-                        <a href="{{ $dataservices->url($i) }}"
-                            class="px-4 py-2 m-1 rounded-full {{ $i == $dataservices->currentPage() ? 'bg-black text-white' : '' }}">
-                            {{ $i }}
-                        </a>
-                    @endfor
+                <!-- Page Number Links -->
+                @for ($i = 1; $i <= $dataservices->lastPage(); $i++)
+                    <a href="{{ $dataservices->url($i) }}"
+                        class="px-4 py-2 m-1 rounded-full {{ $i == $dataservices->currentPage() ? 'bg-black text-white' : '' }}">
+                        {{ $i }}
+                    </a>
+                @endfor
 
-                    <!-- Next Page Link -->
-                    @if ($dataservices->hasMorePages())
-                        <a href="{{ $dataservices->nextPageUrl() }}"
-                            class="px-4 py-2 m-1 rounded-full hover:bg-black hover:text-white">Next</a>
-                    @else
-                        <span class="disabled m-1 px-4 py-2 rounded-full">Next</span>
-                    @endif
-                </div>
+                <!-- Next Page Link -->
+                @if ($dataservices->hasMorePages())
+                    <a href="{{ $dataservices->nextPageUrl() }}"
+                        class="px-4 py-2 m-1 rounded-full hover:bg-black hover:text-white">Next</a>
+                @else
+                    <span class="disabled m-1 px-4 py-2 rounded-full">Next</span>
+                @endif
             </div>
         </div>
+    </div>
     </div>
 
     <!-- Modal Add Form -->
@@ -664,7 +688,103 @@
             </form>
         </div>
     </div>
+    <!-- Modal Edit Awal Form -->
+    <div id="modal-edit-awal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center hidden">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-[90vw] overflow-y-auto" style="max-height: 90vh;">
+            <h2 class="text-xl font-bold mb-4">Edit Data Awal Service</h2>
+            <form id="inputFormEditAwal" method="POST"
+                action="{{ route('dataservice.updateawal', $dataservice->id ?? '') }}">
+                @csrf
+                @method('PUT')
+                <div class="grid grid-cols-4 gap-4">
+                    <!-- Baris 1 -->
+                    <div>
+                        <label for="no_spk_edit_awal">No SPK</label>
+                        <input type="text" id="no_spk_edit_awal" name="no_spk" class="w-full p-2 border rounded"
+                            required>
+                    </div>
+                    <div>
+                        <label for="costumer_edit_awal">Costumer</label>
+                        <input type="text" id="costumer_edit_awal" name="costumer"
+                            class="w-full p-2 border rounded" required>
+                    </div>
+                    <div>
+                        <label for="contact_person_edit_awal">Contact Person</label>
+                        <input type="text" id="contact_person_edit_awal" name="contact_person"
+                            class="w-full p-2 border rounded" required>
+                    </div>
+                    <div>
+                        <label for="masuk_edit_awal">Tanggal Masuk</label>
+                        <input type="datetime-local" id="masuk_edit_awal" name="masuk"
+                            class="w-full p-2 border rounded" required>
+                    </div>
 
+                    <!-- Baris 2 -->
+                    <div>
+                        <label for="keluar_edit_awal">Tanggal Keluar</label>
+                        <input type="datetime-local" id="keluar_edit_awal" name="keluar"
+                            class="w-full p-2 border rounded">
+                    </div>
+                    <div>
+                        <label for="no_polisi_edit_awal">No Polisi</label>
+                        <input type="text" id="no_polisi_edit_awal" name="no_polisi"
+                            class="w-full p-2 border rounded" required>
+                    </div>
+                    <div>
+                        <label for="tahun_edit_awal">Tahun</label>
+                        <input type="text" id="tahun_edit_awal" name="tahun" class="w-full p-2 border rounded"
+                            required>
+                    </div>
+                    <div>
+                        <label for="tipe_mobile_edit_awal">Tipe Mobile</label>
+                        <input type="text" id="tipe_mobile_edit_awal" name="tipe_mobile"
+                            class="w-full p-2 border rounded" required>
+                    </div>
+
+                    <!-- Baris 3 -->
+                    <div>
+                        <label for="warna_edit_awal">Warna</label>
+                        <input type="text" id="warna_edit_awal" name="warna" class="w-full p-2 border rounded"
+                            required>
+                    </div>
+                    <div>
+                        <label for="no_rangka_edit_awal">No Rangka</label>
+                        <input type="text" id="no_rangka_edit_awal" name="no_rangka"
+                            class="w-full p-2 border rounded" required>
+                    </div>
+                    <div>
+                        <label for="no_mesin_edit_awal">No Mesin</label>
+                        <input type="text" id="no_mesin_edit_awal" name="no_mesin"
+                            class="w-full p-2 border rounded" required>
+                    </div>
+                    <div>
+                        <label for="kilometer_edit_awal">Kilometer</label>
+                        <input type="text" id="kilometer_edit_awal" name="kilometer"
+                            class="w-full p-2 border rounded" oninput="formatKilometer(this)" required>
+                    </div>
+                    <div class="col-span-2">
+                        <label for="keluhan_costumer_edit_awal">Keluhan Costumer</label>
+                        <textarea id="keluhan_costumer_edit_awal" name="keluhan_costumer" class="w-full p-2 border rounded" required></textarea>
+                    </div>
+                    <div>
+                        <label for="status_edit_awal">Status</label>
+                        <select id="status_edit_awal" name="status" class="w-full p-2 border rounded" required>
+                            <option value="menunggu">Menunggu</option>
+                            <option value="pulang">Pulang</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Tombol Submit -->
+                <div class="mt-4 flex space-x-4 justify-center">
+                    <button type="button" onclick="closeEditAwalModal()"
+                        class="bg-black text-white hover:bg-red-700 px-4 py-2 rounded-full w-full sm:w-auto">Cancel</button>
+                    <button type="submit"
+                        class="bg-black text-white hover:bg-gray-700 px-4 py-2 rounded-full w-full sm:w-auto">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <!-- Modal Edit Form -->
     <div id="modal-edit" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center hidden">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-[90vw] overflow-y-auto" style="max-height: 90vh;">
@@ -730,7 +850,8 @@
                     <div>
                         <label for="tipe_mobile_edit">Tipe Mobile</label>
                         <input type="text" id="tipe_mobile_edit" name="tipe_mobile"
-                            class="w-full p-2 border rounded" value="{{ $dataservice->tipe_mobile ?? '' }}" required>
+                            class="w-full p-2 border rounded" value="{{ $dataservice->tipe_mobile ?? '' }}"
+                            required>
                     </div>
 
                     <!-- Baris 3 -->
@@ -781,8 +902,8 @@
 
                 <div class="col-span-5 mt-4">
                     <div id="part-keluar-container-edit" class="mt-4">
-                        @if (isset($dataservice) && $dataservice->partkeluar->count() > 0)
-                            @foreach ($dataservice->partkeluar as $part)
+                        @if (isset($dataservice) && $dataservice->partkeluar->where('status', 'pending')->count() > 0)
+                            @foreach ($dataservice->partkeluar->where('status', 'pending') as $part)
                                 <div class="part-keluar-row grid grid-cols-5 gap-4 mt-4">
                                     <div>
                                         <label for="kode_barang_edit">Kode Barang</label>
@@ -823,14 +944,14 @@
                                             value="{{ $part->jumlah }}">
                                     </div>
                                     <div>
-                                        <label for="tanggal_keluar">tanggal_keluar</label>
+                                        <label for="tanggal_keluar">Tanggal Keluar</label>
                                         <input type="date" name="tanggal_keluar[]"
                                             class="w-full p-2 border rounded" value="{{ $part->tanggal_keluar }}">
                                     </div>
                                 </div>
                             @endforeach
                         @else
-                            <p>Tidak ada data part yang keluar.</p>
+                            <p>Tidak ada data part pending.</p>
                         @endif
                     </div>
 
@@ -1190,6 +1311,60 @@
             }
         }
 
+        function openEditAwalModal(
+            id, no_spk, costumer, contact_person, masuk, keluar, no_polisi, tahun,
+            tipe_mobile, warna, no_rangka, no_mesin, kilometer, keluhan_costumer, status
+        ) {
+            document.getElementById("modal-edit-awal").classList.remove("hidden");
+
+            // Set nilai form
+            document.getElementById('no_spk_edit_awal').value = no_spk;
+            document.getElementById('costumer_edit_awal').value = costumer;
+            document.getElementById('contact_person_edit_awal').value = contact_person;
+            document.getElementById('masuk_edit_awal').value = masuk;
+            document.getElementById('keluar_edit_awal').value = keluar;
+            document.getElementById('no_polisi_edit_awal').value = no_polisi;
+            document.getElementById('tahun_edit_awal').value = tahun;
+            document.getElementById('tipe_mobile_edit_awal').value = tipe_mobile;
+            document.getElementById('warna_edit_awal').value = warna;
+            document.getElementById('no_rangka_edit_awal').value = no_rangka;
+            document.getElementById('no_mesin_edit_awal').value = no_mesin;
+            const kmValue = parseFloat(kilometer).toFixed(2) + ' KM';
+            document.getElementById('kilometer_edit_awal').value = kmValue;
+            document.getElementById('keluhan_costumer_edit_awal').value = keluhan_costumer;
+            document.getElementById('status_edit_awal').value = status;
+
+            // Set action form dengan ID yang benar
+            document.getElementById("inputFormEditAwal").action = "/dataservice/updateawal/" + id;
+        }
+
+        function closeEditAwalModal() {
+            document.getElementById("modal-edit-awal").classList.add("hidden");
+        }
+
+        function formatKilometer(input) {
+            // Hapus semua karakter non-digit kecuali titik
+            let value = input.value.replace(/[^0-9.]/g, '');
+
+            // Pastikan hanya ada satu titik desimal
+            const parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+
+            // Batasi dua digit setelah desimal
+            if (parts.length > 1) {
+                value = parts[0] + '.' + parts[1].slice(0, 2);
+            }
+
+            // Tambahkan ' KM' jika ada nilai
+            if (value && !value.endsWith(' KM')) {
+                input.value = value + ' KM';
+            } else if (!value) {
+                input.value = '';
+            }
+        }
+
         function openEditModal(
             id, no_spk, costumer, contact_person, masuk, keluar, no_polisi, nama_mekanik, tahun,
             tipe_mobile, warna, no_rangka, no_mesin, kilometer, keluhan_costumer, kode_barang, nama_part, stn,
@@ -1250,41 +1425,41 @@
             newRow.classList.add('part-keluar-row', 'grid', 'grid-cols-6', 'gap-4', 'mt-4');
 
             newRow.innerHTML = `
-                <div>
-                    <label for="kode_barang_edit">Kode Barang</label>
-                    <select name="kode_barang[]" class="w-full p-2 border rounded kode-barang-select" onchange="fetchSparepartDataEdit(event)">
-                        <option value="">Pilih Kode Barang</option>
-                        @foreach ($spareparts as $sparepart)
-                            <option value="{{ $sparepart->kode_barang }}">{{ $sparepart->kode_barang }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label for="nama_part_edit">Nama Part</label>
-                    <input type="text" name="nama_part[]" class="w-full p-2 border rounded nama-part-input" readonly>
-                </div>
-                <div>
-                    <label for="stn_edit">STN</label>
-                    <input type="text" name="stn[]" class="w-full p-2 border rounded stn-input" readonly>
-                </div>
-                <div>
-                    <label for="merk_edit">Merk</label>
-                    <input type="text" name="merk[]" class="w-full p-2 border rounded merk-input" readonly>
-                </div>
-                <div>
-                    <label for="jumlah_edit">Jumlah</label>
-                    <input type="number" name="jumlah[]" class="w-full p-2 border rounded jumlah-input" value="0">
-                </div>
-                <div>
-                    <label for="tanggal_keluar_edit">Tanggal Keluar</label>
-                    <input type="date" name="tanggal_keluar[]" class="w-full p-2 border rounded">
-                </div>
-                <div class="flex items-end">
-                    <button type="button" onclick="hapusPartKeluar(this)" class="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-700">
-                        <i class="fas fa-trash"></i> Hapus
-                    </button>
-                </div>
-            `;
+        <div>
+            <label for="kode_barang_edit">Kode Barang</label>
+            <select name="kode_barang[]" class="w-full p-2 border rounded kode-barang-select" onchange="fetchSparepartDataEdit(event)">
+                <option value="">Pilih Kode Barang</option>
+                @foreach ($spareparts as $sparepart)
+                    <option value="{{ $sparepart->kode_barang }}">{{ $sparepart->kode_barang }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label for="nama_part_edit">Nama Part</label>
+            <input type="text" name="nama_part[]" class="w-full p-2 border rounded nama-part-input" readonly>
+        </div>
+        <div>
+            <label for="stn_edit">STN</label>
+            <input type="text" name="stn[]" class="w-full p-2 border rounded stn-input" readonly>
+        </div>
+        <div>
+            <label for="merk_edit">Merk</label>
+            <input type="text" name="merk[]" class="w-full p-2 border rounded merk-input" readonly>
+        </div>
+        <div>
+            <label for="jumlah_edit">Jumlah</label>
+            <input type="number" name="jumlah[]" class="w-full p-2 border rounded jumlah-input" value="0">
+        </div>
+        <div>
+            <label for="tanggal_keluar_edit">Tanggal Keluar</label>
+            <input type="date" name="tanggal_keluar[]" class="w-full p-2 border rounded">
+        </div>
+        <div class="flex items-end">
+            <button type="button" onclick="hapusPartKeluar(this)" class="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-700">
+                <i class="fas fa-trash"></i> Hapus
+            </button>
+        </div>
+    `;
 
             container.appendChild(newRow);
         }
@@ -1342,6 +1517,35 @@
 
             document.body.appendChild(form);
             form.submit();
+        }
+
+        function checkPendingParts(serviceId) {
+            // Kirim request ke server untuk cek part pending
+            fetch(`/dataservice/${serviceId}/check-pending-parts`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.has_pending_parts) {
+                        // Tampilkan konfirmasi jika ada part pending
+                        Swal.fire({
+                            title: 'Peringatan!',
+                            text: 'Masih ada part yang berstatus pending. Apakah Anda yakin ingin mencetak invoice?',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Ya, Cetak Invoice',
+                            cancelButtonText: 'Batal'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Jika user tetap ingin cetak, submit form
+                                document.getElementById(`invoice-form-${serviceId}`).submit();
+                            }
+                        });
+                    } else {
+                        // Jika tidak ada pending, langsung cetak
+                        document.getElementById(`invoice-form-${serviceId}`).submit();
+                    }
+                });
         }
     </script>
 </body>

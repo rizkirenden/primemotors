@@ -28,4 +28,12 @@ class JualpartItem extends Model
     {
         return $this->belongsTo(Jualpart::class);
     }
+
+    // In App\Models\JualpartItem.php
+    public function partkeluar()
+    {
+        return $this->hasOne(Partkeluar::class, 'kode_barang', 'kode_barang')
+                   ->where('jualpart_id', $this->jualpart_id)
+                   ->latest(); // Ambil record terbaru jika ada duplikat
+    }
 }

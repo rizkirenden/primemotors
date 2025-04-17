@@ -10,7 +10,7 @@ class UraianpekerjaanController extends Controller
 {
     public function index()
     {
-        $uraianPekerjaans = UraianPekerjaan::paginate(10); // Ambil semua data dari database
+        $uraianPekerjaans = UraianPekerjaan::orderBy('created_at', 'desc')->paginate(10); // Ambil semua data dari database
         return view('uraianpekerjaan', compact('uraianPekerjaans'));
     }
 

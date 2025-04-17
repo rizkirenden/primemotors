@@ -221,11 +221,22 @@
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
 
-                                <!-- Tombol Cetak -->
-                                <a href="{{ route('printpdfjualpart.perdata', $jualpart->id) }}"
-                                    class="text-black hover:text-black ml-3">
-                                    <i class="fas fa-print"></i>
-                                </a>
+                                @php
+                                    $hasPendingItems = false;
+                                    foreach ($jualpart->items as $item) {
+                                        if (($item->part_status ?? '') === 'pending') {
+                                            $hasPendingItems = true;
+                                            break;
+                                        }
+                                    }
+                                @endphp
+
+                                @if (!$hasPendingItems)
+                                    <a href="{{ route('printpdfjualpart.perdata', $jualpart->id) }}"
+                                        class="text-black hover:text-black ml-3">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                @endif
                             </td>
                         </tr>
                         <tr id="desc-{{ $jualpart->id }}" class="hidden description-row">
@@ -244,6 +255,7 @@
                                                     <th class="text-left">Harga Jual</th>
                                                     <th class="text-left">Discount</th>
                                                     <th class="text-left">Total</th>
+                                                    <th class="text-left">Status</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -263,6 +275,10 @@
                                                         </td>
                                                         <td class="px-2 py-1">
                                                             {{ 'Rp ' . number_format($item->total_harga_part, 0, ',', '.') }}
+                                                        </td>
+                                                        <td class="px-2 py-1">
+                                                            {{ $item->part_status ?? 'N/A' }}
+                                                            <!-- Gunakan field yang sudah di-select -->
                                                         </td>
                                                     </tr>
                                                 @endforeach
@@ -310,7 +326,7 @@
         </div>
     </div>
 
-    <!-- Modal for adding data -->
+
     <div id="modal"
         class="modal hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
         <div class="modal-content bg-white p-6 rounded-lg max-w-4xl w-full large">
@@ -336,7 +352,7 @@
                         class="w-full px-4 py-2 border border-gray-300 rounded-full" required>
                 </div>
 
-                <!-- Items Section -->
+
                 <div id="items-container" class="mt-4">
                     <div class="item-row grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                         <select name="items[0][kode_barang]"
@@ -393,7 +409,7 @@
         </div>
     </div>
 
-    <!-- Edit Modal for Editing Data -->
+
     <div id="edit-modal"
         class="modal hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
         <div class="modal-content bg-white p-6 rounded-lg max-w-4xl w-full large">
@@ -688,6 +704,7 @@
                     container.innerHTML = '';
 
                     if (data.items && data.items.length > 0) {
+                        // Tampilkan SEMUA item, tidak hanya yang pending
                         data.items.forEach((item, index) => {
                             addEditItem(index, item);
                         });
@@ -709,6 +726,11 @@
             const container = document.getElementById('edit-items-container');
             const itemId = itemData ? itemData.id : `new-${index}`;
             const itemIndex = container.children.length;
+
+            // Skip if item is approved
+            if (itemData && itemData.part_status === 'approved') {
+                return;
+            }
 
             const newItem = document.createElement('div');
             newItem.className = 'item-row grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4';
@@ -765,6 +787,7 @@
     `;
 
             container.appendChild(newItem);
+
             // If itemData exists, fetch sparepart data if needed
             if (itemData) {
                 const itemRow = container.lastElementChild;

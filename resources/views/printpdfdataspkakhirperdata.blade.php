@@ -155,8 +155,8 @@
     <!-- Data Header -->
     <div class="data-row">
         <div class="data-label">No Spk: {{ $dataservices->no_spk }}</div>
-        <div class="data-label">Tanggal: {{ $dataservices->tanggal }}</div>
-        <div class="data-label">Teknisi:</div>
+        <div class="data-label">Tanggal: {{ \Carbon\Carbon::now()->format('d-m-Y') }}</div>
+        <div class="data-label">Teknisi: {{ $dataservices->nama_mekanik }}</div>
         <div class="data-label">Status: {{ $dataservices->status }}</div>
     </div>
 

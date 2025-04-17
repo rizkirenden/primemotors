@@ -100,7 +100,7 @@
                 <!-- Card Petugas -->
                 <div class="bg-white text-black p-4 rounded-lg shadow-lg relative">
                     <h2 class="text-lg font-semibold mb-2">Petugas</h2>
-                    <p class="text-2xl font-bold">50</p>
+                    <p class="text-2xl font-bold">{{ $petugas }}</p>
                     <i class="fas fa-user-tie absolute top-4 right-4 text-2xl text-black"></i>
                 </div>
 

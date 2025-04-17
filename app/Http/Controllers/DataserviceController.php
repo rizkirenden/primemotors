@@ -16,7 +16,7 @@ class DataserviceController extends Controller
     public function index()
     {
         // Ambil semua data service dengan pagination
-        $dataservices = Dataservice::paginate(10);
+        $dataservices = Dataservice::orderBy('created_at', 'desc')->paginate(10);
 
         // Ambil semua data mekanik
         $mekaniks = Datamekanik::all();
@@ -110,14 +110,6 @@ public function updateawal(Request $request, $id)
         'kilometer' => 'required|regex:/^\d+(\.\d{1,2})?\s*KM$/i',
         'keluhan_costumer' => 'required',
         'status' => 'required',
-        'jenis_pekerjaan' => 'nullable|array',
-        'jenis_pekerjaan.*' => 'nullable|string',
-        'jenis_mobil' => 'nullable|array',
-        'jenis_mobil.*' => 'nullable|string',
-        'waktu_pengerjaan' => 'nullable|array',
-        'waktu_pengerjaan.*' => 'nullable|integer',
-        'ongkos_pengerjaan' => 'nullable|array',
-        'ongkos_pengerjaan.*' => 'nullable|numeric',
     ]);
 
     // Bersihkan input kilometer dengan menghapus "KM"
@@ -143,11 +135,6 @@ public function updateawal(Request $request, $id)
         'kilometer' => $kilometer,
         'keluhan_costumer' => $request->keluhan_costumer,
         'status' => $request->status,
-        'jenis_pekerjaan' => json_encode($request->jenis_pekerjaan),
-        'jenis_mobil' => json_encode($request->jenis_mobil),
-        'waktu_pengerjaan' => json_encode($request->waktu_pengerjaan),
-        'ongkos_pengerjaan' => json_encode($request->ongkos_pengerjaan),
-
     ]);
 
     return redirect()->route('dataservice')->with('success', 'Data service awal berhasil diperbarui!');
@@ -287,7 +274,13 @@ public function updateawal(Request $request, $id)
 
         return redirect()->route('dataservice')->with('success', 'Data service berhasil diupdate!');
     }
+    public function checkPendingParts($id)
+    {
+        $dataservice = Dataservice::findOrFail($id);
+        $hasPending = $dataservice->partkeluar()->where('status', 'pending')->exists();
 
+        return response()->json(['has_pending_parts' => $hasPending]);
+    }
     // Menghapus data service
     public function destroy($id)
     {

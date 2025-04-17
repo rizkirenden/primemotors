@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Partkeluar;
 use App\Models\Datasparepat;
 use App\Models\JualpartItem;
@@ -12,7 +13,7 @@ class PartkeluarController extends Controller
 {
     public function index()
     {
-        // Tambahkan eager loading untuk semua relasi
+
         $partKeluars = PartKeluar::with(['jualpart', 'dataservice', 'datasparepat'])
                             ->orderBy('tanggal_keluar', 'desc')
                             ->paginate(10);
@@ -93,7 +94,7 @@ public function destroy($id)
 }
 
 
-    public function update(Request $request, $id)
+public function update(Request $request, $id)
 {
     $request->validate([
         'kode_barang' => 'required|exists:datasparepats,kode_barang',
@@ -105,37 +106,62 @@ public function destroy($id)
         'jumlah' => 'required|integer|min:1',
     ]);
 
-    // Ambil data part keluar yang akan diupdate
-    $partKeluar = PartKeluar::findOrFail($id);
+    DB::beginTransaction();
 
-    // Update stok di tabel datasparepats (kembalikan stok lama dan kurangi stok baru)
-    $sparepart = Datasparepat::where('kode_barang', $partKeluar->kode_barang)->first();
-    if ($sparepart) {
-        $sparepart->jumlah += $partKeluar->jumlah; // Kembalikan stok lama
-        $sparepart->save();
-    }
+    try {
+        // Ambil data part keluar
+        $partKeluar = PartKeluar::findOrFail($id);
 
-    // Validasi jika stok 0 atau jumlah yang diminta melebihi stok yang tersedia
-    if ($sparepart->jumlah == 0) {
-        return redirect()->back()->with('error', 'Stok barang sudah habis!');
-    }
+        // Kembalikan stok lama
+        $sparepart = Datasparepat::where('kode_barang', $partKeluar->kode_barang)->first();
+        if ($sparepart) {
+            $sparepart->jumlah += $partKeluar->jumlah;
+            $sparepart->save();
+        }
 
-    if ($sparepart->jumlah < $request->jumlah) {
-        return redirect()->back()->with('error', 'Stok tidak mencukupi!');
-    }
+        // Cek stok cukup
+        if ($sparepart->jumlah < $request->jumlah) {
+            return redirect()->back()->with('error', 'Stok tidak mencukupi!');
+        }
 
-    // Update data part keluar
-    $partKeluar->update($request->all());
+        // Update data part keluar
+        $partKeluar->update($request->all());
 
-    // Update stok di tabel datasparepats (kurangi stok baru)
-    $sparepart = Datasparepat::where('kode_barang', $request->kode_barang)->first();
-    if ($sparepart) {
+        // Kurangi stok sesuai jumlah baru
         $sparepart->jumlah -= $request->jumlah;
         $sparepart->save();
-    }
 
-    return redirect()->route('partkeluar')->with('success', 'Data part keluar berhasil diupdate!');
+        // Jika ada relasi jualpart, update juga jualpart_items
+        if ($partKeluar->jualpart_id) {
+            $jualpartItem = JualpartItem::where('kode_barang', $request->kode_barang)
+                                ->where('jualpart_id', $partKeluar->jualpart_id)
+                                ->first();
+
+            if ($jualpartItem) {
+                $jualpartItem->jumlah = $request->jumlah;
+                $jualpartItem->tanggal_keluar = $request->tanggal_keluar;
+                $jualpartItem->total_harga_part = $jualpartItem->harga_jual * $request->jumlah;
+                $jualpartItem->save();
+
+                // Update total_transaksi di jualpart
+                $jualpart = Jualpart::find($jualpartItem->jualpart_id);
+                if ($jualpart) {
+                    $jualpart->total_transaksi = $jualpart->items()->sum('total_harga_part');
+                    $jualpart->save();
+                }
+            }
+        }
+
+        DB::commit();
+
+        return redirect()->route('partkeluar')->with('success', 'Data part keluar berhasil diupdate!');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return redirect()->back()->with('error', 'Terjadi kesalahan saat mengupdate: ' . $e->getMessage());
+    }
 }
+
 
 public function approve($id)
 {

@@ -385,6 +385,10 @@
             form.submit();
         }
 
+        setInterval(function() {
+            window.location.reload();
+        }, 5000);
+
         function showErrorPopup(message) {
             Swal.fire({
                 icon: 'error',

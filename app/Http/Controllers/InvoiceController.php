@@ -12,9 +12,13 @@ class InvoiceController extends Controller
 {
     public function index()
     {
-        $invoices = Invoice::with('dataservice')->paginate(10);
+        $invoices = Invoice::with('dataservice')
+                           ->orderBy('created_at', 'desc')
+                           ->paginate(10);
+
         return view('laporantransaksi', compact('invoices'));
     }
+
 
     public function store(Request $request, $id)
     {
@@ -23,11 +27,7 @@ class InvoiceController extends Controller
         try {
             $dataservice = Dataservice::with('partkeluar.datasparepat')->findOrFail($id);
 
-            if ($dataservice->partkeluar->isEmpty()) {
-                return redirect()->back()->with('error', 'No parts found for this service!');
-            }
-
-            // Hitung total harga part
+            // Hitung total harga part (akan tetap 0 jika tidak ada part)
             $total_harga_part = 0;
             foreach ($dataservice->partkeluar as $part) {
                 $jumlah = (float)$part->jumlah;
@@ -80,13 +80,13 @@ class InvoiceController extends Controller
 
             $firstPart = $dataservice->partkeluar->first();
 
-            // Simpan invoice
+            // Simpan invoice dengan nilai default jika tidak ada part
             Invoice::create([
                 'no_invoice' => $no_invoice,
                 'dataservice_id' => $dataservice->id,
-                'kode_barang' => $firstPart->kode_barang ?? null,
+                'kode_barang' => $firstPart->kode_barang ?? '-',
                 'tanggal_invoice' => now(),
-                'nama_part' => $firstPart->nama_part ?? null,
+                'nama_part' => $firstPart->nama_part ?? 'TANPA PART',
                 'jumlah' => (float)$dataservice->partkeluar->sum('jumlah'),
                 'harga_jual' => (float)($firstPart->datasparepat->harga_jual ?? 0),
                 'total_harga_part' => $total_harga_part,

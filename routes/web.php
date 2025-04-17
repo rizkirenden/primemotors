@@ -86,13 +86,14 @@ Route::get('/printpdfshowroom', [DatashowroomController::class, 'printPDF'])->na
 Route::get('/dataservice', [DataserviceController::class, 'index'])->name('dataservice');
 Route::post('/dataservice', [DataserviceController::class, 'store'])->name('dataservice.store');
 Route::put('/dataservice/{id}', [DataserviceController::class, 'update'])->name('dataservice.update');
-Route::put('/dataservice/{id}/updateawal', [DataserviceController::class, 'updateawal'])->name('dataservice.updateawal');
+Route::put('/dataservice/updateawal/{id}', [DataserviceController::class, 'updateawal'])->name('dataservice.updateawal');
 Route::delete('/dataservice/{id}', [DataserviceController::class, 'destroy'])->name('dataservice.destroy');
 Route::get('/dataservice/{id}/check-partkeluar', [DataserviceController::class, 'checkPartkeluar']);
 Route::get('/printpdfdataspkawal', [DataserviceController::class, 'printspkawalPDF'])->name('printpdfdataspkawal');
 Route::get('/printpdfdatasakhir', [DataserviceController::class, 'printspkakhirPDF'])->name('printpdfdataspkakhir');
 Route::get('/printpdfdataspkawalperdata/{id}', [DataserviceController::class, 'printAwalPerData'])->name('printpdfdataspkawal.perdata');
 Route::get('/printpdfdataspkakhirperdata/{id}', [DataserviceController::class, 'printAkhirPerData'])->name('printpdfdataspkakhir.perdata');
+Route::get('/dataservice/{id}/check-pending-parts', [DataserviceController::class, 'checkPendingParts']);
 
 Route::get('/laporantransaksi', [InvoiceController::class, 'index'])->name('laporantransaksi');
 Route::post('/invoice/{id}', [InvoiceController::class, 'store'])->name('invoice.store');
@@ -117,6 +118,8 @@ Route::put('/jualpart/{id}', [JualpartController::class, 'update'])->name('jualp
 Route::get('/jualpart/{id}/edit', [JualPartController::class, 'edit'])->name('jualpart.edit');
 Route::delete('jualpart/{id}', [JualpartController::class, 'destroy'])->name('jualpart.destroy');
 Route::get('/jualpart/{id}/check-items', [JualpartController::class, 'checkItems']);
+Route::get('/jualpart/{id}/has-approved-items', [JualpartController::class, 'hasApprovedItems']);
+Route::get('/jualpart/{id}/part-statuses', [JualpartController::class, 'getPartStatuses']);
 Route::get('/spareparts/{kode_barang}', [JualpartController::class, 'getSparepart']);
 Route::get('/printpdfjualpart', [JualpartController::class, 'printPDF'])->name('printpdfjualpart');
 Route::get('/printpdfjualpartperdata/{id}', [JualpartController::class, 'printPDFPerData'])->name('printpdfjualpart.perdata');
