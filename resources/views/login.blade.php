@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link rel="icon" type="image/png" href="images/silver.PNG">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         // Function to toggle password visibility
@@ -23,6 +24,7 @@
 </head>
 
 <body class="bg-black h-screen">
+    @include('loading')
     <div class="flex items-center justify-between w-full h-full">
         <div class="bg-white w-1/2 h-full rounded-md flex justify-center items-center">
             <img src="{{ asset('images/silver.PNG') }}" alt="PremierMotors" class="w-80 h-80">

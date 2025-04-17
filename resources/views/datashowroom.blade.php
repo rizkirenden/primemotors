@@ -8,6 +8,7 @@
     <title>Showroom Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="icon" type="image/png" href="images/silver.PNG">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
@@ -168,7 +169,7 @@
 <body class="bg-black flex h-screen">
     <!-- Sidebar -->
     @include('sidebar')
-
+    @include('loading')
     <!-- Main Content -->
     <div class="flex-1 p-3 overflow-x-auto">
         @if (session('success'))

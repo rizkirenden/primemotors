@@ -206,6 +206,7 @@
 <body class="bg-black flex h-screen">
 
     @include('sidebar')
+    @include('loading')
     <div class="flex-1 p-3 overflow-x-auto">
         <h1 class="text-2xl text-white mb-4">Data Service</h1>
 

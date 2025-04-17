@@ -7,6 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="images/silver.PNG">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -63,7 +64,7 @@
     <div class="main-content">
         <!-- Sidebar -->
         @include('sidebar')
-
+        @include('loading')
         <!-- Right Content Area -->
         <div class="dashboard-content">
             <!-- Header -->

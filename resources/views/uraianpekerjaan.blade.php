@@ -9,6 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="icon" type="image/png" href="images/silver.PNG">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
         /* Add borders to the table header and body */
@@ -140,6 +141,7 @@
 <body class="bg-black flex h-screen">
 
     @include('sidebar')
+    @include('loading')
     <div class="flex-1 p-3 overflow-x-auto">
         <h1 class="text-2xl text-white mb-4">Data Uraian Pekerjaan</h1>
         @if (session('success'))

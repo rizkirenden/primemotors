@@ -7,8 +7,21 @@ use App\Models\Datasparepat;
 use Barryvdh\DomPDF\Facade\Pdf;
 class DatasparepatController extends Controller
 {
-    public function index(){
-        $sparepats = Datasparepat::orderBy('created_at', 'desc')->paginate(10);
+    public function index(Request $request) {
+        $search = $request->input('search');
+
+        $query = Datasparepat::query();
+
+        if ($search) {
+            $query->where('kode_barang', 'like', '%' . $search . '%')
+                  ->orWhere('nama_part', 'like', '%' . $search . '%')
+                  ->orWhere('stn', 'like', '%' . $search . '%')
+                  // ... tambahkan field lainnya ...
+                  ->orWhere('tipe', 'like', '%' . $search . '%');
+        }
+
+        $sparepats = $query->orderBy('created_at', 'desc')->paginate(10);
+
         return view('datasparepat', compact('sparepats'));
     }
 

@@ -8,6 +8,7 @@
     <title>Data Sparepat</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="icon" type="image/png" href="images/silver.PNG">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
@@ -140,6 +141,7 @@
 <body class="bg-black flex h-screen">
 
     @include('sidebar')
+    @include('loading')
     <div class="flex-1 p-3 overflow-x-auto">
         <h1 class="text-2xl text-white mb-4">Data Sparepart</h1>
         @if (session('success'))
@@ -268,24 +270,23 @@
             <div class="pagination-wrapper">
                 <div class="pagination-container" id="pagination">
                     <!-- Previous Page Link -->
+                    <!-- Di bagian pagination -->
                     @if ($sparepats->onFirstPage())
                         <span class="disabled m-1 px-4 py-2 rounded-full">Prev</span>
                     @else
-                        <a href="{{ $sparepats->previousPageUrl() }}"
+                        <a href="{{ $sparepats->previousPageUrl() }}&search={{ request('search') }}"
                             class="px-4 py-2 m-1 rounded-full hover:bg-black hover:text-white">Prev</a>
                     @endif
 
-                    <!-- Page Number Links -->
                     @for ($i = 1; $i <= $sparepats->lastPage(); $i++)
-                        <a href="{{ $sparepats->url($i) }}"
+                        <a href="{{ $sparepats->url($i) }}?search={{ request('search') }}"
                             class="px-4 py-2 m-1 rounded-full {{ $i == $sparepats->currentPage() ? 'bg-black text-white' : '' }}">
                             {{ $i }}
                         </a>
                     @endfor
 
-                    <!-- Next Page Link -->
                     @if ($sparepats->hasMorePages())
-                        <a href="{{ $sparepats->nextPageUrl() }}"
+                        <a href="{{ $sparepats->nextPageUrl() }}&search={{ request('search') }}"
                             class="px-4 py-2 m-1 rounded-full hover:bg-black hover:text-white">Next</a>
                     @else
                         <span class="disabled m-1 px-4 py-2 rounded-full">Next</span>
@@ -530,23 +531,9 @@
         function searchTable() {
             let input = document.getElementById("search-input");
             let filter = input.value.toLowerCase();
-            let table = document.querySelector("table tbody");
-            let rows = table.getElementsByTagName("tr");
 
-            Array.from(rows).forEach(row => {
-                let cells = row.getElementsByTagName("td");
-                let found = false;
-
-                // Loop through all the columns of the row
-                Array.from(cells).forEach(cell => {
-                    if (cell && cell.textContent.toLowerCase().includes(filter)) {
-                        found = true;
-                    }
-                });
-
-                // Show or hide the row based on the search result
-                row.style.display = found ? "" : "none";
-            });
+            // Kirim request ke server dengan parameter search
+            window.location.href = "{{ route('datasparepat') }}?search=" + encodeURIComponent(filter);
         }
 
 

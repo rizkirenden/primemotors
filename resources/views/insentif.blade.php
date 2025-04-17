@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Insentif</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="images/silver.PNG">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
@@ -138,7 +139,7 @@
 <body class="bg-black flex h-screen">
 
     @include('sidebar')
-
+    @include('loading')
     <div class="flex-1 p-3 overflow-x-auto">
         <h1 class="text-2xl text-white mb-4">Laporan Insentif</h1>
         <!-- Card -->
